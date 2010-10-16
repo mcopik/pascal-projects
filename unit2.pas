@@ -11,7 +11,7 @@ implementation
 
 
 begin
-write('ASEMBLER!s');
+write('ASEMBLER!sa');
 {$ASMMODE intel}
 asm
 mov ax,21

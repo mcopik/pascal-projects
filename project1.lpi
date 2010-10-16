@@ -9,13 +9,10 @@
       </Flags>
       <MainUnit Value="0"/>
       <TargetFileExt Value=""/>
-      <UseXPManifest Value="True"/>
       <Icon Value="0"/>
-      <ActiveWindowIndexAtStart Value="0"/>
+      <UseXPManifest Value="True"/>
+      <ActiveEditorIndexAtStart Value="1"/>
     </General>
-    <VersionInfo>
-      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="0.0.0.0" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
-    </VersionInfo>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
@@ -33,30 +30,26 @@
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="project1"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="0"/>
-        <WindowIndex Value="1"/>
-        <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
+        <TopLine Value="1"/>
+        <EditorIndex Value="0"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1.pas"/>
         <UnitName Value="Unit1"/>
-        <TopLine Value="13"/>
         <CursorPos X="8" Y="13"/>
+        <TopLine Value="13"/>
         <UsageCount Value="21"/>
       </Unit1>
       <Unit2>
         <Filename Value="unit2.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Unit2"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="0"/>
-        <WindowIndex Value="0"/>
+        <CursorPos X="19" Y="14"/>
         <TopLine Value="1"/>
-        <CursorPos X="1" Y="22"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit2>

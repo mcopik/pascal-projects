@@ -1,0 +1,6 @@
+program Witaj;               {nazwa programu}
+{$APPTYPE CONSOLE}           {obowiązkowa deklaracja dla aplikacji konsolowej tylko i wyłącznie w Delphi}
+begin                        {obowiązkowy początek właściwego programu}
+  Writeln('Witaj świecie!'); {instrukcja druku, uwaga: jeżeli zaczynasz programować dla ułatwienia pisz: WriteLn}
+  Readln;                    {w tym przypadku instrukcja oznacza czekanie na enter, a po jego naciśnięciu aplikacja się wyłączy}
+end.                         {Koniec programu}

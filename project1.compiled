@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <CONFIG>
-  <Compiler Value="/usr/bin/fpc" Date="1274277346"/>
-  <Params Value=" -MObjFPC -Scgi -O1 -gl -vewnhi -l -Fi/home/mcopik/Pulpit/Studia/Pascal/ -Fu/home/mcopik/Pulpit/Studia/Pascal/ -Fu. -FE/home/mcopik/Pulpit/Studia/Pascal/ -oproject1 project1.lpr"/>
+  <Compiler Value="/usr/bin/fpc" Date="1262370406"/>
+  <Params Value=" -MObjFPC -Scgi -O1 -gl -vewnhi -l -Fi/home/mcopik/pascal/ -Fu/home/mcopik/pascal/ -Fu. -FE/home/mcopik/pascal/ -oproject1 project1.lpr"/>
 </CONFIG>

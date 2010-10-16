@@ -11,12 +11,15 @@ implementation
 
 
 begin
-write('ASEMBLER!');
+write('ASEMBLER!s');
 {$ASMMODE intel}
 asm
 mov ax,21
 mov bx,38
 add ax,bx
 end;
+read();
+
+
 end.
 

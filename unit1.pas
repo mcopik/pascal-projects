@@ -8,37 +8,25 @@ uses
   Classes, SysUtils; 
 
 implementation
-           var i, j: integer;
-           const m=3;n=2;
-   var mnozne: array[1..m] of integer;
-   mnozniki: array[1..n] of integer;
-   iloczyny: array[1..m, 1..n] of integer; {tablica dwuwymiarowa}
-
+         var i : Real;
+         function pole(var a:Real):Real;
+         begin
+           pole := (0.001*(sin(a)+sin(a+0.001)))/2;
+         end;
+              //var i:Real;
+              var suma:Real;
 begin
-   writeln('Podaj ', m, ' liczb (mnożne):');
-   for i := 1 to m do
-      read(mnozne[i]);
-   readln; {chroni przed bałaganem}
+     i := 0;
+     suma := 0;
+     while  i < PI/2 do
+     begin
+              suma := suma + pole(i);
+              i := i + 0.001;
+     end;
+   WriteLn(suma);
+   WriteLn(sin((1/2)*PI));
+end.
 
-   writeln('Teraz podaj ', n, ' liczb (mnożniki):');
-   for i := 1 to n do
-      read(mnozniki[i]);
-   readln; {chroni przed bałaganem}
-
-   {obliczanie}
-   for i := 1 to m do
-      for j := 1 to n do
-         iloczyny[i, j] := mnozne[i] * mnozniki[j];
-
-   {drukowanie wyniku}
-   for i := 1 to m do
-   begin
-      for j := 1 to n do
-         write(iloczyny[i, j]: 4);
-      writeln;
-   end;
-
-   readln;
 end.
 
 end.

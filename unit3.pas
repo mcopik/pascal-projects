@@ -1,0 +1,54 @@
+unit Unit3;
+
+{$mode objfpc}
+
+interface
+
+uses
+  Classes, SysUtils; 
+  implementation
+         type Tliczb = array [0..100] of integer;
+         type pointer = ^Tliczb;
+         var i : Integer;
+         var x : Tliczb;
+         var y: ^TLiczb;
+
+         function inicjuj( p1:pointer): Integer;
+         var i:Integer;
+         begin
+              randomize;
+              for i :=0 to 99 do
+              begin
+                   p1^[i] := random(200);
+              end;
+              end;
+
+         function znajdz(p1:pointer): Integer;
+         var min : integer;
+         var i:Integer;
+         begin
+              min := 201;
+               for i := 0 to 99 do
+               begin
+                        if(p1^[i] < min)  then
+                        min := p1^[i];
+               end;
+               znajdz := min;
+         end;
+
+
+
+begin
+
+              inicjuj(@x);
+              Writeln(znajdz(@x));
+                for i := 0 to 99 do
+               begin
+                        write(x[i],' ');
+               end;
+end.
+
+
+
+end.
+

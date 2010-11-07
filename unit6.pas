@@ -25,13 +25,14 @@ type pointer= ^ulamek;
   end;
   type pointer2 = ^list_r;
        list_r = record
-    x:integer;
-    prev,next:pointer2;
+       x:integer;
+       prev,next:pointer2;
   end;
 
   type list = object
     head:pointer2;
     constructor Create();
+    destructor Delete();
     procedure Add(x:integer);
   end;
 
@@ -72,10 +73,7 @@ type pointer= ^ulamek;
   procedure ulamek.Dodaj(p1:pointer);
   begin
          z := y*p1^.GetY();
-         //if znak = TRUE then
          x := x*p1^.GetY() + p1^.GetX()*y;
-         //else
-         //x := x*p1^.GetY() - p1^.GetX()*y;
          y := z;
          z := NWD(x,y);
          x := x DIV z;
@@ -107,19 +105,37 @@ type pointer= ^ulamek;
        y := y DIV z;
      end;
 
+     constructor list.Create();
+     begin
+     GetMem(head,sizeof(list_r));
+     head^.prev := NIL;
+     end;
+
+     procedure list.Add(x:integer);
+     begin
+     end;
+
+     destructor list.Delete();
+     begin
+     FreeMem(head,sizeof(list_r));
+     end;
+
          begin
           WriteLn('Program do obliczania calkowitych pierwiastkow wielomianu n-tego stopnia');
           WriteLn('za pomoca twierdzenia Gaussa');
           WriteLn('Autor:Marcin Copik, grupa 3 I-go roku Informatyki, Politechnika Slaska');
           WriteLn('Podaj stopien wielomianu:');
           Read(n);
-          SetLength(tab,n);
+          SetLength(tab,n+1);
           WriteLn('Podaj wspolczynniki wielomianu');
           for i := 0 to n do
           begin
               Read(z);
               tab[i] := z;
           end;
+
+
+
           {Wczytane wspolczynniki
           Czas znalezc wszystkie dzielniki wyrazu wolnego i wspolczynnika przy najwyzszej potedze}
 

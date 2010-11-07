@@ -9,6 +9,7 @@ uses
 var z,n,i :integer;
 
 type pointer= ^ulamek;
+     tabp = ^array of ulamek;
     ulamek=object
 
      x,y :Integer;
@@ -31,12 +32,18 @@ type pointer= ^ulamek;
 
   type list = object
     head:pointer2;
-    constructor Create();
+    tail:pointer2;
+    constructor Create(x,y:integer);
+    destructor Delete();
     destructor Delete();
     procedure Add(x:integer);
   end;
 
-  var tab: array of integer;
+  //type tabtype= array of integer;
+  //type tabp = ^tabtype;
+  var temp: pointer2;
+  dzielnikiA,dzielnikiB: list;
+  var tab:array of integer;
   implementation
   function NWD(x,y:integer):integer;
   begin
@@ -55,6 +62,46 @@ type pointer= ^ulamek;
           end;
           NWD := x;
           end;
+  function Horner(x:pointer;n:integer;tab:tabp):boolean;
+  begin
+       z := tab[0];
+       for i:= 1 to n do
+       begin
+           z :=
+       end;
+  end;
+
+  constructor list.Create(x,y:integer);
+  begin
+      GetMem(head,sizeof(list_r));
+      GetMem(tail,sizeof(list_r));
+      head^.prev := NIL;
+      head^.next := tail;
+      head^.x := x;
+      tail^.next := NIL;
+      tail^.prev := head;
+      tail^.x := y;
+  end;
+
+  destructor list.Delete();
+  begin
+      //FreeMem(head,sizeof(list_r));
+      temp := head;
+      while temp <> NIL do
+      begin
+          temp := temp^.next;
+          FreeMem(temp^.prev,sizeof(list_r));
+      end;
+  end;
+
+  procedure list.Add(x:integer);
+  begin
+      GetMem(tail^.prev^.next,sizeof(list_r));
+      tail^.prev^.next^.x := x;
+      tail^.prev^.next^.prev := tail^.prev;
+      tail^.prev^.next^.next := tail;
+      tail^.prev := tail^.prev^.next;
+  end;
 
   constructor ulamek.Create(x1,y1:integer);
   begin
@@ -133,8 +180,27 @@ type pointer= ^ulamek;
               Read(z);
               tab[i] := z;
           end;
+          //wyszukanie wszystkich dzielnikow wyrazu wolnego i pierwszego
+          dzielnikiA.Create(1,tab[0]);
+          for i:=2 to trunc(sqrt(tab[0])) do
+          begin
+          if tab[0] MOD i = 0 then
+          dzielnikiA.Add(i);
+          end;
+          dzielnikiB.Create(1,tab[n-1]);
+          for i:=2 to trunc(sqrt(tab[n-1])) do
+          begin
+          if tab[n-1] MOD i = 0 then
+          dzielnikiB.Add(i);
+          end;
 
 
+          {temp := dzielnikiA.head;
+          while temp <> NIL do
+          begin
+              WriteLn(temp^.x);
+              temp := temp^.next;
+          end;    }
 
           {Wczytane wspolczynniki
           Czas znalezc wszystkie dzielniki wyrazu wolnego i wspolczynnika przy najwyzszej potedze}

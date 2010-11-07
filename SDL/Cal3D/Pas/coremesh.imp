@@ -1,0 +1,254 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coremesh.cpp
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreMesh.Create( AFileName : string );
+begin
+  inherited Create;
+  if AFileName <> '' then
+    LoadFromFile( AFileName );
+end;
+
+destructor CalCoreMesh.Destroy;
+var
+  i, CoreSubmeshCount : integer;
+begin
+  // destroy all core submeshes
+  CoreSubmeshCount := Length( m_vectorCoreSubmesh );
+  for i := 0 to CoreSubmeshCount - 1 do
+    m_vectorCoreSubmesh[ i ].Free;
+  SetLength( m_vectorCoreSubmesh, 0 );
+  inherited;
+end;
+
+procedure CalCoreMesh.LoadFromFile( AFileName : string );
+var
+  Stream : TStream;
+begin
+  Stream := CalOpen( AFileName, integer( MESH_FILE_MAGIC ) );
+  if Stream <> nil then
+  begin
+    LoadFromStream( Stream );
+    Stream.Free;
+  end
+  else
+  begin
+    LoadFromXMLFile( AFileName );
+  end;
+end;
+
+procedure CalCoreMesh.LoadFromXMLFile( AFileName : string );
+var
+  Parser : TXmlParser;
+  Magic : string;
+  Version, NumSubMeshes, i : integer;
+begin
+  Parser := TXmlParser.Create; // Create Parser Instance
+
+  // Tell the parser if you want content to be normalized
+  // (i.e. pack and trimm off Whitespaces)
+
+  Parser.Normalize := TRUE;
+
+  // Load the XML Document
+
+  Parser.LoadFromFile( AFileName ); // Load XML file
+
+  // Initialize for Scanning through the Document
+
+  Parser.StartScan; // Prepare Scanning through the document
+
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          // Sort out Header stuff
+          if Parser.CurName = 'HEADER' then
+          begin
+            Magic := Parser.CurAttr.Value( 'MAGIC' );
+            Version := StrToInt( Parser.CurAttr.Value( 'VERSION' ) );
+            if ( Magic <> MESH_XMLFILE_MAGIC )
+            or ( Version < EARLIEST_COMPATIBLE_FILE_VERSION )
+            or ( Version > CURRENT_FILE_VERSION ) then
+            begin
+              CalError.setLastError( INVALID_XML_FILE_FORMAT, 'CalCoreMaterial.LoadFromXMLFile', 87, AFilename );
+              break;
+            end;
+          end;
+
+          //
+          if Parser.CurName = 'MESH' then
+          begin
+            NumSubMeshes := StrToInt( Parser.CurAttr.Value( 'NUMSUBMESH' ) );
+            SetLength( m_vectorCoreSubmesh, NumSubMeshes );
+
+            // load all core submeshes
+            for i := 0 to NumSubMeshes - 1 do
+              m_vectorCoreSubmesh[ i ] := CalCoreSubmesh.Create( Parser );
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+          
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+  Parser.Free;
+end;
+
+procedure CalCoreMesh.LoadFromStream( AStream : TStream );
+var
+  submeshCount : integer;
+  i : integer;
+begin
+  // get the number of submeshes
+  AStream.ReadBuffer( submeshCount, sizeof( submeshCount ) );
+  SetLength( m_vectorCoreSubmesh, submeshCount );
+
+  // load all core submeshes
+  for i := 0 to submeshCount - 1 do
+    m_vectorCoreSubmesh[ i ] := CalCoreSubmesh.Create( AStream );
+end;
+
+function CalCoreMesh.getCoreSubmeshCount : integer;
+begin
+  Result := Length( m_vectorCoreSubmesh )
+end;
+
+function CalCoreMesh.addCoreSubmesh( pCoreSubmesh : CalCoreSubmesh ) : integer;
+var
+  submeshId : integer;
+begin
+  // get next bone id
+  submeshId := getCoreSubmeshCount;
+  SetLength( m_vectorCoreSubmesh, submeshId + 1 );
+  m_vectorCoreSubmesh[ submeshId ] := pCoreSubmesh;
+  Result := submeshId;
+end;
+
+function CalCoreMesh.getCoreSubmesh( id : integer ) : CalCoreSubmesh;
+begin
+  Result := m_vectorCoreSubmesh[ id ];
+end;
+
+function CalCoreMesh.addAsMorphTarget( pCoreMesh : CalCoreMesh ) : integer;
+var
+  subMorphTargetID, iteratorCoreSubmesh, otherIteratorCoreSubmesh : integer;
+  iteratorVectorVertex, vertexCount, i, CoreSubmeshCount : integer;
+  otherVectorCoreSubmesh : CalCoreSubmeshes;
+  pCalCoreSubMorphTarget : CalCoreSubMorphTarget;
+  vectorVertex : vectorVertexes;
+  bv : BlendVertex;
+begin
+  vectorVertex := nil;
+  
+  //Check if the numbers of vertices allow a blending
+  otherVectorCoreSubmesh := pCoreMesh.getVectorCoreSubmesh;
+  if ( Length( m_vectorCoreSubmesh ) <> Length( otherVectorCoreSubmesh ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremesh.imp', 91 );
+    {$ENDIF}
+    result := -1;
+    exit;
+  end;
+
+  if ( Length( m_vectorCoreSubmesh ) = 0 ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremesh.imp', 98 );
+    {$ENDIF}
+    result := -1;
+    exit;
+  end;
+  iteratorCoreSubmesh := 0;
+  otherIteratorCoreSubmesh := 0;
+  subMorphTargetID := m_vectorCoreSubmesh[ iteratorCoreSubmesh ].getCoreSubMorphTargetCount;
+  while ( iteratorCoreSubmesh <> Length( m_vectorCoreSubmesh ) ) do
+  begin
+    if ( m_vectorCoreSubmesh[ iteratorCoreSubmesh ].getVertexCount <> otherVectorCoreSubmesh[ otherIteratorCoreSubmesh ].getVertexCount ) then
+    begin
+      {$IFDEF DEBUG_CAL3D}
+      CalError.setLastError( INVALID_HANDLE, 'coremesh.imp', 109 );
+      {$ENDIF}
+      result := -1;
+      exit;
+    end;
+    inc( iteratorCoreSubmesh );
+    inc( otherIteratorCoreSubmesh );
+  end;
+
+  //Adding the blend targets to each of the core sub meshes
+  iteratorCoreSubmesh := 0;
+  otherIteratorCoreSubmesh := 0;
+  CoreSubmeshCount := Length( m_vectorCoreSubmesh );
+  while ( iteratorCoreSubmesh <> CoreSubmeshCount ) do
+  begin
+    vertexCount := otherVectorCoreSubmesh[ otherIteratorCoreSubmesh ].getVertexCount;
+    pCalCoreSubMorphTarget := CalCoreSubMorphTarget.Create;
+
+    if ( not pCalCoreSubMorphTarget.reserve( vertexCount ) ) then
+    begin
+      result := -1;
+      exit;
+    end;
+    vectorVertex := otherVectorCoreSubmesh[ otherIteratorCoreSubmesh ].getVectorVertex;
+    iteratorVectorVertex := 0;
+    for i := 0 to vertexCount - 1 do
+    begin
+      bv.position.x := vectorVertex[ iteratorVectorVertex ].position.x;
+      bv.position.y := vectorVertex[ iteratorVectorVertex ].position.y;
+      bv.position.z := vectorVertex[ iteratorVectorVertex ].position.z;
+      bv.normal.x := vectorVertex[ iteratorVectorVertex ].normal.x;
+      bv.normal.y := vectorVertex[ iteratorVectorVertex ].normal.y;
+      bv.normal.z := vectorVertex[ iteratorVectorVertex ].normal.z;
+
+      if ( not pCalCoreSubMorphTarget.setBlendVertex( i, bv ) ) then
+      begin
+        result := -1;
+        exit;
+      end;
+      inc( iteratorVectorVertex );
+    end;
+    m_vectorCoreSubmesh[ iteratorCoreSubmesh ].addCoreSubMorphTarget( pCalCoreSubMorphTarget );
+    inc( iteratorCoreSubmesh );
+    inc( otherIteratorCoreSubmesh );
+  end;
+  Result := subMorphTargetID;
+end;
+
+procedure CalCoreMesh.scale( factor : float );
+var
+  i : integer;
+begin
+  for i := Low( m_vectorCoreSubmesh ) to High( m_vectorCoreSubmesh ) do
+  begin
+    m_vectorCoreSubmesh[ i ].scale( factor );
+  end;
+end;
+

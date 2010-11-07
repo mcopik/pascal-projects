@@ -1,0 +1,259 @@
+object Form1: TForm1
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SDL Graphic Font Convertor'
+  Color = 9154505
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  FocusColor = 11846620
+  Height = 480
+  Movable = False
+  OnClick = Form1Click
+  StateImages = []
+  TabOrder = 6
+  TitleBarHeight = 20
+  Width = 640
+  X = 154
+  Y = 91
+  object btLoad: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Load Font...'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 28
+    OnClick = btLoadClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 0
+    Width = 120
+    X = 7
+    Y = 345
+    Z = 0
+  end
+  object btSave: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Save Font...'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 28
+    OnClick = btSaveClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 1
+    Width = 120
+    X = 7
+    Y = 375
+    Z = 1
+  end
+  object btSpFunc: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Copy Options...'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 28
+    OnClick = btSpFuncClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 2
+    Width = 120
+    X = 7
+    Y = 405
+    Z = 2
+  end
+  object cbSaveS: TSDLCheckBox
+    Alignment = taRight
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Save Data Separetly'
+    Checked = False
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 20
+    StateImages = []
+    TabOrder = 3
+    Width = 20
+    X = 150
+    Y = 350
+    Z = 3
+  end
+  object cbOpenGL: TSDLCheckBox
+    Alignment = taRight
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Save as OpenGL Font'
+    Checked = False
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 20
+    StateImages = []
+    TabOrder = 4
+    Width = 20
+    X = 150
+    Y = 380
+    Z = 4
+  end
+  object cbRC: TSDLCheckBox
+    Alignment = taRight
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Replace Color'
+    Checked = False
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 20
+    StateImages = []
+    TabOrder = 5
+    Width = 20
+    X = 150
+    Y = 410
+    Z = 5
+  end
+  object SDLEdit1: TSDLEdit
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    CursorColor = 0
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 26
+    Hint = 'Press Enter to get standard Charsets.'
+    MaxLength = 255
+    OnKeyDown = SDLEdit1KeyDown
+    ReadOnly = False
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 6
+    Width = 450
+    X = 80
+    Y = 445
+    Z = 6
+  end
+  object SDLLabel1: TSDLLabel
+    Alignment = taCenter
+    AutoSize = True
+    BorderWidth = 0
+    Caption = 'Charset:'
+    DragMode = sdmManual
+    Height = 16
+    Layout = tlCenter
+    Width = 47
+    WordWrap = False
+    X = 7
+    Y = 450
+    Z = 7
+  end
+  object SDLLabel2: TSDLLabel
+    Alignment = taCenter
+    AutoSize = True
+    BorderWidth = 0
+    Caption = 'BackColor: ForeColor: SpecialColor:'
+    DragMode = sdmManual
+    Height = 16
+    Layout = tlCenter
+    Width = 203
+    WordWrap = False
+    X = 335
+    Y = 350
+    Z = 8
+  end
+  object SDLLabel3: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = ''
+    DragMode = sdmManual
+    Height = 50
+    Hint = 'Click on me and then on picture to select color.'
+    Layout = tlCenter
+    OnClick = ColorClick
+    Tag = 1
+    Width = 50
+    WordWrap = False
+    X = 410
+    Y = 380
+    Z = 9
+  end
+  object SDLLabel4: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = ''
+    DragMode = sdmManual
+    Height = 50
+    Hint = 'Click on me and then on picture to select color.'
+    Layout = tlCenter
+    OnClick = ColorClick
+    Tag = 2
+    Width = 50
+    WordWrap = False
+    X = 480
+    Y = 380
+    Z = 10
+  end
+  object ZoomRGroup: TSDLRadioGroup
+    BorderWidth = 2
+    Caption = 'Zoom'
+    Color = 11846620
+    DragMode = sdmManual
+    Height = 120
+    ItemIndex = -1
+    Items = (
+      'Normal'
+      '2X'
+      '4X'
+      '8X')
+    OnClick = ZoomRGroupClick
+    RadioHeight = 20
+    RadioWidth = 20
+    TabOrder = 7
+    Width = 80
+    X = 550
+    Y = 350
+    Z = 11
+  end
+  object PictureSB: TSDLScrollBar
+    BackColor = 14344685
+    BorderWidth = 2
+    ButtonColor = 11846620
+    DragMode = sdmManual
+    Height = 24
+    Jumping = True
+    Kind = sbHorizontal
+    LargeChange = 10
+    Position = 0
+    SmallChange = 1
+    WheelChange = 3
+    Width = 621
+    X = 9
+    Y = 314
+    Z = 12
+  end
+end

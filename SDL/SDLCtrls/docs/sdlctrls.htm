@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+
+<html>
+<head>
+<title>
+  Stojkovic's SDL Page - SDL Controls
+</title>
+
+<meta http-equiv="content-style-type" content="text/css">
+<meta name="description" content="sdl controls">
+<meta name="keywords" content="sdl,gui,sdlgui,ctrls,sdlctrls,controls,formeditor,igor,stojkovic,gamemaker">
+
+<link rel="stylesheet" type="text/css" href="default.css">
+
+</head>
+
+<body>
+
+<h1>Stojkovic's SDL Page - SDL Controls</h1>
+
+<div class="navigator">
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=118226&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+<ul>
+  <li><a href="index.html">News</a></li>
+  <li><a href="description.htm">Description</a>
+  <ul class="sublist">
+    <li><a href="sdldraw.htm">SDLDraw</a></li>
+    <li><a href="sdlfont.htm">SDLFont</a></li>
+    <li><a href="sdlgui.htm">SDLGui</a></li>
+    <li>SDL Controls</li>
+  </ul></li>
+  <li><a href="sdltools.htm">SDL Tools</a></li>
+  <li><a href="faq.htm">FAQ</a></li>
+  <li><a href="scrshot.htm">Screen shots</a></li>
+  <li><a href="download.htm">Download</a></li>
+  <li><a href="aboutme.htm">About Me</a></li>
+</ul>
+</div>
+
+<h2 id="TSDLComponent">TSDLComponent</h2>
+<p>This is the base class for all components and controls. Use this for components that can not receive focus and
+react on keyboard events. Properties are:
+
+<dl class="code">
+  <dt>property Pushed: Boolean read FPushed write FPushed;
+  <dd>Shows if mouse button was pressed over this component.
+  <dt>property Font: TSDLFont read FFont write SetFont;
+  <dd>Font for the component.
+  <dt>property Cursor : TSDLCursor read FCursor write FCursor;
+  <dd>Image of the cursor when it is over this component.
+  <dt>property Designing: Boolean read FDesigning write FDesigning;
+  <dd>Shows if component is under design. Used in SDL Form Editor.
+  <dt>property Name: string read FName write SetName;
+  <dd>Name of the component. Used for saving and loading components.
+  <dt>property PopupMenu: TSDLComponent read FPopupMenu write FPopupMenu;
+  <dd>To assign a popup menu to a component use TSDLPopupMenu.Create(ThisComponent).
+  <dt>procedure HidePopupMenu; virtual;
+  <dd>Hides active popup menu or combo's drop list.
+  <dt>property BorderWidth: Byte read FBorderWidth write SetBorderWidth;
+  <dd>Width of border. Used in drawing the component.
+  <dt>property Enabled: Boolean read GetEnabled write SetEnabled default True;
+  <dd>Shows if component is enabled. If it is not it can not receive any events.
+  <dt>property Description: string read FDescription write FDescription;
+  <dd>Description property. Use as you wish.
+  <dt>property DragMode: TSDLDragMode read FDragMode write FDragMode;
+  <dd>Can be dmAutomatic and dmManual. If dmAutomatic user can drag the component during run-time.
+  <dt>property Hint: string read FHint write FHint;
+  <dd>Hint to popup when mouse is over this component.
+  <dt>property Tag : Integer read FTag write FTag default 0;
+  <dd>Numeric Tag. Use as you wish.
+  <dt>property OnDestroy: TSDLNotifyEvent read FOnDestroy write FOnDestroy;
+  <dd>This event is called before component's destruction. See <a href="sdlgui.htm">TSDLNotifyEvent</a>.
+  <dt>property OnMouseMove: TSDLMouseMoveEvent read FOnMouseMove write FOnMouseMove;
+  <dd>This event is called when mouse is moved over the component.  See <a href="sdlgui.htm">TSDLMouseMoveEvent</a>.
+  <dt>property OnMouseUp: TSDLMouseEvent read FOnMouseUp write FOnMouseUp;
+  <dd>This event is called when mouse button is released over the component. See <a href="sdlgui.htm">TSDLMouseEvent</a>.
+  <dt>property OnMouseDown: TSDLMouseEvent read FOnMouseDown write FOnMouseDown;
+  <dd>This event is called when mouse button is pressed over the component. See <a href="sdlgui.htm">TSDLMouseEvent</a>.
+  <dt>property OnClick: TSDLMouseClickEvent read FOnClick write FOnClick;
+  <dd>This event is called when user clicks on the component. See <a href="sdlgui.htm">TSDLMouseClickEvent</a>.
+  <dt>property OnDblClick: TSDLMouseClickEvent read FOnDblClick write FOnDblClick;
+  <dd>This event is called when user double-clicks on the component. See <a href="sdlgui.htm">TSDLMouseClickEvent</a>.
+  <dt>property OnMouseWheel: TSDLMouseWheelEvent read FOnMouseWheel write FOnMouseWheel;
+  <dd>This event is called when user rolls mouse wheel over the component. See <a href="sdlgui.htm">TSDLMouseWheelEvent</a>.
+</dl>
+
+<p>
+Methods are:
+<dl class="code">
+  <dt>procedure Popup(AX,AY: Integer); virtual;
+  <dd>Only used in TSDLPopupMenu in order to pop it up.
+  <dt>procedure LoadFromStrings(SList: TStrings;var Level: Integer);
+  <dd>Loads the component from text in SList. Declaration of component must start at SList[Level].
+  <dt>procedure LoadCompFromFile(const FileName: string);
+  <dd>Loads a component from a file.
+  <dt>procedure SaveToStrings(SList: TStrings; Level: Byte);
+  <dd>Saves the component to SList in text format. Level should be 0.
+  <dt>procedure SaveCompToFile(const FileName: string);
+  <dd>Saves the component to text file.
+</dl>
+
+<h2 id="TSDLControl">TSDLControl</h2>
+<p>This is a base class for controls that can receive focus and react to keyboard events. Properties are:
+
+<dl class="code">
+  <dt>property HasFocus: Boolean read FInFocus;
+  <dd>Shows if control currently hyas focus.
+  <dt>property TabOrder: Integer read FTabOrder write SetTabOrder;
+  <dd>Indicates the position of the control in its parent's tab order.
+  <dt>property OnKeyUp: TSDLKeyEvent read FOnKeyUp write FOnKeyUp;
+  <dd>This event is called when a key is released. See <a href="sdlgui.htm">TSDLKeyEvent</a>.
+  <dt>property OnKeyDown: TSDLKeyEvent read FOnKeyDown write FOnKeyDown;
+  <dd>This event is called when a key is pressed. See <a href="sdlgui.htm">TSDLKeyEvent</a>.
+  <dt>property OnKeyPress: TSDLKeyPressEvent read FOnKeyPress write FOnKeyPress;
+  <dd>This event s called when character key is pressed.  See <a href="sdlgui.htm">TSDLKeyPressEvent</a>.
+  <dt>property OnEnter: TSDLNotifyEvent read FOnEnter write FOnEnter;
+  <dd>This event is called when the control gets focus. See <a href="sdlgui.htm">TSDLNotifyEvent</a>.
+  <dt>property OnExit: TSDLNotifyEvent read FOnExit write FOnExit;
+  <dd>This event is called when control looses focus. See <a href="sdlgui.htm">TSDLNotifyEvent</a>.
+</dl>
+
+<p>Method is:
+<dl class="code">
+  <dt>function SetFocus: Boolean; virtual;
+  <dd>Tries to set focus to the control and if it succeeds it returns True, else it returns False.
+</dl>
+
+<h2 id="TSDLStdControl">TSDLStdControl</h2>
+<p>There is one more base class for controls. This one adds some default drawing routines to it. Properties are:
+
+<dl class="code">
+  <dt>property Color: Cardinal read FColor write FColor;
+  <dd>This is control's default color. It uses this when it has no focus.
+  <dt>property FocusColor: Cardinal read FFocusColor write FFocusColor;
+  <dd>This is the color the control will use when it has focus.
+  <dt>property DisabledColor: Cardinal read FDisabledColor write FDisabledColor;
+  <dd>This is the color the control will use when it is disabled.
+  <dt>property AlwaysDown: Boolean read FAlwaysDown write SetAlwaysDown;
+  <dd>If True control is always drawn as it is pressed and AlwaysUp is False. 
+  <dt>property AlwaysUp: Boolean read FAlwaysUp write SetAlwaysUp;
+  <dd>If True control is always drawn up and AlwaysDown is False.
+  <dt>property StateImages : TStateImages read FStateImages write FStateImages;
+  <dd>If there is an image asigned this property says for what states image contains patterns. It can contain
+  siFocused,siDown and siDisabled. Image patters should be organized in rows (horizontal) and colums (vertical).
+  Rows should contain patterns for animation of one state of the control. There has to be Normal Row, and it can
+  have Focused Row, Down Row and Disabled Row. Normal Row will be drawn when control is enabled and doesn't have focus.
+  When control gets focus it will draw Focus Row, and if one isn't present it will fall back to Normal Row. When control
+  is pressed it will draw Down Row and one isn't present it will fall back to Focused Row. If control is disabled it
+  will draw Disabled Row and if one isn't present it will fall back to Normal Row. There are control with exceptions
+  to this.
+</dl>
+
+<h2 id="ControlList">List of controls</h2>
+<p>
+Let's see a complete list of controls now:
+<dl class="controls">
+  <dt><a href="sdlform.htm">TSDLForm</a>
+  <dd>is a container for other components.
+  <dt><a href="sdlform.htm#TSDLPanel">TSDLPanel <img src="images/TSDLPanel.jpg"></a>
+  <dd>helps manage the placement of child controls embedded in the panel.
+  <dt><a href="sdlbutton.htm">TSDLButton <img src="images/TSDLButton.jpg"></a>
+  <dd>is a push button control. It has Glyph, GroupIndex and Down properties.
+  <dt><a href="sdledit.htm">TSDLEdit <img src="images/TSDLEdit.jpg"></a>
+  <dd>is a single-line edit control.
+  <dt><a href="sdlcheck.htm">TSDLCheckBox <img src="images/TSDLCheckBox.jpg"></a>
+  <dd>represents a check box that can be on (checked) or off (unchecked).
+  <dt><a href="sdlcheck.htm">TSDLRadioButton <img src="images/TSDLRadio.jpg"></a>
+  <dd>Radio buttons present a set of mutually exclusive options to the user.
+  <dt><a href="sdlcheck.htm#TSDLRadioGroup">TSDLRadioGroup <img src="images/TSDLRadioGroup.jpg"></a>
+  <dd>represents a group of radio buttons that function together.
+  <dt><a href="sdlcombo.htm">TSDLComboBox <img src="images/TSDLComboBox.jpg"></a>
+  <dd>combines an edit box with a scrollable list of selectable items.
+  <dt><a href="sdlmessagedlg.htm">TSDLMessageDlg</a>
+  <dd>helper component for SDLMessageDlg function.
+  <dt><a href="sdlfilectrl.htm">TSDLFileListBox</a>
+  <dd>is a specialized list box that lists all the files in a specified directory.
+  <dt><a href="sdlfilectrl.htm#TSDLDirectoryListBox">TSDLDirectoryListBox</a>
+  <dd>represents a list box control that is aware of the directory structure of the current drive.
+  <dt><a href="sdldialogs.htm">TSDLOpenDialog <img src="images/TSDLOpenDialog.jpg"></a>
+  <dd>displays a file-selection dialog.
+  <dt><a href="sdldialogs.htm#TSDLSaveDialog">TSDLSaveDialog <img src="images/TSDLSaveDialog.jpg"></a>
+  <dd>displays a "Save As" dialog for saving files.
+  <dt><a href="sdlfilectrl.htm#TSDLDriveCombo">TSDLDriveCombo</a>
+  <dd>implements a specialized combo box that displays all the drives available when the application runs.
+  Only avaible on Windows.
+  <dt><a href="sdlgauge.htm">TSDLGauge <img src="images/TSDLGauge.jpg"></a>
+  <dd>displays a progress bar.
+  <dt><a href="sdllabel.htm">TSDLLabel <img src="images/TSDLLabel.jpg"></a>
+  <dd>displays text or an image on a form.
+  <dt><a href="sdllistbox.htm">TSDLListBox <img src="images/TSDLListBox.jpg"></a>
+  <dd>displays a scrollable list of items that users can select.
+  <dt><a href="sdlmemo.htm">TSDLMemo <img src="images/TSDLMemo.jpg"></a>
+  <dd>is a multiline edit control.
+  <dt><a href="sdlscroll.htm">TSDLScrollBar <img src="images/TSDLScrollBar.jpg"></a>
+  <dd>is used to scroll the contents of a window, form, or control.
+  <dt><a href="sdlmenus.htm">TSDLMenuItem</a>
+  <dd>describes the properties of an item in a menu.
+  <dt><a href="sdlmenus.htm#TSDLPopupMenu">TSDLPopupMenu <img src="images/TSDLPopupMenu.jpg"></a>
+  <dd>encapsulates the properties, methods, and events of a pop-up menu.
+  <dt><a href="sdlmenus.htm#TSDLMenu">TSDLMenu <img src="images/TSDLMenu.jpg"></a>
+  <dd>encapsulates a menu bar and its accompanying drop-down menus for a form.
+</dl>
+
+</body>
+</html>

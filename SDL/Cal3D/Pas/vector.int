@@ -1,0 +1,66 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// vector.h
+
+CalVector = class
+public
+  x : float;
+  y : float;
+  z : float;
+
+public
+  constructor Create( const mx : float = 0; const my : float = 0; const mz : float = 0 ); overload;
+  constructor Create( const vector : CalVector ); overload;
+  constructor Create( const vector : string ); overload;
+  procedure assign( const vector : CalVector ); overload;
+  procedure assign( const vector : string ); overload;
+
+  procedure add( v : CalVector );
+  procedure sub( v : CalVector );
+  procedure mult( m : CalMatrix ); overload;
+  procedure mult( q : CalQuaternion ); overload;
+  procedure mult( f : float ); overload;
+  procedure divide( f : float ); 
+  procedure blend( factor : float; v : CalVector );
+  function Equals( const v : CalVector ) : boolean;
+  function normalize : float;
+  procedure clear;
+  function length: float;
+  class function subNew( const v : CalVector; const u : CalVector ) : CalVector; 
+
+  procedure LoadFromStream( AStream : TStream );
+end;
+
+CalPlane = class
+public
+  a,b,c,d : float;
+
+  // These methods are made only to calculate the bounding boxes,
+  // don't use them in you program
+
+  function eval ( p : TVertex ) : float;overload;
+  function eval ( p : CalVector ) : float; overload;
+  procedure setPosition( p : TVertex ); overload;
+  procedure setPosition( p : CalVector ); overload;
+  procedure setNormal( p : TVertex ); overload;
+  procedure setNormal( p : CalVector ); overload;
+end;
+
+CalBoundingBox = class
+public
+  plane : array[ 0..5 ] of CalPlane;
+  constructor Create;
+  destructor Destroy; override;
+
+  procedure computePoints( var p : TVertices );
+end;
+
+
+

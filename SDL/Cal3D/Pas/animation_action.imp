@@ -1,0 +1,101 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// animation_action.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalAnimationAction.create( pCoreAnimation : CalCoreAnimation );
+begin
+  inherited;
+  m_type := TYPE_ACTION;
+end;
+
+//----------------------------------------------------------------------------//
+// Execute the action animation for a given delayIn and delayOut time         //
+//----------------------------------------------------------------------------//
+
+function CalAnimationAction.execute( delayIn, delayOut : float; weightTarget : float = 1.0; autoLock : boolean = false ) : boolean;
+begin
+  m_state := STATE_IN;
+  m_weight := 0.0;
+  m_delayIn := delayIn;
+  m_delayOut := delayOut;
+  m_time := 0.0;
+  m_weightTarget := weightTarget;
+  m_autoLock := autoLock;
+  result := true;
+end;
+
+//----------------------------------------------------------------------------//
+// Update the animation action with a given delta time                        //
+//----------------------------------------------------------------------------//
+
+function CalAnimationAction.update( deltaTime : float ) : boolean;
+begin
+  // update animation action time
+  if ( m_state <> STATE_STOPPED ) then
+  begin
+    m_time := m_time + ( deltaTime * m_timeFactor );
+  end;
+
+  // handle IN phase
+  if ( m_state = STATE_IN ) then
+  begin
+    // check if we are still in the IN phase
+    if ( m_time < m_delayIn ) then
+    begin
+      m_weight := m_time / m_delayIn * m_weightTarget;
+      //m_weight := m_time / m_delayIn;
+    end
+    else
+    begin
+      m_state := STATE_STEADY;
+      m_weight := m_weightTarget;
+    end;
+  end;
+
+  // handle STEADY
+  if ( m_state = STATE_STEADY ) then
+  begin
+    // check if we reached OUT phase
+    if ( not m_autoLock ) and ( m_time >= m_pCoreAnimation.Duration - m_delayOut ) then
+    begin
+      m_state := STATE_OUT;
+    end
+    // if the anim is supposed to stay locked on last keyframe, reset the time here.
+    else if ( m_autoLock ) and ( m_time > m_pCoreAnimation.Duration ) then
+    begin
+      m_state := STATE_STOPPED;
+      m_time := m_pCoreAnimation.Duration;
+    end;
+  end;
+
+  // handle OUT phase
+  if ( m_state = STATE_OUT ) then
+  begin
+    // check if we are still in the OUT phase
+    if ( m_time < m_pCoreAnimation.Duration ) then
+    begin
+      m_weight := ( m_pCoreAnimation.Duration - m_time ) / m_delayOut * m_weightTarget;
+//      m_weight := (m_pCoreAnimation.getDuration - m_time) / m_delayOut;
+    end
+    else
+    begin
+      // we reached the end of the action animation
+      m_weight := 0.0;
+      result := false;
+      exit;
+    end;
+  end;
+  result := true;
+end;
+

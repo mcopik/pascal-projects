@@ -1,0 +1,74 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coremodel.H
+
+mapCoreMaterialThread = record
+  id : integer;
+  second : integer;
+end;
+
+mapCoreMaterialThreads = array of mapCoreMaterialThread;
+
+mapmapCoreMaterialThread = record
+  id : integer;
+  second : mapCoreMaterialThreads;
+end;
+mapmapCoreMaterialThreads = array of mapmapCoreMaterialThread;
+
+CalCoreModel = class
+protected
+  m_strName : string;
+  m_pCoreSkeleton : CalCoreSkeleton;
+  m_vectorCoreAnimation : CalCoreAnimations;
+  m_vectorCoreMorphAnimation : CalCoreMorphAnimations;
+  m_vectorCoreMesh : CalCoreMeshes;
+  m_vectorCoreMaterial : CalCoreMaterials;
+  m_mapmapCoreMaterialThread : mapmapCoreMaterialThreads;
+  m_userData : CalUserData;
+  m_animationHelper : array of string;
+
+public
+  constructor create( strName : string );
+  destructor destroy; override;
+
+  procedure setCoreSkeleton( pCoreSkeleton : CalCoreSkeleton );
+
+  function addCoreAnimation( pCoreAnimation : CalCoreAnimation ) : integer;
+  function addCoreMorphAnimation( pCalCoreMorphAnimation : CalCoreMorphAnimation ) : integer;
+  function addCoreMaterial( pCoreMaterial : CalCoreMaterial ) : integer;
+  function addCoreMesh( pCoreMesh : CalCoreMesh ) : integer;
+  function createCoreMaterialThread( coreMaterialThreadId : integer ) : boolean;
+  function getCoreAnimation( id : integer ) : CalCoreAnimation;
+  function getCoreMorphAnimation( id : integer ) : CalCoreMorphAnimation;
+  function getCoreAnimationCount : integer;
+  function getCoreMorphAnimationCount : integer;
+  function getCoreMaterial( id : integer ) : CalCoreMaterial;
+  function getCoreMaterialCount : integer;
+  function getCoreMaterialId( coreMaterialThreadId, setId : integer ) : integer;
+  function getCoreMesh( id : integer ) : CalCoreMesh;
+  function getCoreMeshCount : integer;
+  property CoreSkeleton : CalCoreSkeleton read m_pCoreSkeleton write setCoreSkeleton;
+  property UserData : CalUserData read m_userData write m_userData;
+  function loadCoreAnimation( strFilename : string ) : integer;
+  function loadCoreMaterial( strFilename : string ) : integer;
+  function loadCoreMesh( strFilename : string ) : integer;
+  function loadCoreSkeleton( strFilename : string ) : boolean;
+  function saveCoreAnimation( strFilename : string; id : integer ) : boolean;
+  function saveCoreMaterial( strFilename : string; id : integer ) : boolean;
+  function saveCoreMesh( strFilename : string; id : integer ) : boolean;
+  function saveCoreSkeleton( strFilename : string ) : boolean;
+  function setCoreMaterialId( coreMaterialThreadId, setId, coreMaterialId : integer ) : boolean;
+  procedure addBoneHelper( const strBoneName : string; boneId : integer );
+  procedure addAnimHelper( const strAnimName : string; animId : integer );
+  function getBoneId( const strBoneName : string ) : integer;
+  function getAnimId( const strAnimName : string ) : integer;
+  procedure scale( factor : float );
+end;
+

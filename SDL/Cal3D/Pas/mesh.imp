@@ -1,0 +1,127 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// mesh.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalMesh.Create( pCoreMesh : CalCoreMesh );
+var
+  vectorCoreSubmesh : CalCoreSubmeshes;
+  submeshCount : integer;
+  i : integer;
+begin
+  m_pCoreMesh := pCoreMesh;
+
+  // clone the mesh structure of the core mesh
+  vectorCoreSubmesh := pCoreMesh.getVectorCoreSubmesh;
+
+  // get the number of submeshes
+  submeshCount := length( vectorCoreSubmesh );
+
+  // reserve space in the bone vector
+  setlength( m_vectorSubmesh, submeshCount );
+
+  // clone every core submesh
+  for i := 0 to submeshCount - 1 do
+    m_vectorSubmesh[ i ] := CalSubmesh.Create( vectorCoreSubmesh[ i ] );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalMesh.Destroy;
+var
+  i : integer;
+  submeshCount : integer;
+begin
+  // destroy all submeshes
+  submeshCount := length( m_vectorSubmesh );
+  for i := 0 to submeshCount - 1 do
+    m_vectorSubmesh[ i ].Free;
+  SetLength( m_vectorSubmesh, 0 );
+  m_pCoreMesh := nil;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the submesh for a given id                                             //
+//----------------------------------------------------------------------------//
+
+function CalMesh.getSubmesh( id : integer ) : CalSubmesh;
+begin
+  result := m_vectorSubmesh[ id ];
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of submeshes of this mesh                                   //
+//----------------------------------------------------------------------------//
+
+function CalMesh.getSubmeshCount : integer;
+begin
+  result := Length( m_vectorSubmesh );
+end;
+
+//----------------------------------------------------------------------------//
+// Set the lod level of the mesh                                              //
+//----------------------------------------------------------------------------//
+
+procedure CalMesh.setLodLevel( lodLevel : float );
+var
+  submeshId, SubmeshCount : integer;
+begin
+  // change lod level of every submesh
+  SubmeshCount := length( m_vectorSubmesh );
+  for submeshId := 0 to SubmeshCount - 1 do
+  begin
+    // set the lod level in the submesh
+    m_vectorSubmesh[ submeshId ].setLodLevel( lodLevel );
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Set the material set id of the mesh                                        //
+//----------------------------------------------------------------------------//
+
+procedure CalMesh.setMaterialSet( setId : integer );
+var
+  submeshId, SubmeshCount : integer;
+  coreMaterialThreadId : integer;
+  coreMaterialId : integer;
+begin
+  // change material of every submesh
+  SubmeshCount := length( m_vectorSubmesh );
+  for submeshId := 0 to SubmeshCount - 1 do
+  begin
+    // get the core material thread id of the submesh
+    coreMaterialThreadId := m_vectorSubmesh[ submeshId ].getCoreSubmesh.CoreMaterialThreadId;
+
+    // get the core material id for the given set id in the material thread
+    coreMaterialId := m_pModel.getCoreModel.getCoreMaterialId( coreMaterialThreadId, setId );
+
+    // set the new core material id in the submesh
+    m_vectorSubmesh[ submeshId ].CoreMaterialId := coreMaterialId;
+  end;
+end;
+
+procedure CalMesh.disableInternalData;
+var
+  submeshId, SubmeshCount : integer;
+begin
+  SubmeshCount := length( m_vectorSubmesh );
+  for submeshId := 0 to SubmeshCount - 1 do
+  begin
+    // disable internal data of the submesh
+    m_vectorSubmesh[ submeshId ].disableInternalData;
+  end;
+end;
+

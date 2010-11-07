@@ -1,0 +1,50 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// bone.h
+
+CalBone = class
+protected
+  m_pCoreBone : CalCoreBone;
+  m_pSkeleton : CalSkeleton;
+  m_accumulatedWeight : float;
+  m_accumulatedWeightAbsolute : float;
+  m_translation : CalVector;
+  m_rotation : CalQuaternion;
+  m_translationAbsolute : CalVector;
+  m_rotationAbsolute : CalQuaternion;
+  m_translationBoneSpace : CalVector;
+  m_rotationBoneSpace : CalQuaternion;
+  m_transformMatrix : CalMatrix;
+  m_boundingBox : CalBoundingBox;
+public
+  constructor Create( pSkeleton : CalSkeleton; pCoreBone : CalCoreBone );
+  destructor Destroy; override;
+
+  procedure blendState( weight : float; const translation : CalVector; const rotation : CalQuaternion );
+  procedure calculateState;
+  procedure clearState;
+  procedure calculateBoundingBox;
+  procedure setCoreState;
+  procedure setCoreStateRecursive;
+  procedure setRotation( const rotation : CalQuaternion  );
+  procedure setTranslation( const translation : CalVector );
+
+  property getCoreBone : CalCoreBone read m_pCoreBone;
+  property Rotation : CalQuaternion read m_rotation write setRotation;
+  property getRotationAbsolute : CalQuaternion read m_rotationabsolute;
+  property Translation : CalVector read m_translation write setTranslation;
+  property getTranslationAbsolute : CalVector read m_translationabsolute;
+  property getTranslationBoneSpace : CalVector read m_translationBoneSpace;
+  property getTransformMatrix : CalMatrix read m_transformMatrix;
+  property getBoundingBox : CalBoundingBox read m_boundingBox;
+  procedure lockState;
+  property Skeleton : CalSkeleton write m_pSkeleton;
+end;
+

@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+
+<html>
+<head>
+<title>
+  SDL Graphic User Interface
+</title>
+
+<meta http-equiv="content-style-type" content="text/css">
+<meta name="description" content="sdl controls">
+<meta name="keywords" content="sdl,gui,sdlgui,ctrls,sdlctrls,controls,formeditor,igor,stojkovic,gamemaker">
+
+<link rel="stylesheet" type="text/css" href="default.css">
+
+</head>
+
+<body>
+
+<h1>SDL Graphic User Interface</h1>
+
+<div class="navigator">
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=118226&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+<ul>
+  <li><a href="index.html">News</a></li>
+  <li><a href="description.htm">Description</a>
+  <ul class="sublist">
+    <li><a href="sdldraw.htm">SDLDraw</a></li>
+    <li><a href="sdlfont.htm">SDLFont</a></li>
+    <li>SDLGui</li>
+    <li><a href="sdlctrls.htm">SDL Controls</a></li>
+  </ul></li>
+  <li><a href="sdltools.htm">SDL Tools</a></li>
+  <li><a href="faq.htm">FAQ</a></li>
+  <li><a href="scrshot.htm">Screen shots</a></li>
+  <li><a href="download.htm">Download</a></li>
+  <li><a href="aboutme.htm">About Me</a></li>
+</ul>
+</div>
+
+<p>
+This unit contains an "engine" for all the controls and base classes for them.
+
+<h2>Declared types</h2>
+<dl class="code">
+  <dt>TSDLCursor = record Image : TSDLImage; HotSpotX : Byte; HotSpotY : Byte; end;
+  <dd>Use this to assign image to a cursor.
+  <dt>TSDLBarKind = (sbHorizontal, sbVertical);
+  <dd>Used for ScrollBar and Gauge.
+  <dt>TStateImage = (siFocused,siDown,siDisabled,siNone);
+  <dd>Elements of TStateImages.
+  <dt>TStateImages = set of TStateImage;
+  <dd>Shows what items are contained in control image in form of patterns.
+  See <a href="sdlctrls.htm#TSDLStdControl">TSDLStdControl</a>.
+  <dt>TDrawOption = (doNormal,doCenter,doTile,doStretch);
+  <dd>Shows how to draw a control. See <a href="#TSDLImageObject">TSDLImageObject</a>.DrawOption for more info.
+  <dt>TSDLDragMode = (sdmManual,sdmAutomatic);
+  <dd>Shows if you can drag a control.
+  <dt>Event types:
+  <dd><pre>TSDLNotifyEvent = procedure(Sender: TSDLComponent) of object;
+TSDLMouseEvent = procedure(Sender: TSDLComponent;Button: Integer;
+                 Modifier: TSDLMod;AX,AY: Word) of object;
+TSDLMouseClickEvent = procedure(Sender: TSDLComponent;
+                      AX,AY: Integer) of object;
+TSDLMouseMoveEvent = procedure(Sender: TSDLComponent;
+                     Modifier: TSDLMod; AX,AY : Integer) of object;
+TSDLMouseWheelEvent = procedure(Sender: TSDLComponent;Dir: Integer;
+                      Modifier: TSDLMod;AX,AY : Word) of object;
+TSDLKeyEvent = procedure(Sender: TSDLControl; var Key: Word;
+               Modifier: TSDLMod) of object;
+TSDLKeyPressEvent = procedure (Sender: TSDLControl; var Key: Char) of object;
+TSDLDrawItemEvent = procedure(Sender: TSDLControl;const ItemNo: Integer;
+                    Rect: TSDL_Rect; State: Integer) of object;
+</pre>
+</dl>
+
+<h2 id="TSDLObject">TSDLObject</h2>
+<p>
+TSDLObject is a base class controls, GUI and SDLMouse. It provides what is common for all of them. Properties are:
+
+<dl class="code">
+  <dt>property Count: Integer read GetCount;
+  <dd>How many child objects does it own.
+  <dt>property ControlCount: Integer read GetControlCount;
+  <dd>How many child controls does it own. This is less or equal to Count.
+  <dt>property GUI: TSDLGui read FGui;
+  <dd>Pointer to gui instance. This is nil for TSDLGui.
+  <dt>property Objects[Index: Integer]: TSDLImageObject read GetObject;
+  <dd>Returns indexed object.
+  <dt>property Controls[Index: Integer]: TSDLControl read GetControl;
+  <dd>Returns indexed control.
+  <dt>property ActiveControl: TSDLControl read FActiveControl write FActiveControl;
+  <dd>Child control that has focus.
+  <dt>property Parent: TSDLObject read FParent;
+  <dd>Poiter to parent object.
+  <dt>property ControlParent: TSDLControl read FControlParent;
+  <dd>Pointer to first parent that is TSDLControl.
+  <dt>property Z: Integer read FZ write SetZ;
+  <dd>Used for Z ordering.
+  <dt>property Height: Integer read FHeight write SetHeight;
+  <dd>Height of the object.
+  <dt>property Width: Integer read FWidth write SetWidth;
+  <dd>Width of the object.
+</dl>
+
+<p>
+Methods are:
+<dl class="code">
+  <dt>constructor Create(AParent: TSDLObject); virtual;
+  <dd>Creates a new instance of the object. AParent can be TSDLGui or other component.
+  <dt>procedure Clear;
+  <dd>Frees all child controls.
+  <dt>function IndexOfObject(AObject: TSDLImageObject): Integer;
+  <dd>Returns index of the specified object.
+  <dt>function IndexOfControl(Control: TSDLControl): Integer;
+  <dd>Returns index of the specified control.
+</dl>
+
+<h2 id="TSDLImageObject">TSDLImageObject</h2>
+<p>Next class in the hierarhy is TSDLImageObject. It is a base class for TSDLComponent and TSDLMouse.
+Although TSDLComponent and its descendatns: TSDLControl and TSDLStdControl are part of SDLGui.pas
+you can find their description in <a href="sdlctrls.htm">SDLCtrls</a>.  Properties of TSDLImageObject are:
+
+<dl class="code">
+  <dt>property WorldX: Integer read GetWorldX;    
+  <dd>Returns absolute X coordinate
+  <dt>property WorldY: Integer read GetWorldY;
+  <dd>Returns absolute Y coordinate
+  <dt>property BoundsRect: TSDL_Rect read GetBoundsRect;
+  <dd>Returns absolute bounds rect.
+  <dt>property Image: TSDLImage read FImage write SetImage;
+  <dd>Represents control's Image.
+  <dt>property Dead: Boolean read FDead;
+  <dd>True if you killed the control using Kill method.
+  <dt>property AnimCount: Integer read FAnimCount write FAnimCount;
+  <dd>Represents count of patterns to animate for this control.
+  <dt>property AnimLooped: Boolean read FAnimLooped write FAnimLooped;
+  <dd>If false animation will stop after AnimCount frames, else it will be looped.
+  <dt>property AnimPos: Double read FAnimPos write FAnimPos;
+  <dd>Current position of animation.
+  <dt>property AnimSpeed: Double read FAnimSpeed write FAnimSpeed;
+  <dd>Speed of animation. Set this as 1/(number of ms between two frames). Default 3/1000.
+  <dt>property AnimStart: Integer read FAnimStart write FAnimStart;
+  <dd>From witch pattern to start the animation.
+  <dt>property X: Integer read FX write SetX;
+  <dd>Coordinate X relative to parent position.
+  <dt>property Y: Integer read FY write SetY;
+  <dd>Coordinate Y relative to parent position.
+  <dt>property Visible: Boolean read GetVisible write SetVisible default True;
+  <dd>Indicates whether the control is visible.
+  <dt>property DrawOption: TDrawOption read FDrawOption write FDrawOption default doStretch;
+  <dd>Indicates how the control's image will be drawn. Possible options are:
+    <dl>
+      <dt>doNormal
+      <dd>Draws the image in its actual size, no matter of control's width and height.
+      <dt>doCenter
+      <dd>Draws the image in its actual size but centers it in BoundsRect of control.
+      <dt>doTile
+      <dd>Tiles the image to fill control's bounds rect.
+      <dt>doStretch
+      <dd>Stretches the image to fit in control's bounds rect.
+    </dl>
+  <dt>property ImageIndex: Integer read FImageIndex write SetImageIndex default -1;
+  <dd>If any of the parents have RImages: TSDLImages property it will set an indexed image from that list to this control.
+</dl>
+
+<p>Method is:
+<dl class="code">
+  <dt>procedure Kill;
+  <dd>Prepares control for destruction. It will be destroyed at the end of Gui.Update method. Generally you can
+  destroy a control using its Free method. You have to use this method when you want to destroy a form, from
+  its own method. For example, Form1.Button1Click(...) can't contain Form1.Free so you have to call Form1.Kill.
+</dl>
+
+<h2 id="TSDLMouse">TSDLMouse</h2>
+<p>This class is used to preprocess mouse events, send them to proper controls and provide a system for adding
+an image to the cursor. You do not need to create this, since TSDLGui will create one instance and place it in
+its SDLMouse property. Properties are:
+
+<dl class="code">
+  <dt>property ConstCursor: Boolean read FConstCursor write SetConstCursor;    
+  <dd>If True cursor image can not change if it gets over the control which has Cursor property set.
+  <dt>property HotSpotX: Byte read FHotSpotX write FHotSpotX;
+  <dd>X coord of hot spot. Hot spot determines what point in cursor image to consider as cursor's peak.
+  <dt>property HotSpotY: Byte read FHotSpotY write FHotSpotY;
+  <dd>Y coord of hot spot.
+  <dt>property DefaultCursor: TSDLCursor read FDefaultCursor write FDefaultCursor;
+  <dd>Deafult image for the cursor. Image of the cursor will be this unless it gets over control which
+  has Cursor property set and ConstCursor is false.
+  <dt>property DownControl: TSDLComponent read FDownControl;
+  <dd>Control that mouse button was pressed on.
+  <dt>property OverControl: TSDLComponent read FOverControl;
+  <dd>Control over which the cursor is.
+</dl>
+
+<p>
+Method is:
+<dl class="code">
+  <dt>procedure SetCursor(const Value: TSDLCursor);
+  <dd>Sets the Value as cursor's image. Image will return to DefaultImage if one is present if you move the
+  mouse over the control that does'n have Cursor property assigned.
+</dl>
+
+<h2 id="TSDLGui">TSDLGui</h2>
+<p>This class is like an engine for the entire gui system. In every cycle of you application you should
+call ProcessEvent for all events and Update method for drawing. Properties are:
+
+<dl class="code">
+  <dt>HintColor: Cardinal;
+  <dd>Background of hint text box.
+  <dt>ShowHintAfter: Cardinal;
+  <dd>Number of miliseconds mouse needs to stay still over the control to popup the hint. Default 500.
+  <dt>ShowHintFor: Cardinal;
+  <dd>Number of miliseconds till hint disappears.
+  <dt>HintFont: TSDLFont;
+  <dd>Font for hints.
+  <dt>DesignForm: TObject;
+  <dd>Used only by SDL Form Designer application.
+  <dt>SetSelControl: TSDLNotifyEvent;
+  <dd>Used only by SDL Form Designer application.
+  <dt>DragEnabled: Boolean;
+  <dd>Shows if draging of controls is enabled. Used by SDL Form Designer application.
+  <dt>ShowHints: Boolean;
+  <dd>Popup hints only if this is True.
+  <dt>property AllCount: Integer read FAllCount;
+  <dd>Count of all created objects.
+  <dt>property SDLMouse: TSDLMouse read FSDLMouse;
+  <dd>Pointer to TSDLMouse instance.
+  <dt>property PopupMenu: TSDLComponent read FPopupMenu write FPopupMenu;
+  <dd>Pointer to currently poped up TSDLPopupMenu.
+</dl>
+
+<p>
+Methods are:
+<dl class="code">
+  <dt>procedure ProcessEvent(const Event: TSDL_Event);
+  <dd>Process the specified event sending it to the appropriate controls.
+  <dt>procedure Update;
+  <dd>Animates and draws all controls, draws the hint if one is present and frees the killed controls.
+  <dt>procedure SendQuitSignal;
+  <dd>Sends the SDL_QUITEV signal so application can terminate properly.
+</dl>
+
+</body>
+</html>

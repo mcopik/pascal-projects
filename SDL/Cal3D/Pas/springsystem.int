@@ -1,0 +1,33 @@
+//****************************************************************************//
+// springsystem.h                                                             //
+// Copyright (C) 2001, 2002 Bruno 'Beosil' Heidelberger                       //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+
+CalSpringSystem = class
+protected
+  m_vGravity : CalVector;
+  m_vForce : CalVector;
+
+public
+  m_pModel : CalModel;
+
+
+  constructor Create( pModel : CalModel );
+  destructor Destroy; override;
+
+  procedure calculateForces( var pSubmesh : CalSubmesh; deltaTime : float );
+  procedure calculateVertices( var pSubmesh : CalSubmesh; deltaTime : float );
+  procedure update( deltaTime : float );
+  procedure setGravityVector( const vGravity : CalVector );
+  procedure setForceVector( const vForce : CalVector );
+
+  property GravityVector : CalVector read m_vGravity write setGravityVector;
+  property ForceVector : CalVector read m_vGravity write setForceVector;
+end;
+

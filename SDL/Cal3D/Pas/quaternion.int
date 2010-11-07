@@ -1,0 +1,36 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// quaternion.h
+
+CalQuaternion = class
+public
+  x : float;
+  y : float;
+  z : float;
+  w : float;
+
+  constructor Create( const mx: float = 0.0; const my : float = 0.0; const mz : float = 0.0; const mw : float  = 0.0 ); overload;
+  constructor Create( const Quaternion : CalQuaternion ); overload;
+  constructor Create( const Quaternion : string ); overload;
+  procedure Assign( const Quaternion : CalQuaternion ); overload;
+  procedure Assign( const Quaternion : string ); overload;
+
+  procedure blend( factor : float; q : CalQuaternion );
+  procedure mult( q : CalQuaternion ); overload;
+  procedure mult( tx, ty, tz : float ); overload;
+  procedure mult( v : CalVector ); overload;
+  procedure clear;
+  procedure conjugate;
+  procedure invert;
+  procedure set_( qx, qy, qz, qw : float );
+
+  procedure LoadFromStream( AStream : TStream );
+end;
+

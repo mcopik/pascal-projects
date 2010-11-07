@@ -1,0 +1,165 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// matrix.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalMatrix.Create;
+begin
+  inherited;
+  dxdx := 0.0;
+  dydx := 0.0;
+  dzdx := 0.0;
+  dxdy := 0.0;
+  dydy := 0.0;
+  dzdy := 0.0;
+  dxdz := 0.0;
+  dydz := 0.0;
+  dzdz := 0.0;
+end;
+
+constructor CalMatrix.Create( const q : CalQuaternion );
+var
+  xx2, yy2, zz2, xy2, zw2, xz2, yw2, yz2, xw2 : float;
+begin
+  inherited Create;
+  xx2 := q.x * q.x * 2;
+  yy2 := q.y * q.y * 2;
+  zz2 := q.z * q.z * 2;
+  xy2 := q.x * q.y * 2;
+  zw2 := q.z * q.w * 2;
+  xz2 := q.x * q.z * 2;
+  yw2 := q.y * q.w * 2;
+  yz2 := q.y * q.z * 2;
+  xw2 := q.x * q.w * 2;
+  dxdx := 1 - yy2 - zz2;
+  dxdy := xy2 + zw2;
+  dxdz := xz2 - yw2;
+  dydx := xy2 - zw2;
+  dydy := 1 - xx2 - zz2;
+  dydz := yz2 + xw2;
+  dzdx := xz2 + yw2;
+  dzdy := yz2 - xw2;
+  dzdz := 1 - xx2 - yy2;
+end;
+
+constructor CalMatrix.Create( weight : float; const m : CalMatrix );
+begin
+  inherited Create;
+  dxdx := m.dxdx * weight;
+  dxdy := m.dxdy * weight;
+  dxdz := m.dxdz * weight;
+  dydx := m.dydx * weight;
+  dydy := m.dydy * weight;
+  dydz := m.dydz * weight;
+  dzdx := m.dzdx * weight;
+  dzdy := m.dzdy * weight;
+  dzdz := m.dzdz * weight;
+end;
+
+procedure CalMatrix.blend( factor : float; const m : CalMatrix );
+begin
+  dxdx := dxdx + m.dxdx * factor;
+  dydx := dydx + m.dydx * factor;
+  dzdx := dzdx + m.dzdx * factor;
+  dxdy := dxdy + m.dxdy * factor;
+  dydy := dydy + m.dydy * factor;
+  dzdy := dzdy + m.dzdy * factor;
+  dxdz := dxdz + m.dxdz * factor;
+  dydz := dydz + m.dydz * factor;
+  dzdz := dzdz + m.dzdz * factor;
+end;
+
+function CalMatrix.det : float;
+begin
+  result := dxdx * ( dydy * dzdz - dydz * dzdy )
+    - dxdy * ( dydx * dzdz - dzdx * dydz )
+    + dxdz * ( dydx * dzdy - dzdx * dydy );
+end;
+
+procedure CalMatrix.assign( const q : CalQuaternion );
+var
+  xx2, yy2, zz2, xy2, zw2, xz2, yw2, yz2, xw2 : float;
+begin
+  xx2 := q.x * q.x * 2;
+  yy2 := q.y * q.y * 2;
+  zz2 := q.z * q.z * 2;
+  xy2 := q.x * q.y * 2;
+  zw2 := q.z * q.w * 2;
+  xz2 := q.x * q.z * 2;
+  yw2 := q.y * q.w * 2;
+  yz2 := q.y * q.z * 2;
+  xw2 := q.x * q.w * 2;
+  dxdx := 1 - yy2 - zz2;
+  dxdy := xy2 + zw2;
+  dxdz := xz2 - yw2;
+  dydx := xy2 - zw2;
+  dydy := 1 - xx2 - zz2;
+  dydz := yz2 + xw2;
+  dzdx := xz2 + yw2;
+  dzdy := yz2 - xw2;
+  dzdz := 1 - xx2 - yy2;
+end;
+
+procedure CalMatrix.assign( const m : CalMatrix );
+begin
+  dxdx := m.dxdx;
+  dxdy := m.dxdy;
+  dxdz := m.dxdz;
+  dydx := m.dydx;
+  dydy := m.dydy;
+  dydz := m.dydz;
+  dzdx := m.dzdx;
+  dzdy := m.dzdy;
+  dzdz := m.dzdz;
+end;
+
+procedure CalMatrix.mult( const m : CalMatrix );
+var
+  ndxdx, ndydx, ndzdx, ndxdy, ndydy, ndzdy, ndxdz, ndydz, ndzdz : float;
+begin
+  ndxdx := m.dxdx * dxdx + m.dxdy * dydx + m.dxdz * dzdx;
+  ndydx := m.dydx * dxdx + m.dydy * dydx + m.dydz * dzdx;
+  ndzdx := m.dzdx * dxdx + m.dzdy * dydx + m.dzdz * dzdx;
+
+  ndxdy := m.dxdx * dxdy + m.dxdy * dydy + m.dxdz * dzdy;
+  ndydy := m.dydx * dxdy + m.dydy * dydy + m.dydz * dzdy;
+  ndzdy := m.dzdx * dxdy + m.dzdy * dydy + m.dzdz * dzdy;
+
+  ndxdz := m.dxdx * dxdz + m.dxdy * dydz + m.dxdz * dzdz;
+  ndydz := m.dydx * dxdz + m.dydy * dydz + m.dydz * dzdz;
+  ndzdz := m.dzdx * dxdz + m.dzdy * dydz + m.dzdz * dzdz;
+
+  dxdx := ndxdx;
+  dydx := ndydx;
+  dzdx := ndzdx;
+  dxdy := ndxdy;
+  dydy := ndydy;
+  dzdy := ndzdy;
+  dxdz := ndxdz;
+  dydz := ndydz;
+  dzdz := ndzdz;
+end;
+
+procedure CalMatrix.mult( factor : float );
+begin
+  dxdx := dxdx * factor;
+  dydx := dydx * factor;
+  dzdx := dzdx * factor;
+  dxdy := dxdy * factor;
+  dydy := dydy * factor;
+  dzdy := dzdy * factor;
+  dxdz := dxdz * factor;
+  dydz := dydz * factor;
+  dzdz := dzdz * factor;
+end;
+

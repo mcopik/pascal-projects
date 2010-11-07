@@ -1,0 +1,221 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// corematerial.cpp
+
+//----------------------------------------------------------------------------//
+// Get the number of maps                                                     //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreMaterial.Create( AFileName : string );
+begin
+  inherited Create;
+  m_userData := 0;
+  if AFileName <> '' then
+    LoadFromFile( AFileName );
+end;
+
+function CalCoreMaterial.getMapCount : integer;
+begin
+  result := length( m_vectorMap );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the (texture) filename of the given map                                //
+//----------------------------------------------------------------------------//
+
+function CalCoreMaterial.getMapFilename( mapId : integer ) : string;
+begin
+  result := m_vectorMap[ mapId ].strFilename;
+end;
+
+//----------------------------------------------------------------------------//
+// Set the user data in a given map of this core material                     //
+//----------------------------------------------------------------------------//
+
+procedure CalCoreMaterial.setMapUserData( mapId : integer; userData : CalUserData );
+begin
+  m_vectorMap[ mapId ].userData := userData;
+end;
+
+procedure CalCoreMaterial.LoadFromFile( AFileName : string );
+var
+  Stream : TStream;
+begin
+  Stream := CalOpen( AFileName, integer( MATERIAL_FILE_MAGIC ) );
+  if Stream <> nil then
+  begin
+    LoadFromStream( Stream );
+    Stream.Free;
+  end
+  else
+  begin
+    LoadFromXMLFile( AFileName );
+  end;
+end;
+
+procedure CalCoreMaterial.LoadFromXMLFile( AFileName : string );
+
+  function ParseColour( Colour : string ) : Color;
+  var
+    i : integer;
+  begin
+    i := Pos( ' ', Colour );
+    Result.red := StrToInt( Copy( Colour, 0, i - 1 ) );
+    Colour := Copy( Colour, i + 1, Length( Colour ) - i + 1 );
+    i := Pos( ' ', Colour );
+    Result.green := StrToInt( Copy( Colour, 0, i - 1 ) );
+    Colour := Copy( Colour, i + 1, Length( Colour ) - i + 1 );
+    i := Pos( ' ', Colour );
+    Result.blue := StrToInt( Copy( Colour, 0, i - 1 ) );
+    Colour := Copy( Colour, i + 1, Length( Colour ) - i + 1 );
+    Result.alpha := StrToInt( Copy( Colour, 0, Length( Colour ) ) );
+  end;
+
+var
+  Parser : TXmlParser;
+  Magic : string;
+  Version, NumMaps, MapCounter : integer;
+begin
+  NumMaps := 0;
+  MapCounter := 0;
+  Parser := TXmlParser.Create; // Create Parser Instance
+  try
+  // Tell the parser if you want content to be normalized
+  // (i.e. pack and trimm off Whitespaces)
+
+    Parser.Normalize := TRUE;
+
+  // Load the XML Document
+
+    Parser.LoadFromFile( AFileName ); // Load XML file
+
+  // Initialize for Scanning through the Document
+
+    Parser.StartScan; // Prepare Scanning through the document
+
+    while Parser.Scan do
+    begin
+      case Parser.CurPartType of // Here the parser tells you what it has found
+        ptStartTag,
+          ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+          begin
+          // Sort out Header stuff
+            if Parser.CurName = 'HEADER' then
+            begin
+              Magic := Parser.CurAttr.Value( 'MAGIC' );
+              Version := StrToInt( Parser.CurAttr.Value( 'VERSION' ) );
+              if ( Magic <> MATERIAL_XMLFILE_MAGIC )
+                or ( Version < EARLIEST_COMPATIBLE_FILE_VERSION )
+                or ( Version > CURRENT_FILE_VERSION ) then
+              begin
+                CalError.setLastError( INVALID_XML_FILE_FORMAT, 'CalCoreMaterial.LoadFromXMLFile', 104, AFilename );
+                break;
+              end;
+            end;
+
+          //
+            if Parser.CurName = 'MATERIAL' then
+            begin
+              NumMaps := StrToInt( Parser.CurAttr.Value( 'NUMMAPS' ) );
+              SetLength( m_vectorMap, NumMaps );
+            end;
+          end;
+
+        ptContent,
+          ptCData :
+          begin
+            if Parser.CurName = 'AMBIENT' then
+            begin
+              m_ambientColor := ParseColour( Parser.CurContent );
+            end;
+
+            if Parser.CurName = 'DIFFUSE' then
+            begin
+              m_diffuseColor := ParseColour( Parser.CurContent );
+            end;
+
+            if Parser.CurName = 'SPECULAR' then
+            begin
+              m_specularColor := ParseColour( Parser.CurContent );
+            end;
+
+            if Parser.CurName = 'SHININESS' then
+            begin
+              m_shininess := StrToFloat( Parser.CurContent );
+            end;
+
+            if Parser.CurName = 'MAP' then
+            begin
+              if MapCounter < NumMaps then
+              begin
+                m_vectorMap[ MapCounter ].strFilename := Parser.CurContent;
+              // initialize the user data
+                m_vectorMap[ MapCounter ].userData := 0;
+                inc( MapCounter );
+              end;
+            end;
+
+          end;
+
+        ptEndTag : // Process End-Tag here (Parser.CurName)
+          begin
+
+          end;
+
+        ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+          begin
+
+          end;
+      end;
+    end;
+  finally
+    Parser.Free;
+  end;
+end;
+
+procedure CalCoreMaterial.LoadFromStream( AStream : TStream );
+var
+  mapCount : integer;
+  i : integer;
+  l : integer;
+  s : string;
+begin
+  // get the ambient color of the core material
+  AStream.ReadBuffer( m_ambientColor, sizeof( m_ambientColor ) );
+
+  // get the diffuse color of the core material
+  AStream.ReadBuffer( m_diffuseColor, sizeof( m_diffuseColor ) );
+
+  // get the specular color of the core material
+  AStream.ReadBuffer( m_specularColor, sizeof( m_specularColor ) );
+
+  // get the shininess factor of the core material
+  AStream.ReadBuffer( m_shininess, 4 );
+
+  // read the number of maps
+  AStream.ReadBuffer( mapCount, 4 );
+  SetLength( m_vectorMap, mapCount );
+
+  // load all maps
+  for i := 0 to mapCount - 1 do
+  begin
+    // get the filename length of the map
+    AStream.ReadBuffer( l, 4 );
+
+    // read the filename of the map
+    setlength( s, l );
+    AStream.ReadBuffer( s[ 1 ], l );
+    m_vectorMap[ i ].strFilename := s;
+
+    // initialize the user data
+    m_vectorMap[ i ].userData := 0;
+  end;
+end;
+

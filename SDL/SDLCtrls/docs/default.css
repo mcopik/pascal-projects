@@ -1,0 +1,55 @@
+/*
+ * black = "#000000"  green = "#008000"
+ * silver = "#C0C0C0"  lime = "#00FF00"
+ * gray = "#808080"  olive = "#808000"
+ * white = "#FFFFFF"  yellow = "#FFFF00"
+ * maroon = "#800000"  navy = "#000080"
+ * red = "#FF0000"  blue = "#0000FF"
+ * purple = "#800080"  teal = "#008080"
+ * fuchsia = "#FF00FF"  aqua = "#00FFFF"
+ */
+
+body { 
+  background: white;
+  color: black;
+  padding: 1em 1em 5em 170px;
+  line-height: 1.3;
+  font-family: "Gill Sans MT", "Gill Sans", GillSans, Arial, Helvetica, sans-serif;
+   }
+h1 {
+  color: navy;
+  text-align: center;
+   }
+h2 {
+  font-size: large;
+  color: navy;
+   }
+p {
+  text-indent: 2em;
+  }
+div.navigator {
+  position: fixed;
+  padding: 1em;
+  border: medium outset silver;
+  background: silver;
+  left: 10px;
+  width: 110px; 
+    }
+div.navigator ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+     }
+div.navigator ul.sublist {
+  margin: 0 0 0 1em;
+  }     
+dl.controls dt {
+  display: run-in;
+  font-weight: bold;
+  line-height: 2em;
+      }
+dl.code > dt {
+  font-family: monospace;
+  color: green;
+  font-weight: bold;
+  }

@@ -1,0 +1,50 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// error.h
+
+// misc
+ TError=(
+  OK,
+  INTERNAL,
+    INVALID_HANDLE,
+    MEMORY_ALLOCATION_FAILED,
+    FILE_NOT_FOUND,
+    INVALID_FILE_FORMAT,
+    INVALID_BINARY_FILE_FORMAT,
+    INVALID_XML_FILE_FORMAT,
+    FILE_PARSER_FAILED,
+    INDEX_BUILD_FAILED,
+    NO_PARSER_DOCUMENT,
+    INVALID_ANIMATION_DURATION,
+    BONE_NOT_FOUND,
+    INVALID_ATTRIBUTE_VALUE,
+    INVALID_KEYFRAME_COUNT,
+    INVALID_ANIMATION_TYPE,
+    FILE_CREATION_FAILED,
+    FILE_WRITING_FAILED,
+    INCOMPATIBLE_FILE_VERSION,
+    NO_MESH_IN_MODEL,
+    BAD_DATA_SOURCE,
+    NULL_BUFFER,
+    INVALID_MIXER_TYPE,
+    MAX_ERROR_CODE
+ );
+
+ CalError=class
+// member functions
+public
+  class function getLastErrorCode:TError;
+  class function getLastErrorDescription:string;
+  class function getLastErrorFile:string;
+  class function getLastErrorLine:integer;
+  class function getLastErrorText:string;
+  class procedure printLastError;
+  class procedure setLastError(code:TError; strFile:string; line:integer; strText:string = '');
+end;

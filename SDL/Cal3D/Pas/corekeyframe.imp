@@ -1,0 +1,113 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// corekeyframe.cpp
+
+constructor CalCoreKeyFrame.Create;
+begin
+  inherited Create;
+  m_time := 0.0;
+  m_translation := CalVector.Create;
+  m_rotation := CalQuaternion.Create;
+end;
+
+constructor CalCoreKeyFrame.Create( AStream : TStream );
+begin
+  inherited Create;
+  m_time := 0.0;
+  m_translation := CalVector.Create;
+  m_rotation := CalQuaternion.Create;
+  if AStream <> nil then
+    LoadFromStream( AStream );
+end;
+
+constructor CalCoreKeyFrame.Create( Parser : TXmlParser );
+begin
+  inherited Create;
+  m_time := 0.0;
+  m_translation := CalVector.Create;
+  m_rotation := CalQuaternion.Create;
+  if Parser <> nil then
+    LoadFromXMLFile( Parser );
+end;
+
+destructor CalCoreKeyFrame.Destroy;
+begin
+  m_translation.Free;
+  m_rotation.Free;
+  inherited;
+end;
+
+procedure CalCoreKeyFrame.LoadFromXMLFile( Parser : TXmlParser );
+begin
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          //
+          if Parser.CurName = 'KEYFRAME' then
+          begin
+            m_time := StrToInt( Parser.CurAttr.Value( 'TIME' ) );
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+          if Parser.CurName = 'TRANSLATION' then
+          begin
+            m_translation.assign( Parser.CurContent );
+          end;
+
+          if Parser.CurName = 'ROTATION' then
+          begin
+            m_rotation.assign( Parser.CurContent );
+          end;
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+          if Parser.CurName = 'KEYFRAME' then
+          begin
+            break;
+          end;
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+end;
+
+procedure CalCoreKeyFrame.LoadFromStream( AStream : TStream );
+begin
+  // get the time of the keyframe
+  AStream.ReadBuffer( m_time, 4 );
+
+  // get the translation of the bone
+  m_translation.LoadFromStream( AStream );
+
+  // get the rotation of the bone
+  m_rotation.LoadFromStream( AStream );
+end;
+
+procedure CalCoreKeyFrame.setRotation( const rotation : CalQuaternion );
+begin
+  m_rotation.assign( rotation );
+end;
+
+procedure CalCoreKeyFrame.setTranslation( const translation : CalVector );
+begin
+  m_translation.assign( translation );
+end;
+

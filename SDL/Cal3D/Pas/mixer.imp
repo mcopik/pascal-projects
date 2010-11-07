@@ -1,0 +1,461 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// mixer.cpp
+
+constructor CalAbstractMixer.Create( pModel : CalModel );
+begin
+  inherited Create;
+
+end;
+
+destructor CalAbstractMixer.Destroy;
+begin
+
+  inherited;
+end;
+
+function CalAbstractMixer.isDefaultMixer : boolean;
+begin
+  result := false;
+end;
+
+procedure CalAbstractMixer.updateAnimation( deltaTime : float );
+begin
+
+end;
+
+procedure CalAbstractMixer.updateSkeleton;
+begin
+
+end;
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalMixer.Create( pModel : CalModel );
+var
+  pCoreModel : CalCoreModel;
+  coreAnimationCount : integer;
+begin
+  inherited Create( pModel );
+
+  m_pModel := pModel;
+
+  pCoreModel := m_pModel.getCoreModel;
+  if ( pCoreModel = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'CalMixer.Create', 55 );
+    {$ENDIF}
+    exit;
+  end;
+
+  // build the animation table
+  coreAnimationCount := m_pModel.getCoreModel.getCoreAnimationCount;
+
+  SetLength( m_vectorAnimation, coreAnimationCount );
+
+  // set the animation time/duration values to default
+  m_animationTime := 0.0;
+  m_animationDuration := 0.0;
+  m_timeFactor := 1.0;
+
+  m_listAnimationCycle := TList.Create;
+  m_listAnimationAction := Tlist.Create;
+  //m_pModel := pModel;
+  // build the animation table
+  //setlength( m_vectorAnimation, m_pModel.getCoreModel.getCoreAnimationCount );
+  // needed by updateSkeleton
+  //m_translation := CalVector.Create( 0, 0, 0 );
+  //m_rotation := CalQuaternion.Create( 0, 0, 0, 0 );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalMixer.Destroy;
+var
+  i : integer;
+begin
+  // destroy all active animation actions
+  for i := 0 to m_listAnimationAction.count - 1 do
+    CalAnimationAction( m_listAnimationAction[ i ] ).Free;
+  m_listAnimationAction.Free;
+
+  // destroy all active animation cycles
+  for i := 0 to m_listAnimationCycle.count - 1 do
+    CalAnimationCycle( m_listAnimationCycle[ i ] ).Free;
+
+  m_listAnimationCycle.Free;
+  m_vectorAnimation := nil;
+
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Blend a cycle animation to the given weight in delay time                  //
+//----------------------------------------------------------------------------//
+
+function CalMixer.blendCycle( id : integer; weight, delay : float ) : boolean;
+var
+  pAnimation : CalAnimation;
+  pCoreAnimation : CalCoreAnimation;
+  pAnimationCycle : CalAnimationCycle;
+  coreTrack : CalCoreTrack;
+  lastKeyframe, firstKeyframe, newKeyframe : CalCoreKeyframe;
+  itr : integer;
+  listCoreTrack : CalCoreTracks;
+begin
+  listCoreTrack := nil;
+  // get the animation for the given id
+  pAnimation := m_vectorAnimation[ id ];
+  // create a new animation instance if it is not active yet
+  if ( pAnimation = nil ) then
+  begin
+    // take the fast way out if we are trying to clear an inactive animation
+    if ( weight = 0.0 ) then
+    begin
+      result := true;
+      exit;
+    end;
+
+    // get the core animation
+    pCoreAnimation := m_pModel.getCoreModel.getCoreAnimation( id );
+
+    coreTrack := pCoreAnimation.getCoreTrack( 0 );
+
+    lastKeyframe := coreTrack.getCoreKeyframe( coreTrack.getCoreKeyframeCount - 1 );
+
+    if ( lastKeyframe.Time < pCoreAnimation.Duration ) then
+    begin
+      listCoreTrack := pCoreAnimation.getListCoreTrack;
+
+      for itr := 0 to Length( listCoreTrack ) - 1 do
+      begin
+        coreTrack := listCoreTrack[ itr ];
+
+        firstKeyframe := coreTrack.getCoreKeyframe( 0 );
+        newKeyframe := CalCoreKeyframe.Create;
+
+        newKeyframe.setTranslation( firstKeyframe.Translation );
+        newKeyframe.setRotation( firstKeyframe.Rotation );
+        newKeyframe.Time := pCoreAnimation.Duration;
+
+        coreTrack.addCoreKeyframe( newKeyframe );
+      end;
+    end;
+
+    // allocate a new animation cycle instance
+    pAnimationCycle := CalAnimationCycle.create( pCoreAnimation );
+
+    // insert new animation into the tables
+    m_vectorAnimation[ id ] := pAnimationCycle;
+    m_listAnimationCycle.insert( 0, pAnimationCycle );
+    // blend the animation
+    result := pAnimationCycle.blend( weight, delay );
+    exit;
+  end;
+
+  // check if this is really a animation cycle instance
+  if ( pAnimation.getType <> TYPE_CYCLE ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_ANIMATION_TYPE, 'CalMixer.blendCycle', 166 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // clear the animation cycle from the active vector if the target weight is zero
+  if ( weight = 0.0 ) then
+    m_vectorAnimation[ id ] := nil;
+
+  // cast it to an animation cycle
+  pAnimationCycle := CalAnimationCycle( pAnimation );
+
+  // blend the animation cycle
+  result := pAnimationCycle.blend( weight, delay );
+end;
+
+//----------------------------------------------------------------------------//
+// Clear a cycle animation in the given delay time                            //
+//----------------------------------------------------------------------------//
+
+function CalMixer.clearCycle( id : integer; delay : float ) : boolean;
+var
+  pAnimation : CalAnimation;
+  pAnimationCycle : CalAnimationCycle;
+begin
+  // get the animation for the given id
+  pAnimation := m_vectorAnimation[ id ];
+
+  // we can only clear cycles that are active
+  if ( pAnimation = nil ) then
+  begin
+    result := true;
+    exit;
+  end;
+
+  // clear the animation cycle from the active vector
+  m_vectorAnimation[ id ] := nil;
+
+  // cast it to an animation cycle
+  pAnimationCycle := CalAnimationCycle( pAnimation );
+
+  // set animation cycle to async state
+  pAnimationCycle.setAsync( m_animationTime, m_animationDuration );
+
+  // blend the animation cycle
+  result := pAnimationCycle.blend( 0.0, delay );
+end;
+
+//----------------------------------------------------------------------------//
+// Execute an action animation for a given delayIn and dealyOut time          //
+//----------------------------------------------------------------------------//
+
+function CalMixer.executeAction( id : integer; delayIn, delayOut : float; weightTarget : float; autoLock : boolean ) : boolean;
+var
+  pCoreAnimation : CalCoreAnimation;
+  pAnimationAction : CalAnimationAction;
+begin
+  // get the core animation
+  pCoreAnimation := m_pModel.getCoreModel.getCoreAnimation( id );
+  if ( pCoreAnimation = nil ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  // allocate a new animation action instance
+  pAnimationAction := CalAnimationAction.create( pCoreAnimation );
+
+  // insert new animation into the table
+  m_listAnimationAction.insert( 0, pAnimationAction );
+
+  // execute the animation
+  result := pAnimationAction.execute( delayIn, delayOut, weightTarget, autoLock );
+end;
+
+//----------------------------------------------------------------------------//
+// Update all animations of this mixer with a given delta time                //
+//----------------------------------------------------------------------------//
+
+procedure CalMixer.updateAnimation( deltaTime : float );
+var
+  i : integer;
+  AnimationAction : CalAnimationAction;
+  accumulatedWeight, accumulatedDuration : float;
+  AnimationCycle : CalAnimationCycle;
+begin
+  // update the current animation time
+  if ( m_animationDuration = 0.0 ) then
+  begin
+    m_animationTime := 0.0;
+  end
+  else
+  begin
+    m_animationTime := m_animationTime + ( deltaTime * m_timeFactor );
+    if ( m_animationTime >= m_animationDuration ) then
+    begin
+      m_animationTime := fmod( m_animationTime, m_animationDuration );
+    end;
+    if (m_animationTime < 0) then
+      m_animationTime := m_animationTime + m_animationDuration;
+  end;
+
+  // update all active animation actions of this model
+  i := 0;
+  while i < m_listAnimationAction.count do
+  begin
+    AnimationAction := m_listAnimationAction[ i ];
+    // update and check if animation action is still active
+    if AnimationAction.update( deltaTime ) then
+      inc( i )
+    else
+    begin
+    // animation action has ended, destroy and remove it from the animation list
+      AnimationAction.free;
+      m_listAnimationAction.delete( i );
+    end;
+  end;
+
+  // todo: update all active animation poses of this model
+
+  // update the weight of all active animation cycles of this model
+  accumulatedWeight := 0.0;
+  accumulatedDuration := 0.0;
+  i := 0;
+  while i < m_listAnimationCycle.count do
+  begin
+    AnimationCycle := m_listAnimationCycle[ i ];
+   // update and check if animation cycle is still active
+    if AnimationCycle.update( deltaTime ) then
+    begin
+      // check if it is in sync. if yes, update accumulated weight and duration
+      if AnimationCycle.getState = STATE_SYNC then
+      begin
+        accumulatedWeight := accumulatedWeight + AnimationCycle.getWeight;
+        accumulatedDuration := accumulatedDuration + ( AnimationCycle.getWeight * AnimationCycle.getCoreAnimation.Duration );
+      end;
+
+      inc( i );
+    end
+    else
+    begin
+      // animation cycle has ended, destroy and remove it from the animation list
+      AnimationCycle.free;
+      m_listAnimationCycle.delete( i );
+    end;
+  end;
+
+  // adjust the global animation cycle duration
+  if ( accumulatedWeight > 0.0 ) then
+  begin
+    m_animationDuration := accumulatedDuration / accumulatedWeight;
+  end
+  else
+  begin
+    m_animationDuration := 0.0;
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Update the skeleton of this mixer                                          //
+//----------------------------------------------------------------------------//
+
+procedure CalMixer.updateSkeleton;
+var
+  pSkeleton : CalSkeleton;
+  vectorBone : CalBones;
+  pCoreAnimation : CalCoreAnimation;
+  listCoreTrack : CalCoreTracks; //TList;
+  pBone : CalBone;
+  animationTime : float;
+  i, j : integer;
+  AnimationAction : CalAnimationAction;
+  CoreTrack : CalCoreTrack;
+  AnimationCycle : CalAnimationCycle;
+  translation : CalVector;
+  rotation : CalQuaternion;
+begin
+  listCoreTrack := nil;
+  vectorBone := nil;
+  
+  // get the skeleton we need to update
+  pSkeleton := m_pModel.getSkeleton;
+  if ( pSkeleton = nil ) then
+    exit;
+
+  // clear the skeleton state
+  pSkeleton.clearState;
+
+  // get the bone vector of the skeleton
+  vectorBone := pSkeleton.getVectorBone;
+
+  //
+  translation := CalVector.Create;
+  rotation := CalQuaternion.Create;
+
+  // loop through all animation actions
+  for i := 0 to m_listAnimationAction.count - 1 do
+  begin
+    AnimationAction := m_listAnimationAction[ i ];
+
+    // get the core animation instance
+    pCoreAnimation := AnimationAction.getCoreAnimation;
+
+    // get the list of core tracks of above core animation
+    listCoreTrack := pCoreAnimation.getListCoreTrack;
+
+    // loop through all core tracks of the core animation
+    for j := 0 to length( listCoreTrack ) - 1 do
+    begin
+      CoreTrack := listCoreTrack[ j ];
+
+      // get the appropriate bone of the track
+      pBone := vectorBone[ CoreTrack.getCoreBoneId ];
+
+      // get the current translation and rotation
+      CoreTrack.getState( AnimationAction.getTime, translation, rotation );
+
+      // blend the bone state with the new state
+      pBone.blendState( AnimationAction.getWeight, translation, rotation );
+    end;
+  end;
+
+  // lock the skeleton state
+  pSkeleton.lockState;
+
+  // loop through all animation cycles
+  for i := 0 to m_listAnimationCycle.count - 1 do
+  begin
+    AnimationCycle := m_listAnimationCycle[ i ];
+
+    // get the core animation instance
+    pCoreAnimation := AnimationCycle.getCoreAnimation;
+
+    // calculate adjusted time
+    if AnimationCycle.getState = STATE_SYNC then
+    begin
+      if ( m_animationDuration = 0.0 ) then
+      begin
+        animationTime := 0.0;
+      end
+      else
+      begin
+        animationTime := m_animationTime * pCoreAnimation.Duration / m_animationDuration;
+      end;
+    end
+    else
+    begin
+      animationTime := AnimationCycle.getTime;
+    end;
+
+    // get the list of core tracks of above core animation
+    listCoreTrack := pCoreAnimation.getListCoreTrack;
+
+    // loop through all core tracks of the core animation
+    for j := 0 to length( listCoreTrack ) - 1 do
+    begin
+      CoreTrack := listCoreTrack[ j ];
+
+      // get the appropriate bone of the track
+      pBone := vectorBone[ CoreTrack.getCoreBoneId ];
+
+      // get the current translation and rotation
+      CoreTrack.getState( animationTime, translation, rotation );
+
+      // blend the bone state with the new state
+      pBone.blendState( AnimationCycle.getWeight, translation, rotation );
+    end;
+  end;
+
+  // free variables that are no longer used
+  translation.Free;
+  rotation.Free;
+
+  // lock the skeleton state
+  pSkeleton.lockState;
+
+  // let the skeleton calculate its final state
+  pSkeleton.calculateState;
+end;
+
+function CalMixer.isDefaultMixer : boolean;
+begin
+  result := true;
+end;
+
+function CalMixer.getAnimationDuration : float;
+begin
+  result := m_animationDuration;
+end;

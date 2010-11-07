@@ -1,0 +1,403 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coresubmesh.cpp
+
+constructor CalCoreSubmesh.Create( AStream : TStream );
+begin
+  inherited Create;
+  if AStream <> nil then
+    LoadFromStream( AStream );
+end;
+
+constructor CalCoreSubmesh.Create( Parser : TXmlParser );
+begin
+  inherited Create;
+  if Parser <> nil then
+    LoadFromXMLFile( Parser );
+end;
+
+destructor CalCoreSubmesh.Destroy;
+var
+  iteratorCoreSubMorphTarget : integer;
+begin
+  // destroy all data
+  SetLength( m_vectorFace, 0 );
+  SetLength( m_vectorVertex, 0 );
+  SetLength( m_vectorPhysicalProperty, 0 );
+  SetLength( m_vectorvectorTextureCoordinate, 0 );
+  SetLength( m_vectorSpring, 0 );
+  SetLength( m_vectorTangentsEnabled, 0 );
+  SetLength( m_vectorvectorTangentSpace, 0 );
+
+  // destroy all core sub morph targets
+  for iteratorCoreSubMorphTarget := 0 to Length( m_vectorCoreSubMorphTarget ) - 1 do
+  begin
+    m_vectorCoreSubMorphTarget[ iteratorCoreSubMorphTarget ].Free;
+    m_vectorCoreSubMorphTarget[ iteratorCoreSubMorphTarget ] := nil;
+  end;
+  SetLength( m_vectorCoreSubMorphTarget, 0 );
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of faces                                                    //
+//----------------------------------------------------------------------------//
+
+function CalCoreSubmesh.getFaceCount : integer;
+begin
+  result := length( m_vectorFace );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of Springs                                                  //
+//----------------------------------------------------------------------------//
+
+function CalCoreSubmesh.getSpringCount : integer;
+begin
+  result := Length( m_vectorSpring );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of vertices                                                 //
+//----------------------------------------------------------------------------//
+
+function CalCoreSubmesh.getVertexCount : integer;
+begin
+  result := length( m_vectorVertex );
+end;
+
+procedure CalCoreSubmesh.LoadFromXMLFile( Parser : TXmlParser );
+var
+  NUMVERTICES, NUMFACES, NUMSPRINGS, NUMTEXCOORDS, i : integer;
+begin
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          //
+          if Parser.CurName = 'SUBMESH' then
+          begin
+            m_coreMaterialThreadId := StrToInt( Parser.CurAttr.Value( 'MATERIAL' ) );
+            NUMVERTICES := StrToInt( Parser.CurAttr.Value( 'NUMVERTICES' ) );
+            SetLength( m_vectorVertex, NUMVERTICES );
+            SetLength( m_vectorPhysicalProperty, NUMVERTICES );
+
+            NUMFACES := StrToInt( Parser.CurAttr.Value( 'NUMFACES' ) );
+            SetLength( m_vectorFace, NUMFACES );
+
+            m_lodCount := StrToInt( Parser.CurAttr.Value( 'NUMLODSTEPS' ) );
+
+            NUMSPRINGS := StrToInt( Parser.CurAttr.Value( 'NUMSPRINGS' ) );
+
+            NUMTEXCOORDS := StrToInt( Parser.CurAttr.Value( 'NUMTEXCOORDS' ) );
+
+            // reserve memory for all the submesh data
+            setlength( m_vectorvectorTextureCoordinate, NUMTEXCOORDS );
+            for i := 0 to NUMTEXCOORDS - 1 do
+            begin
+              setlength( m_vectorvectorTextureCoordinate[ i ], NUMVERTICES );
+              // load the tangent space enable flags.
+              enableTangents( i, false );
+            end;
+
+            // load all vertices and their influences
+
+            // load all springs
+
+            // load all faces
+
+          end;
+        end;
+      ptContent,
+        ptCData :
+        begin
+
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+          if Parser.CurName = 'SUBMESH' then
+          begin
+            break;
+          end;
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+end;
+
+procedure CalCoreSubmesh.LoadFromStream( AStream : TStream );
+var
+  vertexCount : integer;
+  faceCount, springCount : integer;
+  textureCoordinateCount : integer;
+  vertexId : integer;
+  textureCoordinateId : integer;
+  influenceCount : integer;
+  PP : PhysicalProperty;
+begin
+  // get the material thread id of the submesh
+  AStream.ReadBuffer( m_coreMaterialThreadId, 4 );
+
+  // get the number of vertices, faces and level-of-details
+  AStream.ReadBuffer( vertexCount, 4 );
+  SetLength( m_vectorVertex, vertexCount );
+
+  // get the number of Faces
+  AStream.ReadBuffer( faceCount, 4 );
+  SetLength( m_vectorFace, faceCount );
+
+  // get the number of LOD
+  AStream.ReadBuffer( m_lodCount, 4 );
+
+  // get the number of springs
+  AStream.ReadBuffer( springCount, 4 );
+
+  // reserve memory for the Springs
+  setlength( m_vectorSpring, springCount );
+
+  // reserve the space for the physical properties if we have springs in the core submesh instance
+  if ( springCount > 0 ) then
+    SetLength( m_vectorPhysicalProperty, vertexCount );
+
+  // get the number of texture coordinates per vertex
+  AStream.ReadBuffer( textureCoordinateCount, 4 );
+
+  // reserve memory for all the submesh data
+  setlength( m_vectorvectorTextureCoordinate, textureCoordinateCount );
+  for textureCoordinateId := 0 to textureCoordinateCount - 1 do
+  begin
+    setlength( m_vectorvectorTextureCoordinate[ textureCoordinateId ], vertexCount );
+    // load the tangent space enable flags.
+    enableTangents( textureCoordinateId, false );
+  end;
+
+  // load all vertices and their influences
+  for vertexId := 0 to vertexCount - 1 do
+  begin
+    with m_vectorVertex[ vertexId ] do
+    begin
+      // load data of the vertex
+      position := CalVector.Create( 0, 0, 0 );
+      position.LoadFromStream( AStream );
+      normal := CalVector.Create( 0, 0, 0 );
+      normal.LoadFromStream( AStream );
+      AStream.ReadBuffer( collapseId, 4 );
+      AStream.ReadBuffer( faceCollapseCount, 4 );
+
+      // load all texture coordinates of the vertex
+      {
+      setlength(TextureCoordinates,textureCoordinateCount);
+      AStream.ReadBuffer(TextureCoordinates[0],textureCoordinateCount*sizeof(TextureCoordinate));
+      }
+
+      for textureCoordinateId := 0 to textureCoordinateCount - 1 do
+      begin
+        // load data of the influence
+        AStream.ReadBuffer( m_vectorvectorTextureCoordinate[ textureCoordinateId ][ vertexId ], sizeof( TextureCoordinate ) );
+      end;
+
+      // get the number of influences
+      AStream.ReadBuffer( influenceCount, 4 );
+
+      // reserve memory for the influences in the vertex
+      setlength( vectorInfluence, influenceCount );
+
+      // load all influences of the vertex
+      AStream.ReadBuffer( vectorInfluence[ 0 ], influenceCount * sizeof( Influence ) );
+
+      // load the physical property of the vertex if there are springs in the core submesh
+      if ( springCount > 0 ) then
+      begin
+        AStream.ReadBuffer( PP.weight, SizeOf( float ) );
+        //if((vertexId < 0) or (vertexId >= Length( m_vectorPhysicalProperty ) then begin result := false; exit; end;
+
+        // set the physical property in the core submesh instance
+        m_vectorPhysicalProperty[ vertexId ].weight := PP.weight;
+      end;
+    end;
+  end;
+
+  // load all springs
+  AStream.ReadBuffer( m_vectorSpring[ 0 ], springCount * sizeof( Spring ) );
+
+  // load all faces
+  AStream.ReadBuffer( m_vectorFace[ 0 ], faceCount * sizeof( Face ) );
+end;
+
+function CalCoreSubmesh.addCoreSubMorphTarget( pCoreSubMorphTarget : CalCoreSubMorphTarget ) : integer;
+var
+  subMorphTargetId : integer;
+begin
+  // get next sub morph target id
+  subMorphTargetId := getCoreSubMorphTargetCount;
+  SetLength( m_vectorCoreSubMorphTarget, subMorphTargetId + 1 );
+
+  m_vectorCoreSubMorphTarget[ subMorphTargetId ] := pCoreSubMorphTarget;
+
+  result := subMorphTargetId;
+end;
+
+function CalCoreSubmesh.getCoreSubMorphTarget( id : integer ) : CalCoreSubMorphTarget;
+begin
+  result := m_vectorCoreSubMorphTarget[ id ];
+end;
+
+function CalCoreSubmesh.getCoreSubMorphTargetCount : integer;
+begin
+  result := Length( m_vectorCoreSubMorphTarget );
+end;
+
+function CalCoreSubmesh.getVectorCoreSubMorphTarget : CalCoreSubMorphTargets;
+begin
+  result := m_vectorCoreSubMorphTarget;
+end;
+
+procedure CalCoreSubmesh.scale( factor : float );
+var
+  vertexId, VertexCount : integer;
+begin
+  // rescale all vertices
+
+  VertexCount := Length( m_vectorVertex );
+  for vertexId := 0 to VertexCount - 1 do
+  begin
+    m_vectorVertex[ vertexId ].position.mult( factor );
+  end;
+
+  if ( Length( m_vectorSpring ) > 0 ) then
+  begin
+
+    // There is a problem when we resize and that there is
+    // a spring system, I was unable to solve this
+    // problem, so I disable the spring system
+    // if the scale are too big
+
+    if ( abs( factor - 1.0 ) > 0.10 ) then
+    begin
+      SetLength( m_vectorSpring, 0 );
+      SetLength( m_vectorPhysicalProperty, 0 );
+    end;
+  end;
+end;
+
+function CalCoreSubmesh.isTangentsEnabled( mapId : integer ) : boolean;
+begin
+  if ( ( mapId < 0 ) or ( mapId >= Length( m_vectorTangentsEnabled ) ) ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  result := m_vectorTangentsEnabled[ mapId ];
+end;
+
+function CalCoreSubmesh.enableTangents( mapId : integer; enabled : boolean ) : boolean;
+var
+  tangentId, faceId, TangentSpaceCount, faceCount : integer;
+begin
+  if ( ( mapId < 0 ) or ( mapId >= Length( m_vectorTangentsEnabled ) ) ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  m_vectorTangentsEnabled[ mapId ] := enabled;
+
+  if ( not enabled ) then
+  begin
+    SetLength( m_vectorvectorTangentSpace[ mapId ], 0 );
+    m_vectorvectorTangentSpace[ mapId ] := nil;
+    result := true;
+    exit;
+  end;
+
+  SetLength( m_vectorvectorTangentSpace[ mapId ], Length( m_vectorVertex ) );
+  TangentSpaceCount := Length( m_vectorvectorTangentSpace[ mapId ] );
+  for tangentId := 0 to TangentSpaceCount - 1 do
+  begin
+    m_vectorvectorTangentSpace[ mapId ][ tangentId ].tangent := CalVector.Create( 0.0, 0.0, 0.0 );
+    m_vectorvectorTangentSpace[ mapId ][ tangentId ].crossFactor := 1;
+  end;
+
+  faceCount := Length( m_vectorFace );
+  for faceId := 0 to faceCount - 1 do
+  begin
+    UpdateTangentVector( m_vectorFace[ faceId ].vertexId[ 0 ], m_vectorFace[ faceId ].vertexId[ 1 ], m_vectorFace[ faceId ].vertexId[ 2 ], mapId );
+    UpdateTangentVector( m_vectorFace[ faceId ].vertexId[ 1 ], m_vectorFace[ faceId ].vertexId[ 2 ], m_vectorFace[ faceId ].vertexId[ 0 ], mapId );
+    UpdateTangentVector( m_vectorFace[ faceId ].vertexId[ 2 ], m_vectorFace[ faceId ].vertexId[ 0 ], m_vectorFace[ faceId ].vertexId[ 1 ], mapId );
+  end;
+
+  TangentSpaceCount := Length( m_vectorvectorTangentSpace[ mapId ] );
+  for tangentId := 0 to TangentSpaceCount - 1 do
+  begin
+    m_vectorvectorTangentSpace[ mapId ][ tangentId ].tangent.normalize;
+  end;
+
+  result := true;
+end;
+
+procedure CalCoreSubmesh.UpdateTangentVector( v0, v1, v2, mapId : integer );
+var
+  vvtx : vectorVertexes;
+  vtex : TextureCoordinates;
+  du1, dv1, du2, dv2, prod1, prod2, x, y : double;
+  vec1, vec2, tangent, tempNormal : CalVector;
+  component : double;
+begin
+  vvtx := getVectorVertex;
+  vtex := m_vectorvectorTextureCoordinate[ mapId ];
+
+  // Step 1. Compute the approximate tangent vector.
+  du1 := vtex[ v1 ].u - vtex[ v0 ].u;
+  dv1 := vtex[ v1 ].v - vtex[ v0 ].v;
+  du2 := vtex[ v2 ].u - vtex[ v0 ].u;
+  dv2 := vtex[ v2 ].v - vtex[ v0 ].v;
+
+  prod1 := ( du1 * dv2 - dv1 * du2 );
+  prod2 := ( du2 * dv1 - dv2 * du1 );
+
+  if ( ( abs( prod1 ) < 0.000001 )
+    or ( abs( prod2 ) < 0.000001 ) ) then
+    exit;
+
+  x := dv2 / prod1;
+  y := dv1 / prod2;
+
+  vec1 := CalVector.Create( vvtx[ v1 ].position.x - vvtx[ v0 ].position.x, vvtx[ v1 ].position.y - vvtx[ v0 ].position.y, vvtx[ v1 ].position.z - vvtx[ v0 ].position.z );
+
+  vec2 := CalVector.Create( vvtx[ v2 ].position.x - vvtx[ v0 ].position.x, vvtx[ v2 ].position.y - vvtx[ v0 ].position.y, vvtx[ v2 ].position.z - vvtx[ v0 ].position.z );
+
+  vec1.mult( x );
+  vec2.mult( y );
+  tangent := CalVector.Create( vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z );
+
+  // Step 2. Orthonormalize the tangent.
+  component := tangent.x * vvtx[ v0 ].normal.x + tangent.y * vvtx[ v0 ].normal.y + tangent.z * vvtx[ v0 ].normal.z;
+  tempNormal := CalVector.Create( vvtx[ v0 ].normal.x * component, vvtx[ v0 ].normal.y * component, vvtx[ v0 ].normal.z * component );
+  tangent.sub( tempNormal );
+  tangent.normalize;
+
+  // Step 3: Add the estimated tangent to the overall estimate for the vertex.
+  m_vectorvectorTangentSpace[ mapId ][ v0 ].tangent.add( tangent );
+
+  // Free Our used Vectors
+  tempNormal.Free;
+  vec1.Free;
+  vec2.Free;
+  tangent.Free;
+end;
+

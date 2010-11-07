@@ -1,0 +1,45 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// renderer.h
+
+CalRenderer = class
+public
+  m_pModel : CalModel;
+  m_pSelectedSubmesh : CalSubmesh;
+
+  constructor Create; overload;
+  constructor Create( pRenderer : CalRenderer ); overload;
+  constructor Create( pModel : CalModel ); overload;
+  destructor Destroy; override;
+  
+  function beginRendering : boolean;
+  procedure endRendering;
+  procedure getAmbientColor( var pColorBuffer {:byte} );
+  procedure getDiffuseColor( var pColorBuffer {:byte} );
+  function getFaceCount : integer;
+  function getFaces : vectorFaces; //(var pFaceBuffer{:integer}):integer;
+  function getMapCount : integer;
+  function getMapUserData( mapId : integer ) : CalUserData;
+  function getMeshCount : integer;
+  function getNormals : TNormals; //(var pNormalBuffer{:float}):integer;
+  function getShininess : float;
+  procedure getSpecularColor( var pColorBuffer {:byte} );
+  function getSubmeshCount( meshId : integer ) : integer;
+  function getTextureCoordinates( mapId : integer ) : TextureCoordinates; // var pTextureCoordinateBuffer{:float}):integer;
+  function getVertexCount : integer;
+  function getVertices : TVertices;
+  function selectMeshSubmesh( meshId, submeshId : integer ) : boolean;
+  function getTangentSpaces( mapId : integer ) : vectorTangentSpaces;
+  function getVerticesAndNormals : TVertices;
+  function getVerticesNormalsAndTexCoords( NumTexCoords : integer = 1 ) : CalVectors;
+  function isTangentsEnabled(mapId : integer ) : boolean;
+  procedure setNormalization( normalize : boolean );
+end;
+

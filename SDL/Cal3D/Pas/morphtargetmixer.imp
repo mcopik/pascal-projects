@@ -1,0 +1,166 @@
+//****************************************************************************//
+// morphtargetmixer.cpp                                                       //
+// Copyright (C) 2001, 2002 Bruno 'Beosil' Heidelberger                       //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+constructor CalMorphTargetMixer.Create( pModel : CalModel );
+var
+  morphAnimationCount : integer;
+  iterator : integer;
+begin
+  inherited Create;
+  if ( pModel = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'morphtargetgetmixer.imp', 13 );
+    {$ENDIF}
+    exit;
+  end;
+
+  m_pModel := pModel;
+
+  morphAnimationCount := pModel.getCoreModel.getCoreMorphAnimationCount;
+  if ( morphAnimationCount <> 0 ) then
+  begin
+    // reserve the space needed in all the vectors
+    SetLength( m_vectorCurrentWeight, morphAnimationCount );
+
+    SetLength( m_vectorEndWeight, morphAnimationCount );
+
+    SetLength( m_vectorDuration, morphAnimationCount );
+
+    for iterator := 0 to morphAnimationCount - 1 do
+    begin
+      m_vectorCurrentWeight[ iterator ] := 0.0;
+      m_vectorEndWeight[ iterator ] := 0.0;
+      m_vectorDuration[ iterator ] := 0.0;
+    end;
+  end;
+end;
+
+destructor CalMorphTargetMixer.Destroy;
+begin
+  
+  inherited;
+end;
+
+function CalMorphTargetMixer.blend( id : integer; weight : float; delay : float ) : boolean;
+begin
+  if ( ( id < 0 ) or ( id >= Length( m_vectorCurrentWeight ) ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'morphtargetmixer.imp', 51 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+  m_vectorEndWeight[ id ] := weight;
+  m_vectorDuration[ id ] := delay;
+  result := true;
+end;
+
+function CalMorphTargetMixer.clear( id : integer; delay : float ) : boolean;
+begin
+  if ( ( id < 0 ) or ( id >= Length( m_vectorCurrentWeight ) ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'morphtargetmixer.imp', 64 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+  m_vectorEndWeight[ id ] := 0.0;
+  m_vectorDuration[ id ] := delay;
+  result := true;
+end;
+
+function CalMorphTargetMixer.getCurrentWeight( id : integer ) : float;
+begin
+  if ( ( id < 0 ) or ( id >= Length( m_vectorCurrentWeight ) ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'morphtargetmixer.imp', 77 );
+    {$ENDIF}
+    result := 0.0; //false
+    exit;
+  end;
+  result := m_vectorCurrentWeight[ id ];
+end;
+
+function CalMorphTargetMixer.getCurrentWeightBase : float;
+var
+  currentWeight : float;
+  iterator, WeightCount : integer;
+begin
+  currentWeight := 1.0;
+  WeightCount := Length( m_vectorCurrentWeight );
+  for iterator := 0 to WeightCount - 1 do
+  begin
+    currentWeight := currentWeight - m_vectorCurrentWeight[ iterator ];
+  end;
+  result := currentWeight;
+end;
+
+function CalMorphTargetMixer.getMorphTargetCount : integer;
+begin
+  result := Length( m_vectorCurrentWeight );
+end;
+
+
+procedure CalMorphTargetMixer.update( deltaTime : float );
+var
+  iterator : integer;
+  morphAnimationID : integer;
+  pCoreMorphAnimation : CalCoreMorphAnimation;
+  meshIterator : Cardinal;
+  vectorSubmesh : CalSubmeshes;
+  submeshCount, submeshId, MorphTargetCount, CoreMeshCount, WeightCount : integer;
+  vectorCoreMeshID, vectorMorphTargetID : integers;
+begin
+  vectorSubmesh := nil;
+  vectorCoreMeshID := nil;
+  vectorMorphTargetID := nil;
+
+  WeightCount := Length( m_vectorCurrentWeight );
+  for iterator := 0 to WeightCount - 1 do
+  begin
+    if ( deltaTime >= m_vectorDuration[ iterator ] ) then
+    begin
+      m_vectorCurrentWeight[ iterator ] := m_vectorEndWeight[ iterator ];
+      m_vectorDuration[ iterator ] := 0.0;
+    end
+    else
+    begin
+      m_vectorCurrentWeight[ iterator ] := m_vectorCurrentWeight[ iterator ] +
+        ( ( m_vectorEndWeight[ iterator ] - m_vectorCurrentWeight[ iterator ] ) *
+        deltaTime / m_vectorDuration[ iterator ] );
+      m_vectorDuration[ iterator ] := m_vectorDuration[ iterator ] - deltaTime;
+    end;
+  end;
+
+  MorphTargetCount := getMorphTargetCount;
+  for morphAnimationID := 0 to MorphTargetCount - 1 do
+  begin
+    pCoreMorphAnimation := m_pModel.getCoreModel.getCoreMorphAnimation( morphAnimationID );
+    vectorCoreMeshID := pCoreMorphAnimation.getVectorCoreMeshID;
+    vectorMorphTargetID := pCoreMorphAnimation.getVectorMorphTargetID;
+
+    CoreMeshCount := Length( vectorCoreMeshID );
+    for meshIterator := 0 to CoreMeshCount - 1 do
+    begin
+      vectorSubmesh := m_pModel.getMesh( vectorCoreMeshID[ meshIterator ] ).getVectorSubmesh;
+
+      submeshCount := Length( vectorSubmesh );
+      for submeshId := 0 to submeshCount - 1 do
+      begin
+        vectorSubmesh[ submeshId ].setMorphTargetWeight
+          ( vectorMorphTargetID[ meshIterator ], m_vectorCurrentWeight[ morphAnimationID ] );
+      end;
+    end;
+  end;
+end;

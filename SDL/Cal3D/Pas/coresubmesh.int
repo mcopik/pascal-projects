@@ -1,0 +1,112 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coresubmesh.h
+
+// misc
+TextureCoordinate = record
+  u, v : float;
+end;
+TextureCoordinates = array { Vertex } of TextureCoordinate;
+vectorTextureCoordinates = array { MapID } of TextureCoordinates;
+
+TangentSpace = record
+  tangent : CalVector;
+  crossFactor : single;  // To get the binormal, use ((N x T) * crossFactor)
+end;
+vectorTangentSpaces = array of TangentSpace;
+vectorvectorTangentSpaces = array of vectorTangentSpaces;
+
+Influence = record
+  boneId : integer;
+  weight : float;
+  //x, y, z : float;
+  //nx, ny, nz : float;
+end;
+vectorInfluences = array of Influence;
+
+/// The core submesh Vertex.
+Vertex = record
+  position : CalVector;
+  normal : CalVector;
+  vectorInfluence : vectorInfluences;
+  collapseId : integer;
+  faceCollapseCount : integer;
+end;
+vectorVertexes = array of Vertex;
+
+Face = record
+  vertexId : array[ 0..2 ] of integer;
+end;
+vectorFaces = array of Face;
+
+PhysicalProperty = record
+  weight : single;
+end;
+vectorPhysicalProperties = array of PhysicalProperty;
+
+/// The core submesh Spring.
+Spring = record
+  vertexId : array[ 0..1 ] of integer;
+  springCoefficient : single;
+  idleLength : single;
+end;
+vectorSprings = array of Spring;
+
+vectorBooleans = array of boolean;
+
+CalCoreSubmesh = class
+protected
+  m_vectorVertex : vectorVertexes;
+  m_vectorTangentsEnabled : vectorBooleans;
+  m_vectorvectorTangentSpace : vectorvectorTangentSpaces;
+  m_vectorvectorTextureCoordinate : vectorTextureCoordinates;
+  m_vectorPhysicalProperty : vectorPhysicalProperties;
+  m_vectorFace : vectorFaces;
+  m_vectorSpring : vectorSprings;
+  m_vectorCoreSubMorphTarget : CalCoreSubMorphTargets;
+
+  m_coreMaterialThreadId : integer;
+  m_lodCount : integer;
+  m_springCount : integer;
+
+  procedure UpdateTangentVector( v0, v1, v2, mapId : integer );
+
+public
+  constructor Create( AStream : TStream ); overload;
+  constructor Create( Parser : TXmlParser ); overload;
+  destructor Destroy; override;
+  property CoreMaterialThreadId : integer read m_coreMaterialThreadId write m_coreMaterialThreadId;
+  function getFaceCount : integer;
+  property LodCount : integer read m_lodCount write m_lodCount;
+  function getSpringCount : integer;
+  property SpringCount : integer read m_springCount write m_springCount;
+  property getVectorFace : vectorFaces read m_vectorFace;
+  property getVectorPhysicalProperty : vectorPhysicalProperties read m_vectorPhysicalProperty;
+  property getVectorSpring : vectorSprings read m_vectorSpring;
+  property getVectorVectorTangentSpace : vectorvectorTangentSpaces read m_vectorvectorTangentSpace;
+  property getVectorVectorTextureCoordinate : vectorTextureCoordinates read m_vectorvectorTextureCoordinate;
+  property getVectorVertex : vectorVertexes read m_vectorVertex;
+
+  function getVertexCount : integer;
+
+  function isTangentsEnabled( mapId : integer) : boolean;
+  function enableTangents( mapId : integer; enabled : boolean ) : boolean;
+  
+  function addCoreSubMorphTarget( pCoreSubMorphTarget : CalCoreSubMorphTarget ) : integer;
+  function getCoreSubMorphTarget( id : integer ) : CalCoreSubMorphTarget;
+  function getCoreSubMorphTargetCount : integer;
+  function getVectorCoreSubMorphTarget : CalCoreSubMorphTargets;
+  procedure scale( factor : float );
+
+  
+  procedure LoadFromStream( AStream : TStream );
+  procedure LoadFromXMLFile( Parser : TXmlParser );
+end;
+

@@ -1,0 +1,35 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coretrack.h
+
+CalCoreTrack = class
+private
+  function getUpperBound( time : float ) : integer;
+protected
+  m_coreBoneId : integer;
+  m_keyFrames : CalCoreKeyFrames;
+
+public
+  constructor Create( AStream : TStream ); overload;
+  constructor Create( Parser : TXmlParser ); overload;
+  destructor destroy; override;
+
+  function getState( time : float; var translation : CalVector; var rotation : CalQuaternion ) : boolean;
+  property getCoreBoneId : integer read m_coreBoneId write m_coreBoneId;
+  property getMapCoreKeyframe : CalCoreKeyFrames read m_keyFrames;
+  function getCoreKeyframeCount : integer;
+  function getCoreKeyframe( idx : integer ) : CalCoreKeyframe;
+  function addCoreKeyframe( pCoreKeyframe : CalCoreKeyframe ) : boolean;
+  procedure scale( factor : float );
+
+  procedure LoadFromStream( AStream : TStream );
+  procedure LoadFromXMLFile( Parser : TXmlParser );
+end;
+

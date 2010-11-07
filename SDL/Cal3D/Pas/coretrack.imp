@@ -1,0 +1,238 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coretrack.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreTrack.Create( AStream : TStream );
+begin
+  inherited Create;
+  m_coreBoneId := -1;
+  if AStream <> nil then
+    LoadFromStream( AStream );
+end;
+
+constructor CalCoreTrack.Create( Parser : TXmlParser );
+begin
+  inherited Create;
+  m_coreBoneId := -1;
+  if Parser <> nil then
+    LoadFromXMLFile( Parser );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalCoreTrack.Destroy;
+var
+  i : integer;
+begin
+  // destroy all core keyframes
+  for i := 0 to length( m_keyframes ) - 1 do
+    m_keyframes[ i ].Free;
+
+  m_keyframes := nil;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the state of the core track at a given time                            //
+//----------------------------------------------------------------------------//
+
+function CalCoreTrack.getState( time : float; var translation : CalVector; var rotation : CalQuaternion ) : boolean;
+var
+  iteratorCoreKeyframeBefore, iteratorCoreKeyframeAfter : integer;
+  pCoreKeyframeBefore : CalCoreKeyframe;
+  pCoreKeyframeAfter : CalCoreKeyframe;
+  blendFactor : float;
+begin
+
+  // get the keyframe after the requested time
+  iteratorCoreKeyframeAfter := getUpperBound( time );
+
+  // check if the time is after the last keyframe
+  if ( iteratorCoreKeyframeAfter = Length( m_keyframes ) ) then
+  begin
+    // return the last keyframe state
+    dec( iteratorCoreKeyframeAfter );
+    rotation.assign( m_keyframes[ iteratorCoreKeyframeAfter ].Rotation );
+    translation.assign( m_keyframes[ iteratorCoreKeyframeAfter ].Translation );
+
+    result := true;
+    exit;
+  end;
+
+  // check if the time is before the first keyframe
+  if ( iteratorCoreKeyframeAfter = 0 ) then
+  begin
+    // return the first keyframe state
+    rotation.assign( m_keyframes[ iteratorCoreKeyframeAfter ].Rotation );
+    translation.assign( m_keyframes[ iteratorCoreKeyframeAfter ].Translation );
+
+    result := true;
+    exit;
+  end;
+
+  // get the keyframe before the requested one
+  iteratorCoreKeyframeBefore := iteratorCoreKeyframeAfter;
+  dec( iteratorCoreKeyframeBefore );
+
+  // get the two keyframe pointers
+  pCoreKeyframeBefore := m_keyframes[ iteratorCoreKeyframeBefore ];
+  pCoreKeyframeAfter := m_keyframes[ iteratorCoreKeyframeAfter ];
+
+  // calculate the blending factor between the two keyframe states
+  blendFactor := ( time - pCoreKeyframeBefore.Time ) / ( pCoreKeyframeAfter.Time - pCoreKeyframeBefore.Time );
+
+  // blend between the two keyframes
+  translation.assign( pCoreKeyframeBefore.Translation );
+  translation.blend( blendFactor, pCoreKeyframeAfter.Translation );
+
+  rotation.assign( pCoreKeyframeBefore.Rotation );
+  rotation.blend( blendFactor, pCoreKeyframeAfter.Rotation );
+
+  result := true;
+end;
+
+procedure CalCoreTrack.LoadFromXMLFile( Parser : TXmlParser );
+var
+  BoneID, NoOfKeyFrames : integer;
+begin
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          //
+          if Parser.CurName = 'TRACK' then
+          begin
+
+            m_coreBoneId := StrToInt( Parser.CurAttr.Value( 'BONEID' ) );
+            NoOfKeyFrames := StrToInt( Parser.CurAttr.Value( 'NUMKEYFRAMES' ) );
+            SetLength( m_keyframes, NoOfKeyFrames );
+            
+            // load all core keyframes
+            for BoneId := 0 to NoOfKeyFrames - 1 do
+              m_keyframes[ BoneId ] := CalCoreKeyFrame.Create( Parser );
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+          if Parser.CurName = 'TRACK' then
+          begin
+            break;
+          end;
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+end;
+
+procedure CalCoreTrack.LoadFromStream( AStream : TStream );
+var
+  keyframeCount : integer;
+  i : integer;
+begin
+  // read the bone id
+  AStream.ReadBuffer( m_coreBoneId, 4 );
+
+  // read the number of keyframes
+  AStream.ReadBuffer( keyframeCount, 4 );
+  SetLength( m_keyframes, keyframeCount );
+
+  // load all core keyframes
+  for i := 0 to keyframeCount - 1 do
+    m_keyframes[ i ] := CalCoreKeyFrame.Create( AStream );
+end;
+
+function CalCoreTrack.getCoreKeyframeCount : integer;
+begin
+  result := Length( m_keyframes );
+end;
+
+function CalCoreTrack.addCoreKeyframe( pCoreKeyframe : CalCoreKeyframe ) : boolean;
+var
+  idx : integer;
+begin
+  idx := Length( m_keyframes );
+  SetLength( m_keyframes, idx + 1 );
+
+  m_keyframes[ idx ] := pCoreKeyframe;
+
+  idx := idx - 1;
+  while ( ( idx > 0 ) and ( m_keyframes[ idx ].Time < m_keyframes[ idx - 1 ].Time ) ) do
+  begin
+    //swap( m_keyframes[ idx ], m_keyframes[ idx - 1 ] );
+    dec( idx );
+  end;
+
+  result := true;
+end;
+
+procedure CalCoreTrack.scale( factor : float );
+var
+  keyframeId : integer;
+  translation : CalVector;
+begin
+  translation := CalVector.Create;
+  for keyframeId := 0 to Length( m_keyframes ) - 1 do
+  begin
+    translation.assign( m_keyframes[ keyframeId ].Translation );
+    translation.mult( factor );
+    m_keyframes[ keyframeId ].setTranslation( translation );
+  end;
+  translation.free;
+end;
+
+function CalCoreTrack.getUpperBound( time : float ) : integer;
+var
+  lowerBound, upperBound, middle : integer;
+begin
+  lowerBound := 0;
+  upperBound := Length( m_keyframes ) - 1;
+
+  while ( lowerBound < upperBound - 1 ) do
+  begin
+    middle := ( lowerBound + upperBound ) div 2;
+
+    if ( time >= m_keyframes[ middle ].Time ) then
+    begin
+      lowerBound := middle;
+    end
+    else
+    begin
+      upperBound := middle;
+    end;
+  end;
+
+  result := { m_keyframes.begin( ) + } upperBound;
+end;
+
+
+function CalCoreTrack.getCoreKeyframe( idx : integer ) : CalCoreKeyframe;
+begin
+  result := m_keyFrames[ idx ];
+end;
+

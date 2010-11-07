@@ -1,0 +1,23 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// animation_cycle.h
+
+CalAnimationCycle = class( CalAnimation )
+protected
+  m_targetDelay : float;
+  m_targetWeight : float;
+public
+  constructor Create( pCoreAnimation : CalCoreAnimation );
+
+  function blend( weight, delay : float ) : boolean;
+  procedure setAsync( time, duration : float );
+  function update( deltaTime : float ) : boolean;
+end;
+

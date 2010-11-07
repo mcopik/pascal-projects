@@ -1,0 +1,211 @@
+object MenuDesigner: TMenuDesigner
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SDL Menu Designer'
+  Color = 9154505
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  DrawOption = doStretch
+  FocusColor = 11846620
+  Height = 320
+  StateImages = []
+  TabOrder = 5
+  TitleBarHeight = 20
+  Width = 420
+  X = 222
+  Y = 80
+  object cbMenus: TSDLComboBox
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 12303291
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    DrawOption = doStretch
+    DropDownColor = 14540253
+    DropDownCount = 1
+    FocusColor = 14540253
+    Height = 25
+    Hint = 'List of menus.'
+    Items = ()
+    OnChange = cbMenusChange
+    OnClick = cbMenusClick
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 0
+    Width = 250
+    X = 10
+    Y = 30
+    Z = 0
+  end
+  object lbItems: TSDLListBox
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 12303291
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 14540253
+    Height = 200
+    Hint = 'List of items. Double click to view its popup menu or add it. Press Del to delete the item.'
+    Items = ()
+    OnClick = lbItemsClick
+    OnDblClick = lbItemsDblClick
+    OnKeyDown = lbItemsKeyDown
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 1
+    Width = 250
+    X = 10
+    Y = 70
+    Z = 1
+    object ScrollBar: TSDLScrollBar
+      BackColor = 14344685
+      BorderWidth = 2
+      ButtonColor = 11846620
+      DragMode = sdmManual
+      DrawOption = doStretch
+      Height = 196
+      Kind = sbVertical
+      LargeChange = 12
+      Max = 0
+      Position = 0
+      SmallChange = 1
+      WheelChange = 3
+      Width = 20
+      X = 228
+      Y = 2
+      Z = 0
+    end
+  end
+  object btClose: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Close'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 30
+    Hint = 'Closes this window.'
+    OnClick = btCloseClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 2
+    Width = 128
+    X = 279
+    Y = 114
+    Z = 2
+  end
+  object btAddMenu: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Add Main Menu'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 30
+    Hint = 'Adds Main Menu to Design Form.'
+    OnClick = btAddMenuClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 3
+    Width = 128
+    X = 278
+    Y = 30
+    Z = 3
+  end
+  object btAddPopup: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Add Popup Menu'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 30
+    Hint = 'Adds Popup Menu to selected control.'
+    OnClick = btAddPopupClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 4
+    Width = 128
+    X = 279
+    Y = 71
+    Z = 4
+  end
+  object btAddItem: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Add Item'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 25
+    Hint = 'Adds new item with caption given in edit box.'
+    OnClick = btAddItemClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 5
+    Width = 80
+    X = 181
+    Y = 280
+    Z = 5
+  end
+  object ebItem: TSDLEdit
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 12303291
+    CursorColor = 0
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 14540253
+    Height = 25
+    Hint = 'Caption for new item.'
+    OnKeyDown = ebItemKeyDown
+    ReadOnly = False
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 6
+    Width = 160
+    X = 10
+    Y = 280
+    Z = 6
+  end
+  object lblControl: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = 'nil'
+    DragMode = sdmManual
+    DrawOption = doStretch
+    Height = 60
+    Layout = tlCenter
+    Width = 148
+    WordWrap = True
+    X = 265
+    Y = 165
+    Z = 7
+  end
+end

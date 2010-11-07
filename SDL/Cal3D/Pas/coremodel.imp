@@ -1,0 +1,570 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coremodel.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreModel.Create( strName : string );
+begin
+  inherited Create;
+  m_strName := strName;
+  m_pCoreSkeleton := nil;
+  m_userData := 0;
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalCoreModel.Destroy;
+var
+  i : integer;
+begin
+  // destroy all core animations
+  for i := 0 to length( m_vectorCoreAnimation ) - 1 do
+    m_vectorCoreAnimation[ i ].Free;
+  SetLength( m_vectorCoreAnimation, 0 );
+
+  // destroy all core animations
+  for i := 0 to length( m_vectorCoreMorphAnimation ) - 1 do
+    m_vectorCoreMorphAnimation[ i ].Free;
+  SetLength( m_vectorCoreMorphAnimation, 0 );
+  
+  // destroy all core meshes
+  for i := 0 to length( m_vectorCoreMesh ) - 1 do
+    m_vectorCoreMesh[ i ].Free;
+  SetLength( m_vectorCoreMesh, 0 );
+
+  // destroy all core materials
+  for i := 0 to length( m_vectorCoreMaterial ) - 1 do
+    m_vectorCoreMaterial[ i ].Free;
+  SetLength( m_vectorCoreMaterial, 0 );
+
+  if ( m_pCoreSkeleton <> nil ) then
+    m_pCoreSkeleton.free;
+  m_pCoreSkeleton := nil;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Add a core animation instance to this core model                           //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.addCoreAnimation( pCoreAnimation : CalCoreAnimation ) : integer;
+var
+  morphAnimationId : integer;
+begin
+  // get the id of the core animation
+  morphAnimationId := length( m_vectorCoreAnimation );
+  setlength( m_vectorCoreAnimation, morphAnimationId + 1 );
+  m_vectorCoreAnimation[ morphAnimationId ] := pCoreAnimation;
+  result := morphAnimationId;
+end;
+
+function CalCoreModel.addCoreMorphAnimation( pCalCoreMorphAnimation : CalCoreMorphAnimation ) : integer;
+var
+  animationId : integer;
+begin
+  // get the id of the core animation
+  animationId := length( m_vectorCoreMorphAnimation );
+  setlength( m_vectorCoreMorphAnimation, animationId + 1 );
+  m_vectorCoreMorphAnimation[ animationId ] := pCalCoreMorphAnimation;
+  result := animationId;
+end;
+
+
+//----------------------------------------------------------------------------//
+// Add a core material instance to this core model                            //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.addCoreMaterial( pCoreMaterial : CalCoreMaterial ) : integer;
+var
+  materialId : integer;
+begin
+  // get the id of the core material
+  materialId := length( m_vectorCoreMaterial );
+  setlength( m_vectorCoreMaterial, materialId + 1 );
+  m_vectorCoreMaterial[ materialId ] := pCoreMaterial;
+  result := materialId;
+end;
+
+//----------------------------------------------------------------------------//
+// Add a core mesh instance to this core model                                //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.addCoreMesh( pCoreMesh : CalCoreMesh ) : integer;
+var
+  meshId : integer;
+begin
+  // get the id of the core mesh
+  meshId := length( m_vectorCoreMesh );
+  setlength( m_vectorCoreMesh, meshId + 1 );
+  m_vectorCoreMesh[ meshId ] := pCoreMesh;
+
+  result := meshId;
+end;
+
+//----------------------------------------------------------------------------//
+// Create a material thread for a given material thread id                    //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.createCoreMaterialThread( coreMaterialThreadId : integer ) : boolean;
+begin
+  // insert an empty core material thread with a given id
+//  std.map<int, int> mapCoreMaterialThreadId;
+//  m_mapmapCoreMaterialThread.insert(std.make_pair(coreMaterialThreadId, mapCoreMaterialThreadId));
+  SetLength( m_mapmapCoreMaterialThread, coreMaterialThreadID + 1 );
+  m_mapmapCoreMaterialThread[ coreMaterialThreadID ].id := coreMaterialThreadId;
+  setlength( m_mapmapCoreMaterialThread[ coreMaterialThreadID ].second, 1 );
+  result := true;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the core animations for a given id                                     //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreAnimation( id : integer ) : CalCoreAnimation;
+begin
+  result := m_vectorCoreAnimation[ id ];
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of core animations of this core model                       //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreAnimationCount : integer;
+begin
+  result := length( m_vectorCoreAnimation );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the core material for a given id                                       //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreMaterial( id : integer ) : CalCoreMaterial;
+begin
+  result := m_vectorCoreMaterial[ id ];
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of core materials of this core model                        //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreMaterialCount : integer;
+begin
+  result := length( m_vectorCoreMaterial );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the core mesh for a given id                                           //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreMesh( id : integer ) : CalCoreMesh;
+begin
+  result := m_vectorCoreMesh[ id ];
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of core meshes of this core model                           //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreMeshCount : integer;
+begin
+  result := length( m_vectorCoreMesh );
+end;
+
+//----------------------------------------------------------------------------//
+// Get core material id for a given material thread/set id                    //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.getCoreMaterialId( coreMaterialThreadId, setId : integer ) : integer;
+var
+  i : integer;
+  map : mapcoreMaterialThreads;
+begin
+  map := nil;
+  
+  // find the core material thread
+  i := length( m_mapmapCoreMaterialThread ) - 1;
+  while ( i >= 0 ) and ( m_mapmapCoreMaterialThread[ i ].id <> coreMaterialThreadId ) do
+    dec( i );
+  if i >= 0 then
+  begin
+    // get the core material thread
+    map := m_mapmapCoreMaterialThread[ i ].second;
+
+    // find the material id for the given set
+    i := length( map ) - 1;
+    while ( i >= 0 ) and ( map[ i ].id <> setId ) do
+      dec( i );
+    if i >= 0 then
+      i := map[ i ].second;
+  end;
+  result := i;
+end;
+
+procedure CalCoreModel.setCoreSkeleton( pCoreSkeleton : CalCoreSkeleton );
+begin
+  // destroy a possible existing core skeleton
+  if ( m_pCoreSkeleton <> nil ) then
+  begin
+    m_pCoreSkeleton.Free;
+    m_pCoreSkeleton := nil;
+  end;
+
+  m_pCoreSkeleton := pCoreSkeleton;
+end;
+
+//----------------------------------------------------------------------------//
+// Load a core animation for this core model from a given file                //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.loadCoreAnimation( strFilename : string ) : integer;
+var
+  pCoreAnimation : CalCoreAnimation;
+  animationId : integer;
+begin
+  // the core skeleton has to be loaded already
+  if ( m_pCoreSkeleton = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremodel.imp', 274 );
+    {$ENDIF}
+    result := -1;
+    exit;
+  end;
+
+  // load a new core animation
+  pCoreAnimation := CalCoreAnimation.Create( strFilename );
+
+  if pCoreAnimation = nil then
+  begin
+    result := -1;
+    exit;
+  end;
+
+  // add core animation to this core model
+  animationId := addCoreAnimation( pCoreAnimation );
+
+  if ( animationId = -1 ) then
+  begin
+    pCoreAnimation.Free;
+    result := -1;
+    exit;
+  end;
+
+  result := animationId;
+end;
+
+//----------------------------------------------------------------------------//
+// Load a core material for this core model from a given file                 //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.loadCoreMaterial( strFilename : string ) : integer;
+var
+  pCoreMaterial : CalCoreMaterial;
+  materialId : integer;
+begin
+  // the core skeleton has to be loaded already
+  if ( m_pCoreSkeleton = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremodel.imp', 333 );
+    {$ENDIF}
+    result := -1;
+    exit;
+  end;
+
+  // load a new core material
+  pCoreMaterial := CalCoreMaterial.Create( strFilename );
+  if pCoreMaterial = nil then
+  begin
+    result := -1;
+    exit;
+  end;
+
+  // add core material to this core model
+  materialId := addCoreMaterial( pCoreMaterial );
+
+  if ( materialId = -1 ) then
+  begin
+    pCoreMaterial.Free;
+    result := -1;
+    exit;
+  end;
+
+  result := materialId;
+end;
+
+//----------------------------------------------------------------------------//
+// Load a core mesh for this core model from a given file                     //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.loadCoreMesh( strFilename : string ) : integer;
+var
+  pCoreMesh : CalCoreMesh;
+  meshId : integer;
+begin
+  // the core skeleton has to be loaded already
+  if ( m_pCoreSkeleton = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremodel.imp', 369 );
+    {$ENDIF}
+    result := -1;
+    exit;
+  end;
+
+  // load a new core mesh
+  pCoreMesh := CalCoreMesh.Create( strFilename );
+  if pCoreMesh = nil then
+  begin
+    result := -1;
+    exit;
+  end;
+
+  // add core mesh to this core model
+  meshId := addCoreMesh( pCoreMesh );
+
+  if ( meshId = -1 ) then
+  begin
+    pCoreMesh.Free;
+    result := -1;
+    exit;
+  end;
+
+  result := meshId;
+end;
+
+//----------------------------------------------------------------------------//
+// Load a core skeleton for this core model from a given file                 //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.loadCoreSkeleton( strFilename : string ) : boolean;
+begin
+  // destroy the current core skeleton
+  if ( m_pCoreSkeleton <> nil ) then
+    m_pCoreSkeleton.free;
+
+  // load a new core skeleton
+  m_pCoreSkeleton := CalCoreSkeleton.Create( strFileName );
+  if m_pCoreSkeleton = nil then
+  begin
+    result := false;
+    exit;
+  end;
+
+  result := true;
+end;
+
+
+
+
+
+//----------------------------------------------------------------------------//
+// Set a given material id as a given set id for a given material thread id   //
+//----------------------------------------------------------------------------//
+
+function CalCoreModel.setCoreMaterialId( coreMaterialThreadId, setId, coreMaterialId : integer ) : boolean;
+var
+  iterator : integer;
+  map : mapCoreMaterialThreads;
+  i : integer;
+begin
+  // find the core material thread
+  iterator := length( m_mapmapCoreMaterialThread ) - 1;
+  while ( iterator >= 0 ) and ( m_mapmapCoreMaterialThread[ iterator ].id <> coreMaterialThreadId ) do
+    dec( iterator );
+  if ( iterator < 0 ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'coremodel.imp', 524 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // get the core material thread
+  map := m_mapmapCoreMaterialThread[ iterator ].second;
+
+  // set the given set id in the core material thread to the given core material id
+  for i := 0 to length( map ) - 1 do
+  begin
+    if map[ i ].id = setID then
+    begin
+      map[ i ].second := coreMaterialId;
+      result := true;
+      exit;
+    end;
+  end;
+  i := length( map );
+  setlength( map, i + 1 );
+  map[ i ].id := setId;
+  map[ i ].second := coreMaterialId;
+
+  result := true;
+end;
+
+
+function CalCoreModel.getCoreMorphAnimation( id : integer ) : CalCoreMorphAnimation;
+begin
+  result := m_vectorCoreMorphAnimation[ id ];
+end;
+
+function CalCoreModel.getCoreMorphAnimationCount : integer;
+begin
+  result := Length( m_vectorCoreMorphAnimation );
+end;
+
+function CalCoreModel.saveCoreAnimation( strFilename : string; id : integer ) : boolean;
+begin
+  // check if the core animation id is valid
+  (*if((coreAnimationId < 0) || (coreAnimationId >= (int)m_vectorCoreAnimation.size()))
+  {
+    CalError.setLastError(CalError::INVALID_HANDLE, __FILE__, __LINE__);
+    result := false;
+  }
+
+  // save the core animation
+  if(!CalSaver.saveCoreAnimation(strFilename, m_vectorCoreAnimation[coreAnimationId]))
+  {
+    result := false;
+  } *)
+
+  result := true;
+end;
+
+function CalCoreModel.saveCoreMaterial( strFilename : string; id : integer ) : boolean;
+begin
+  (*// check if the core material id is valid
+  if((coreMaterialId < 0) || (coreMaterialId >= (int)m_vectorCoreMaterial.size()))
+  {
+    CalError.setLastError(CalError::INVALID_HANDLE, __FILE__, __LINE__);
+    result := false;
+  }
+
+  // save the core animation
+  if(!CalSaver.saveCoreMaterial(strFilename, m_vectorCoreMaterial[coreMaterialId]))
+  {
+    result := false;
+  }*)
+
+  result := true;
+end;
+
+function CalCoreModel.saveCoreMesh( strFilename : string; id : integer ) : boolean;
+begin
+  (*// check if the core mesh id is valid
+  if((coreMeshId < 0) || (coreMeshId >= (int)m_vectorCoreMesh.size()))
+  {
+    CalError.setLastError(CalError::INVALID_HANDLE, __FILE__, __LINE__);
+    result := false;
+  }
+
+  // save the core animation
+  if(!CalSaver.saveCoreMesh(strFilename, m_vectorCoreMesh[coreMeshId]))
+  {
+    result := false;
+  } *)
+
+  result := true;
+end;
+
+function CalCoreModel.saveCoreSkeleton( strFilename : string ) : boolean;
+begin
+  (*// check if we have a core skeleton in this code model
+  if(m_pCoreSkeleton == 0)
+  {
+    CalError.setLastError(CalError::INVALID_HANDLE, __FILE__, __LINE__);
+    result := false;
+  }
+
+  // save the core skeleton
+  if(!CalSaver.saveCoreSkeleton(strFilename, m_pCoreSkeleton))
+  {
+    result := false;
+  }*)
+
+  result := true;
+end;
+
+procedure CalCoreModel.addAnimHelper( const strAnimName : string; animId : integer );
+begin
+  //SetLength( m_animationHelper, animId + 1 );
+  m_animationHelper[ animId ] := strAnimName;
+end;
+
+procedure CalCoreModel.addBoneHelper( const strBoneName : string; boneId : integer );
+begin
+  //Make sure the skeleton has been loaded first
+  if ( m_pCoreSkeleton <> nil ) then
+  begin
+    //Map the bone ID to the name
+    m_pCoreSkeleton.mapCoreBoneName( boneId, strBoneName );
+  end;
+end;
+
+
+function CalCoreModel.getBoneId( const strBoneName : string ) : integer;
+begin
+  if ( m_pCoreSkeleton <> nil ) then
+  begin
+    result := m_pCoreSkeleton.getCoreBoneId( strBoneName );
+    exit;
+  end;
+
+  result := -1;
+end;
+
+function CalCoreModel.getAnimId( const strAnimName : string ) : integer;
+var
+  i, HelperCount : integer;
+begin
+  result := 0;
+  HelperCount := Length( m_animationHelper );
+
+  if ( HelperCount < 1 ) then
+  begin
+    result := -1;
+    exit;
+  end;
+  
+  for i := 0 to HelperCount - 1 do
+  begin
+    if ( m_animationHelper[ i ] = strAnimName ) then
+    begin
+      result := i;
+      break;
+    end;
+  end;
+end;
+
+procedure CalCoreModel.scale( factor : float );
+var
+  animationId, meshId : integer;
+  animationCount, meshCount : integer;
+begin
+  m_pCoreSkeleton.scale( factor );
+  
+  animationCount := Length( m_vectorCoreAnimation );
+  for animationId := 0 to animationCount - 1 do
+  begin
+    m_vectorCoreAnimation[ animationId ].scale( factor );
+  end;
+
+  meshCount := Length( m_vectorCoreMesh );
+  for meshId := 0 to meshCount - 1 do
+  begin
+    m_vectorCoreMesh[ meshId ].scale( factor );
+  end;
+end;
+

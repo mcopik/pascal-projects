@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+
+<html>
+<head>
+<title>
+  Stojkovic's SDL Page - SDL Font
+</title>
+
+<meta http-equiv="content-style-type" content="text/css">
+<meta name="description" content="sdl controls">
+<meta name="keywords" content="sdl,gui,sdlgui,ctrls,sdlctrls,controls,formeditor,igor,stojkovic,gamemaker">
+
+<link rel="stylesheet" type="text/css" href="default.css">
+
+</head>
+
+<body>
+
+<h1>SDL Font</h1>
+
+<div class="navigator">
+<a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=118226&amp;type=1" width="88" height="31" border="0" alt="SourceForge.net Logo" /></a>
+<ul>
+  <li><a href="index.html">News</a></li>
+  <li><a href="description.htm">Description</a>
+  <ul class="sublist">
+    <li><a href="sdldraw.htm">SDLDraw</a></li>
+    <li>SDLFont</li>
+    <li><a href="sdlgui.htm">SDLGui</a></li>
+    <li><a href="sdlctrls.htm">SDL Controls</a></li>
+  </ul></li>
+  <li><a href="sdltools.htm">SDL Tools</a></li>
+  <li><a href="faq.htm">FAQ</a></li>
+  <li><a href="scrshot.htm">Screen shots</a></li>
+  <li><a href="download.htm">Download</a></li>
+  <li><a href="aboutme.htm">About Me</a></li>
+</ul>
+</div>
+
+<p>
+This unit contains two classes for text drawing - TSDLRasterFont and TSDLTTFFont and one class for text
+wrapping - TWrapManager. TSDLRasterFont and TSDLTTFFont inherits from TSDLFont so they have some same
+properties and methods.
+
+<h2>Declared types and variables</h2>
+<dl class="code">
+  <dt>TSDLTextLayout = (tlTop, tlCenter, tlBottom);
+  <dd>Used for vertical text alignment.
+  <dt>TSDLAlignment = (taLeft, taCenter, taRight);
+  <dd>Used for horizontal text alignment.
+  <dt>TSDLFontStyles = (fsBold,fsItalic,fsUnderline);
+  <dd>Used for TSDLFontStyle.
+  <dt>TSDLFontStyle = set of TSDLFontStyles;
+  <dd>Used for style in TSDLTTFFont.
+  <dt>GlobalFont: TSDLFont;
+  <dd>Most controls demands that you assign them font right after their creation. In order to avoid
+  public variables like this one in every unit where you create controls I declared one here, so every
+  unit that uses font can assign this font to controls it creates. The first font you create will be
+  assigned to this variable. GlobalFont is assigned to <a href="sdlgui.htm">TSDLComponent</a> on its creation.
+</dl>
+
+<h2>TSDLFont</h2>
+<p>
+So, the same properties for TSDLRasterFont and TSDLTTFFont are:
+<dl class="code">
+  <dt>property Name : string read FName write FName;
+  <dd>Name of font.
+  <dt>property FileName: string read FFileName write FFileName;
+  <dd>Name of file from witch the font was loaded.
+  <dt>property Alignment: TSDLAlignment read FAlignment write FAlignment;
+  <dd>Horizontal alignment of text.
+  <dt>property Layout: TSDLTextLayout read FLayout write FLayout;
+  <dd>Vertical alignment of text.
+  <dt>property Color: Cardinal read FColor write SetColor;
+  <dd>Color of text.
+</dl>
+<p>
+And the same methods are:
+<dl class="code">
+  <dt>procedure TextOut(Target: PSDL_Surface;X,Y: Integer;const Text: string); virtual; abstract;
+  <dd>Prints Text to the specified Surface at X,Y coordinates.
+  <dt>procedure TextRect(Target : PSDL_Surface;const Rect: TSDL_Rect;const Text: string);
+  <dd>Prints Text to the specified Surface. Text is clipped inside the Rect and it is align in it depending from
+  Alignment and Layout properties.
+  <dt>procedure TextRectA(Target : PSDL_Surface;Rect: TSDL_Rect;X,Y: Integer;const Text: string);
+  <dd>Prints Text to the specified Surface at X,Y coordinates. It is clipped inside the Rect.
+  <dt>function TextExtent(const Text: string): TSDL_Rect; virtual; abstract;
+  <dd>Returns Text width and height in Result.w and Result.h.
+  <dt>function TextWidth(const Text: string): Integer; virtual; abstract;
+  <dd>Returns width of Text.
+  <dt>function TextHeight(const Text: string): Integer; virtual; abstract;
+  <dd>Returns Height of Text.
+  <dt>procedure LoadFromFile(const AFileName: string);
+  <dd>Loads a font from the specified file.
+  <dt>procedure LoadFromStream(Stream: TStream); virtual; abstract;
+  <dd>Loads a font from the specified stream.
+  <dt>procedure SaveToFile(const FileName: string);
+  <dd>Saves a font to the specified FileName.
+  <dt>procedure SaveToStream(Stream: TStream); virtual; abstract;
+  <dd>Saves a font to the specified stream. Only font data is saved, but it contains FileName so it can load
+  font image or ttf file.
+  <dt>procedure SetTempAlign(AAlignment: TSDLAlignment; ALayout: TSDLTextLayout);
+  <dd>Saves old Alignment and Layout and then sets the new ones.
+  <dt>procedure RestoreAlignment;
+  <dd>Restores saved Alignment and Layout.
+</dl>
+
+<h2>TSDLRasterFont</h2>
+<p>
+Use this to work with bitmap fonts in SGF - SDL Graphic Font format. Image of letters can be in any supported format,
+but at the end of that file special data will be added. This allows all image viewing and editing programs to be able
+to open that image. When you edit and save that image additional data will be lost so you have to extract it first
+and add it back later. For this you have a special tool - <a href="sdltools.htm#SGFileOp">SG File Operator</a>. You
+also have tools to build these fonts from ttf fonts or other bitmap font formats. See <a href="sdltools.htm">Tools</a>.
+It works the same with and without OpenGL. It has three new properties:
+<dl class="code">
+  <dt>property CharSet: string read FCharset write FCharset;
+  <dd>Contains the characters in order they apear in the image.
+  <dt>property ReplaceColor: Boolean read FReplaceColor write FReplaceColor;
+  <dd>If True seting new color only replaces the old one and this is faster. If False it will call
+  <a href="sdldraw.htm">SDLScreen.ModifyHueTo</a>.
+  <dt>property TabSpaces: Byte read FTabSpaces write FTabSpaces;
+  <dd>Represents number of spaces to draw on Tab char. Default is four.
+</dl>
+<p>
+And one new method:
+<dl class="code">
+  <dt>procedure Load(const FontName, ImageFile: string);
+  <dd>Loads a font from ImageFile and names it as FontName.
+</dl>
+
+<h2>TSDLTTFFont</h2>
+<p>
+Use this to work with TTF fonts. It works the only without OpenGL. It has four new properties:
+<dl class="code">
+  <dt>property Size: Byte read FSize write SetSize;
+  <dd>Size of Font.
+  <dt>property Style: TSDLFontStyle read FStyle write SetStyle;
+  <dd>Can contain none or more values of fsBold,fsItalic,fsUnderline.
+  <dt>Shaded: Boolean;
+  <dd>If this is True letters will have soft edges but nontransparent backgound.
+  <dt>BackColor: Cardinal;
+  <dd>Color of background when Shaded is True.
+</dl>
+<p>
+And one new method:
+<dl class="code">
+  <dt>procedure Load(const FontName, AFileName: string;PointSize: Integer);
+  <dd>Loads a font from AFileName and names it as FontName. It also sets its size to PointSize.
+</dl>
+
+<h2>TWrapManager</h2>
+<p>
+Use this to work with wrapped text. It wrappes text using max width text can occupy or it can simply manage text with
+line breaks without additional wrapping.
+<dl class="code">
+  <dt>property TrimLines: Boolean read FTrimLines write FTrimLines;
+  <dd>If True it will trim spaces on the begining and the end of every line. This does not change the original text
+  in WrapingText property. Default is True.
+  <dt>property WrapToWidth: Boolean read FWrapToWidth write SetWrapToWidth;
+  <dd>If True it does additional wrapping of every line so that text fits in specified width.
+  <dt>property WrapWidth: Word read FWrapWidth write SetWrapWidth;
+  <dd>Maximal width to which the text should be wrapped.
+  <dt>property WrapingText: string read FWrapingText write SetWrapingText;
+  <dd>Text to wrap. This is never changed by wrapping manager.
+  <dt>property WrapedLines: TStringList read FWrapedLines;
+  <dd>Wrapped lines.
+  <dt>property LinesCount: Integer read GetLinesCount;
+  <dd>Number of wrapped lines.
+  <dt>property OnChange: TNotifyEvent read FOnChange write FOnChange;
+  <dd>Occurs when WrappingText of WrapWidth change.
+</dl>
+
+<p>Methods are:
+<dl class="code">
+  <dt>constructor Create(AFont: TSDLFont);
+  <dd>Creates a new wrap manager and connects AFont with it.
+  <dt>procedure TextOut(Target : PSDL_Surface;X,Y: Integer);
+  <dd>Prints wrapped text on surface Target at X,Y coordinates using AFont's current Alignment.
+  <dt>procedure TextRect(Target : PSDL_Surface;const Rect: TSDL_Rect);
+  <dd>Prints wrapped text on surface Target inside the specified rect using AFont's current Alignment and Layout.
+  <dt>procedure TextRectA(Target : PSDL_Surface;const Rect: TSDL_Rect;X,Y: Integer);
+  <dd>Prints wrapped text on surface Target inside the specified rect at the specified coordinates.
+</dl>
+
+</body>
+</html>

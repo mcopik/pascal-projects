@@ -1,0 +1,96 @@
+STATUS INFO : @ 20:18:25 MSG : Starting Application IN : Initialization
+
+STATUS INFO : @ 20:18:27 MSG : o----------------------------------------------------------------o IN : 
+
+STATUS INFO : @ 20:18:27 MSG : |                       The Cally Demo 2.0                       | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : |     Orignial version (C) 2001 Bruno 'Beosil' Heidelberger      | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : |             Delphi version (C) 2001 Paul TOTH                  | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : o----------------------------------------------------------------o IN : 
+
+STATUS INFO : @ 20:18:27 MSG : | This program is free software; you can redistribute it and/or  | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : | modify it under the terms of the GNU General Public License as | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : | published by the Free Software Foundation; either version 2 of | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : | the License, or (at your option) any later version.            | IN : 
+
+STATUS INFO : @ 20:18:27 MSG : o----------------------------------------------------------------o IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading 'cally' model ... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading skeleton 'cally.csf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_idle.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_tornado_kick.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_walk.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_strut.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_jog.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_shoot_arrow.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading animation 'cally_wave.caf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_calf_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_calf_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_chest.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_foot_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_foot_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_hand_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_hand_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_head.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_lowerarm_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_lowerarm_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_neck.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_pelvis.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_ponytail.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_thigh_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_thigh_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_upperarm_left.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading mesh 'cally_upperarm_right.cmf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Loading material 'cally_skin.xrf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Invalid binary file format : data/cally/cally_skin.xrf ( 262 )  IN : DCal3D.PAS
+
+STATUS INFO : @ 20:18:27 MSG : Loading material 'cally_ponytail.xrf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Invalid binary file format : data/cally/cally_ponytail.xrf ( 262 )  IN : DCal3D.PAS
+
+STATUS INFO : @ 20:18:27 MSG : Loading material 'cally_chest.xrf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Invalid binary file format : data/cally/cally_chest.xrf ( 262 )  IN : DCal3D.PAS
+
+STATUS INFO : @ 20:18:27 MSG : Loading material 'cally_pelvis.xrf'... IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Invalid binary file format : data/cally/cally_pelvis.xrf ( 262 )  IN : DCal3D.PAS
+
+STATUS INFO : @ 20:18:27 MSG : Initialization done. IN : 
+
+STATUS INFO : @ 20:18:27 MSG : Quit the demo by pressing 'q' or ESC IN : 
+
+STATUS INFO : @ 20:20:46 MSG : Terminating Application IN : Finalization
+

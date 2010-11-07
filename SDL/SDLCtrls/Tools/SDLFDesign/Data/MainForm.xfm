@@ -1,0 +1,216 @@
+object : TMainForm
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SDL Form Designer'
+  Color = 9154505
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  DrawOption = doStretch
+  FocusColor = 11846620
+  Height = 74
+  ImagesFileName = '../Data/Controls.sil'
+  Movable = False
+  StateImages = []
+  TabOrder = 0
+  TitleBarHeight = 20
+  Width = 800
+  X = 0
+  Y = 0
+  object btSelect: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = True
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    GlyphIndex = 0
+    GroupIndex = 0
+    Height = 28
+    Hint = 'Select'
+    OnClick = AddButtonClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 0
+    Tag = -1
+    Width = 28
+    X = 2
+    Y = 43
+    Z = 0
+  end
+  object Menu: TSDLMenu
+    AlwaysDown = False
+    AlwaysUp = True
+    BorderWidth = 1
+    Color = 11846620
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    DrawOption = doStretch
+    FocusColor = 11846620
+    Height = 20
+    StateImages = []
+    TabOrder = 1
+    Width = 796
+    X = 2
+    Y = 22
+    Z = 1
+    object : TSDLMenuItem
+      BorderWidth = 2
+      Caption = 'File'
+      DrawOption = doStretch
+      GroupIndex = 0
+      object : TSDLPopupMenu
+        AlwaysDown = False
+        AlwaysUp = False
+        BorderWidth = 2
+        Color = 11846620
+        DisabledColor = 11842740
+        DragMode = sdmManual
+        DrawOption = doStretch
+        FocusColor = 11846620
+        StateImages = []
+        TabOrder = 1
+        Visible = False
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'New Form'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = NewClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Open...'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = OpenClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Save'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = SaveClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Save As...'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = SaveAsClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Exit'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ExitClick
+        end
+      end
+    end
+    object : TSDLMenuItem
+      BorderWidth = 2
+      Caption = 'Edit'
+      DrawOption = doStretch
+      GroupIndex = 0
+      object : TSDLPopupMenu
+        AlwaysDown = False
+        AlwaysUp = False
+        BorderWidth = 2
+        Color = 11846620
+        DisabledColor = 11842740
+        DragMode = sdmManual
+        DrawOption = doStretch
+        FocusColor = 11846620
+        StateImages = []
+        TabOrder = 2
+        Visible = False
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Lock Controls'
+          Checked = True
+          DrawOption = doStretch
+          GroupIndex = 1
+          OnClick = LockClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Show Hints'
+          Checked = True
+          DrawOption = doStretch
+          GroupIndex = 1
+          OnClick = HintsClick
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Proc Implementation'
+          DrawOption = doStretch
+          GroupIndex = 1
+          OnClick = AddProcImplClick
+        end
+      end
+    end
+    object : TSDLMenuItem
+      BorderWidth = 2
+      Caption = 'View'
+      DrawOption = doStretch
+      GroupIndex = 0
+      object : TSDLPopupMenu
+        AlwaysDown = False
+        AlwaysUp = False
+        BorderWidth = 2
+        Color = 11846620
+        DisabledColor = 11842740
+        DragMode = sdmManual
+        DrawOption = doStretch
+        FocusColor = 11846620
+        StateImages = []
+        TabOrder = 3
+        Visible = False
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Design Form'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ViewClick
+          Tag = 1
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Object Inspector'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ViewClick
+          Tag = 2
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Code Viewer'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ViewClick
+          Tag = 3
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Menu Designer'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ViewClick
+          Tag = 4
+        end
+        object : TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Images List'
+          DrawOption = doStretch
+          GroupIndex = 0
+          OnClick = ViewClick
+          Tag = 5
+        end
+      end
+    end
+  end
+end

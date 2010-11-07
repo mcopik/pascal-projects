@@ -1,0 +1,52 @@
+//****************************************************************************//
+// coremorphanimation.cpp                                                     //
+// Copyright (C) 2003 Steven Geens                                            //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+constructor CalCoreMorphAnimation.Create;
+begin
+  inherited;
+  
+end;
+
+destructor CalCoreMorphAnimation.Destroy;
+begin
+  SetLength( m_vectorCoreMeshID, 0 );
+  SetLength( m_vectorMorphTargetID, 0 );
+  inherited;
+end;
+
+function CalCoreMorphAnimation.addMorphTarget( coreMeshID : integer; morphTargetID : integer ) : boolean;
+var
+  CMeshID, MTargetID : integer;
+begin
+  // Add to m_vectorCoreMeshID array
+  CMeshID := Length( m_vectorCoreMeshID );
+  SetLength( m_vectorCoreMeshID, CMeshID + 1 );
+
+  m_vectorCoreMeshID[ CMeshID ] := coreMeshID;
+
+  // Add to m_vectorCoreMeshID array
+  MTargetID := Length( m_vectorMorphTargetID );
+  SetLength( m_vectorMorphTargetID, MTargetID + 1 );
+  
+  m_vectorMorphTargetID[ MTargetID ] := morphTargetID;
+
+  result := true;
+end;
+
+function CalCoreMorphAnimation.getVectorCoreMeshID : integers;
+begin
+  result := m_vectorCoreMeshID;
+end;
+
+function CalCoreMorphAnimation.getVectorMorphTargetID : integers;
+begin
+  result := m_vectorMorphTargetID;
+end;
+

@@ -1,0 +1,414 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// model.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalModel.Create( pCoreModel : CalCoreModel );
+begin
+  m_pCoreModel := pCoreModel;
+
+  // allocate a new skeleton instance
+  m_pSkeleton := CalSkeleton.Create( pCoreModel.CoreSkeleton );
+
+  // if a mixer was already set (from a previous call to create or
+  // a call to setAbstractMixer), re-use it. Otherwise create a
+  // CalMixer instance.
+  if( m_pMixer <> nil ) then
+  begin
+    m_pMixer.Free;
+  end;
+
+  // create the mixer from this model
+  m_pMixer := CalMixer.Create( Self );
+
+  // Create the morph target mixer from this model
+  m_pMorphTargetMixer := CalMorphTargetMixer.Create( Self );
+
+  // create the physique from this model
+  m_pPhysique := CalPhysique.Create( Self );
+
+  // create the spring system from this model
+  m_pSpringSystem := CalSpringSystem.Create( Self );
+
+  // allocate a new renderer instance
+  m_pRenderer := CalRenderer.Create( Self );
+
+  // initialize the user data
+  m_userData := 0;
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalModel.Destroy;
+var
+  meshId : integer;
+begin
+  // destroy all active meshes
+  for meshId := 0 to Length( m_vectorMesh ) - 1 do
+  begin
+    m_vectorMesh[meshId].Free;
+    m_vectorMesh[meshId] := nil;
+  end;
+  SetLength( m_vectorMesh, 0 );
+
+
+  // destroy the renderer instance
+  if(m_pRenderer <> nil ) then
+  begin
+    m_pRenderer.Free;
+    m_pRenderer := nil;
+  end;
+
+  // destroy the spring system instance
+  if(m_pSpringSystem <> nil) then
+  begin
+    m_pSpringSystem.Free;
+    m_pSpringSystem := nil;
+  end;
+
+  // destroy the physique instance
+  if(m_pPhysique <> nil) then
+  begin
+    m_pPhysique.Free;
+    m_pPhysique := nil;
+  end;
+
+  // destroy the mixer instance
+  if(m_pMixer <> nil) then
+  begin
+    m_pMixer.Free;
+    m_pMixer := nil;
+  end;
+  
+  // destroy the morph target mixer instance
+  if(m_pMorphTargetMixer <> nil) then
+  begin
+    m_pMorphTargetMixer.Free;
+    m_pMorphTargetMixer := nil;
+  end;
+  
+  // destroy the skeleton instance
+  if(m_pSkeleton <> nil) then
+  begin
+    m_pSkeleton.Free;
+    m_pSkeleton := nil;
+  end;
+
+  m_pCoreModel := nil;
+end;
+
+//----------------------------------------------------------------------------//
+// Set the material set id of the mesh                                        //
+//----------------------------------------------------------------------------//
+
+procedure CalModel.setMaterialSet( setId : integer );
+var
+  iteratorMesh, MeshCount : integer;
+begin
+  // set the lod level in all meshes
+  MeshCount := Length( m_vectorMesh );
+  for iteratorMesh := 0 to MeshCount - 1 do
+  begin
+    // set the material set in the mesh
+    m_vectorMesh[ iteratorMesh ].setMaterialSet( setId );
+  end;
+end;
+
+function CalModel.getMesh( coreMeshId : integer ) : CalMesh;
+var
+  pCoreMesh : CalCoreMesh;
+  meshId, meshCount : integer;
+begin
+  // check if the id is valid
+  if ( ( coreMeshId < 0 ) or ( coreMeshId >= m_pCoreModel.getCoreMeshCount ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'model.imp', 131 );
+    {$ENDIF}
+    result := nil;
+    exit;
+  end;
+  // get the core mesh
+  pCoreMesh := m_pCoreModel.getCoreMesh( coreMeshId );
+
+  // search the mesh
+  meshCount := Length( m_vectorMesh );
+  for meshId := 0 to meshCount - 1 do
+  begin
+    // check if we found the matching mesh
+    if ( m_vectorMesh[ meshId ].getCoreMesh = pCoreMesh ) then
+    begin
+      result := m_vectorMesh[ meshId ];
+      exit;
+    end;
+  end;
+  result := nil;
+end;
+
+//----------------------------------------------------------------------------//
+// Update this model with a given delta time                                  //
+//----------------------------------------------------------------------------//
+
+procedure CalModel.update( deltaTime : float );
+begin
+  m_pMixer.updateAnimation( deltaTime );
+  m_pMixer.updateSkeleton;
+
+  m_pMorphTargetMixer.update( deltaTime );
+  m_pPhysique.update;
+  m_pSpringSystem.update( deltaTime );
+end;
+
+function CalModel.attachMesh( coreMeshId : integer ) : boolean;
+var
+  pCoreMesh : CalCoreMesh;
+  pMesh : CalMesh;
+  meshId, meshCount : integer;
+begin
+  // check if the id is valid
+  if ( ( coreMeshId < 0 ) or ( coreMeshId >= m_pCoreModel.getCoreMeshCount ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'CalModel.attachMesh', 109 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // get the core mesh
+  pCoreMesh := m_pCoreModel.getCoreMesh( coreMeshId );
+
+  // check if the mesh is already attached
+  meshCount := Length( m_vectorMesh );
+  for meshId := 0 to meshCount - 1 do
+  begin
+    // check if we found the matching mesh
+    if ( m_vectorMesh[ meshId ].getCoreMesh = pCoreMesh ) then
+    begin
+      // mesh is already active. do nothing
+      result := true;
+      exit;
+    end;
+  end;
+
+  // allocate a new mesh instance
+  // create the new mesh instance
+  pMesh := CalMesh.Create( pCoreMesh );
+  if ( pMesh = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( MEMORY_ALLOCATION_FAILED, 'CalModel.attachMesh', 135 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // set model in the mesh instance
+  pMesh.Model := self;
+
+  // insert the new mesh into the active list
+  meshId := Length( m_vectorMesh );
+  SetLength( m_vectorMesh, meshId + 1 );
+
+  m_vectorMesh[ meshId ] := pMesh;
+
+  result := true;
+end;
+
+function CalModel.detachMesh( coreMeshId : integer ) : boolean;
+var
+  pCoreMesh : CalCoreMesh;
+  iteratorMesh, MeshCount : integer;
+  pMesh : CalMesh;
+begin
+  // check if the id is valid
+  if ( ( coreMeshId < 0 ) or ( coreMeshId >= m_pCoreModel.getCoreMeshCount ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'CalModel.detachMesh', 160 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // get the core mesh
+  pCoreMesh := m_pCoreModel.getCoreMesh( coreMeshId );
+
+  // find the mesh for the given id
+  MeshCount := Length( m_vectorMesh );
+  for iteratorMesh := 0 to MeshCount - 1 do
+  begin
+    // get the mesh
+
+    pMesh := m_vectorMesh[ iteratorMesh ];
+
+    // check if we found the matching mesh
+    if ( pMesh.getCoreMesh = pCoreMesh ) then
+    begin
+      // destroy the mesh
+      pMesh.Free;
+
+      // erase the mesh out of the active mesh list
+      m_vectorMesh[ iteratorMesh ] := nil;
+
+      result := true;
+      exit;
+    end;
+  end;
+
+  result := false;
+end;
+
+function CalModel.getMixer : CalMixer;
+begin
+  if ( m_pMixer = nil ) then
+  begin
+    result := nil;
+    exit;
+  end;
+
+  if ( not m_pMixer.isDefaultMixer ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_MIXER_TYPE, 'CalModel.getMixer', 121 );
+    {$ENDIF}
+    result := nil;
+    exit;
+  end
+  else
+  begin
+    result := CalMixer( m_pMixer );
+  end;
+end;
+
+procedure CalModel.setAbstractMixer( pMixer : CalAbstractMixer );
+begin
+  if ( m_pMixer <> nil ) then
+    m_pMixer.Free;
+
+  m_pMixer := pMixer;
+  // Needed??
+  if ( m_pMixer <> nil ) then
+    m_pMixer.Create( self );
+end;
+
+function CalModel.getBoundingBox( precision : boolean ) : CalBoundingBox;
+var
+  v, translation : CalVector;
+  iteratorBone, planeId, i, BoneCount : integer;
+  localBoundingBox : CalBoundingBox;
+  vectorBone : CalBones;
+  points : TVertices;
+begin
+  SetLength( points, 8 );
+  
+  v := CalVector.Create( 1.0, 0.0, 0.0 );
+  m_boundingBox.plane[ 0 ].setNormal( v );
+
+  v.x := -1.0;
+  v.y := 0.0;
+  v.z := 0.0;
+  m_boundingBox.plane[ 1 ].setNormal( v );
+
+  v.x := 0.0;
+  v.y := 1.0;
+  v.z := 0.0;
+  m_boundingBox.plane[ 2 ].setNormal( v );
+
+  v.x := 0.0;
+  v.y := -1.0;
+  v.z := 0.0;
+  m_boundingBox.plane[ 3 ].setNormal( v );
+
+  v.x := 0.0;
+  v.y := 0.0;
+  v.z := 1.0;
+  m_boundingBox.plane[ 4 ].setNormal( v );
+
+  v.x := 0.0;
+  v.y := 0.0;
+  v.z := -1.0;
+  m_boundingBox.plane[ 5 ].setNormal( v );
+  v.free;
+
+  if ( precision ) then
+    m_pSkeleton.calculateBoundingBoxes;
+
+  vectorBone := m_pSkeleton.getVectorBone;
+
+  translation := CalVector.Create;
+  BoneCount := Length( vectorBone );
+  for iteratorBone := 0 to BoneCount - 1 do
+  begin
+    // If it's just an approximation that are needed then
+    // we just compute the bounding box from the skeleton
+
+    if ( not precision ) or ( not vectorBone[ iteratorBone ].getCoreBone.isBoundingBoxPrecomputed ) then
+    begin
+
+      translation.assign( vectorBone[ iteratorBone ].getTranslationAbsolute );
+
+      for planeId := 0 to 5 do
+      begin
+        if ( m_boundingBox.plane[ planeId ].eval( translation ) < 0.0 ) then
+        begin
+          m_boundingBox.plane[ planeId ].setPosition( translation );
+        end;
+      end;
+    end
+    else
+    begin
+      localBoundingBox := vectorBone[ iteratorBone ].getBoundingBox;
+
+      localBoundingBox.computePoints( points );
+
+      for i := 0 to 7 do
+      begin
+        for planeId := 0 to 5 do
+        begin
+          if ( m_boundingBox.plane[ planeId ].eval( points[ i ] ) < 0.0 ) then
+          begin
+            m_boundingBox.plane[ planeId ].setPosition( points[ i ] );
+          end
+        end;
+      end;
+    end;
+  end;
+  SetLength( points, 0 );
+
+  translation.Free;
+  result := m_boundingBox;
+end;
+
+procedure CalModel.setLodLevel( lodLevel : float );
+var
+  iteratorMesh, meshCount : integer;
+begin
+  // set the lod level in all meshes
+  meshCount := Length( m_vectorMesh );
+  for iteratorMesh := 0 to meshCount - 1 do
+    m_vectorMesh[ iteratorMesh ].setLodLevel( lodLevel ); // set the lod level in the mesh
+end;
+
+procedure CalModel.disableInternalData;
+var
+  iteratorMesh, meshCount : integer;
+begin
+  // Disable internal data in all meshes
+  meshCount := Length( m_vectorMesh );
+  for iteratorMesh := 0 to meshCount - 1 do
+    m_vectorMesh[ iteratorMesh ].disableInternalData; // Disable internal data in the mesh
+end;
+

@@ -1,0 +1,287 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// bone.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalBone.Create( pSkeleton : CalSkeleton; pCoreBone : CalCoreBone );
+begin
+  inherited Create;
+  m_pSkeleton := pSkeleton;
+  m_pCoreBone := pCoreBone;
+  m_translation := CalVector.Create( 0, 0, 0 );
+  m_rotation := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_translationAbsolute := CalVector.Create( 0, 0, 0 );
+  m_rotationAbsolute := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_translationBoneSpace := CalVector.Create( 0, 0, 0 );
+  m_rotationBoneSpace := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_transformMatrix := CalMatrix.Create;
+  m_boundingBox := CalBoundingBox.Create;
+end;
+
+destructor CalBone.Destroy;
+begin
+  m_translation.Free;
+  m_rotation.Free;
+  m_translationAbsolute.Free;
+  m_rotationAbsolute.Free;
+  m_translationBoneSpace.Free;
+  m_rotationBoneSpace.Free;
+  m_transformMatrix.Free;
+  m_boundingBox.Free;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Blend the current bone state with the given state                          //
+//----------------------------------------------------------------------------//
+
+procedure CalBone.blendState( weight : float; const translation : CalVector; const rotation : CalQuaternion );
+var
+  factor : float;
+begin
+  if ( m_accumulatedWeightAbsolute = 0.0 ) then
+  begin
+    // it is the first state, so we can just copy it into the bone state
+    m_translationAbsolute.assign( translation );
+    m_rotationAbsolute.assign( rotation );
+    m_accumulatedWeightAbsolute := weight;
+  end
+  else
+  begin
+    // it is not the first state, so blend all attributes
+    factor := weight / ( m_accumulatedWeightAbsolute + weight );
+    m_translationAbsolute.blend( factor, translation );
+    m_rotationAbsolute.blend( factor, rotation );
+    m_accumulatedWeightAbsolute := m_accumulatedWeightAbsolute + weight;
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Calculate the state of the bone                                            //
+//----------------------------------------------------------------------------//
+
+procedure CalBone.calculateState;
+var
+  parentId : integer;
+  pParent : CalBone;
+  i : integer;
+  ChildCount: integer;
+begin
+  // check if the bone was not touched by any active animation
+  if( m_accumulatedWeight = 0.0 ) then
+  begin
+    // set the bone to the initial skeleton state
+    m_translation.assign( m_pCoreBone.Translation );
+    m_rotation.assign( m_pCoreBone.Rotation );
+  end;
+
+  // get parent bone id
+  parentId := m_pCoreBone.getParentId;
+
+  if(parentId = -1) then
+  begin
+    // no parent, this means absolute state == relative state
+    m_translationAbsolute.assign( m_translation );
+    m_rotationAbsolute.assign( m_rotation );
+  end
+  else
+  begin
+    // get the parent bone
+    pParent := m_pSkeleton.getBone( parentId );
+
+    // transform relative state with the absolute state of the parent
+    m_translationAbsolute.assign( m_translation );
+    m_translationAbsolute.mult( pParent.getRotationAbsolute );
+    m_translationAbsolute.add( pParent.getTranslationAbsolute );
+
+    m_rotationAbsolute.assign( m_rotation );
+    m_rotationAbsolute.mult( pParent.getRotationAbsolute );
+  end;
+
+  // calculate the bone space transformation
+  m_translationBoneSpace.assign( m_pCoreBone.TranslationBoneSpace );
+  m_translationBoneSpace.mult( m_rotationAbsolute );
+  m_translationBoneSpace.add( m_translationAbsolute );
+
+  m_rotationBoneSpace.assign( m_pCoreBone.RotationBoneSpace );
+  m_rotationBoneSpace.mult( m_rotationAbsolute );
+
+  // Generate the vertex transform.  If I ever add support for bone-scaling
+  // to Cal3D, this step will become significantly more complex.
+  m_transformMatrix.Assign( m_rotationBoneSpace );
+
+
+  // calculate all child bones
+  ChildCount := length( m_pCoreBone.getListChildId );
+  for i := 0 to ChildCount - 1 do
+    m_pSkeleton.getBone( m_pCoreBone.getListChildId[ i ] ).calculateState;
+end;
+
+//----------------------------------------------------------------------------//
+// Clear the state of the bone                                                //
+//----------------------------------------------------------------------------//
+
+procedure CalBone.clearState;
+begin
+  m_accumulatedWeight := 0.0;
+  m_accumulatedWeightAbsolute := 0.0;
+end;
+
+//----------------------------------------------------------------------------//
+// Lock the state into the accumulated state                                  //
+//----------------------------------------------------------------------------//
+
+procedure CalBone.lockState;
+var
+  factor : float;
+begin
+  // clamp accumulated weight
+  if ( m_accumulatedWeightAbsolute > 1.0 - m_accumulatedWeight ) then
+  begin
+    m_accumulatedWeightAbsolute := 1.0 - m_accumulatedWeight;
+  end;
+  
+  if ( m_accumulatedWeightAbsolute > 0.0 ) then
+  begin
+    if ( m_accumulatedWeight = 0.0 ) then
+    begin
+      // it is the first state, so we can just copy it into the bone state
+      m_translation.Assign( m_translationAbsolute );
+      m_rotation.Assign( m_rotationAbsolute );
+      m_accumulatedWeight := m_accumulatedWeightAbsolute;
+    end
+    else
+    begin
+      // it is not the first state, so blend all attributes
+      factor := m_accumulatedWeightAbsolute / ( m_accumulatedWeight + m_accumulatedWeightAbsolute );
+      m_translation.blend( factor, m_translationAbsolute );
+      m_rotation.blend( factor, m_rotationAbsolute );
+      m_accumulatedWeight := m_accumulatedWeight + m_accumulatedWeightAbsolute;
+    end;
+
+    m_accumulatedWeightAbsolute := 0.0;
+  end;
+end;
+
+procedure CalBone.calculateBoundingBox;
+var
+  {boneId,} planeId, i : integer;
+  dir, position : CalVector;
+begin
+  if ( not getCoreBone.isBoundingBoxPrecomputed ) then
+    exit;
+
+  //boneId := m_pSkeleton.getCoreSkeleton.getCoreBoneID( getCoreBone.getName );
+
+  dir := CalVector.Create( 1.0, 0.0, 0.0 );
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 0 ].setNormal( dir );
+
+  dir.x := -1.0;
+  dir.y := 0.0;
+  dir.z := 0.0;
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 1 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 1.0;
+  dir.z := 0.0;
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 2 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := -1.0;
+  dir.z := 0.0;
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 3 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 0.0;
+  dir.z := 1.0;
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 4 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 0.0;
+  dir.z := -1.0;
+  dir.mult( getTransformMatrix );
+  m_boundingBox.plane[ 5 ].setNormal( dir );
+
+  // we no longer need dir so free it.
+  dir.free;
+
+  position := CalVector.Create;
+  for i := 0 to 5 do
+  begin
+    position.assign( getCoreBone.getBoundingData( i ) );
+
+    position.mult( getTransformMatrix );
+    position.add( getTranslationBoneSpace );
+
+    for planeId := 0 to 5 do
+    begin
+      if ( m_boundingBox.plane[ planeId ].eval( position ) < 0.0 ) then
+      begin
+        m_boundingBox.plane[ planeId ].setPosition( position );
+      end;
+    end;
+  end;
+  position.free;
+end;
+
+procedure CalBone.setCoreState;
+begin
+  // set the bone to the initial skeleton state
+  m_translation.assign( m_pCoreBone.Translation );
+  m_rotation.assign( m_pCoreBone.Rotation );
+
+  // set the appropriate weights
+  m_accumulatedWeightAbsolute := 1.0;
+  m_accumulatedWeight := 1.0;
+
+  calculateState;
+end;
+
+procedure CalBone.setCoreStateRecursive;
+var
+  i, ChildCount : integer;
+begin
+  // set the bone to the initial skeleton state
+  m_translation.assign( m_pCoreBone.Translation );
+  m_rotation.assign( m_pCoreBone.Rotation );
+
+  // set the appropriate weights
+  m_accumulatedWeightAbsolute := 1.0;
+  m_accumulatedWeight := 1.0;
+
+  // set core state for all child bones
+  ChildCount := length( m_pCoreBone.getListChildId );
+  for i := 0 to ChildCount - 1 do
+    m_pSkeleton.getBone( m_pCoreBone.getListChildId[ i ] ).setCoreStateRecursive;
+
+  calculateState;
+end;
+
+procedure CalBone.setRotation( const rotation : CalQuaternion  );
+begin
+  m_rotation.assign( rotation );
+  m_accumulatedWeightAbsolute := 1.0;
+  m_accumulatedWeight := 1.0;
+end;
+
+procedure CalBone.setTranslation( const translation : CalVector );
+begin
+  m_translation.assign( translation );
+  m_accumulatedWeightAbsolute := 1.0;
+  m_accumulatedWeight := 1.0;
+end;

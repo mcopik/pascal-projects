@@ -1,0 +1,46 @@
+STATUS INFO : @ 22:11:27 MSG : Starting Application IN : Initialization
+
+STATUS INFO : @ 22:11:27 MSG : Starting Initialization IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : Command line not found IN : CheckCommandLine
+
+STATUS INFO : @ 22:11:27 MSG : SDL_MIXER Initialization was successful IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : SDL_MIXER: hooking RestartMusic was successful IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : Setting video mode 640x480 was successful IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : Creating surfaces... IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : Creating surfaces was successful IN : Initialize
+
+STATUS INFO : @ 22:11:27 MSG : Initialization was successful IN : Initialize
+
+STATUS INFO : @ 22:11:28 MSG : Loading was successful: Caverns/0.lev IN : Initialize
+
+STATUS INFO : @ 22:11:28 MSG : SDL_MIXER: loading Music/Title.xm was successful IN : LoadMusic
+
+STATUS INFO : @ 22:11:39 MSG : Loading was successful: Caverns/5.lev IN : Initialize
+
+STATUS INFO : @ 22:11:39 MSG : SDL_MIXER: loading Music/Ingame.xm was successful IN : LoadMusic
+
+STATUS INFO : @ 22:12:41 MSG : Loading was successful: Caverns/5.lev IN : Initialize
+
+STATUS INFO : @ 22:12:44 MSG : Loading was successful: Caverns/5.lev IN : Initialize
+
+STATUS INFO : @ 22:12:47 MSG : Loading was successful: Caverns/5.lev IN : Initialize
+
+STATUS INFO : @ 22:12:49 MSG : Loading was successful: Caverns/0.lev IN : Initialize
+
+STATUS INFO : @ 22:12:49 MSG : SDL_MIXER: loading Music/Game Over.xm was successful IN : LoadMusic
+
+STATUS INFO : @ 22:12:51 MSG : Loading was successful: Caverns/0.lev IN : Initialize
+
+STATUS INFO : @ 22:12:51 MSG : SDL_MIXER: loading Music/Title.xm was successful IN : LoadMusic
+
+STATUS INFO : @ 22:12:56 MSG : Starting finalization IN : Finalize
+
+STATUS INFO : @ 22:12:56 MSG : Finalization went OK IN : Finalize
+
+STATUS INFO : @ 22:12:56 MSG : Terminating Application IN : Finalization
+

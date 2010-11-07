@@ -1,0 +1,538 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// render.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalRenderer.Create;
+begin
+  inherited;
+  m_pModel := nil;
+  m_pSelectedSubmesh := nil;
+end;
+
+constructor CalRenderer.Create( pRenderer : CalRenderer );
+begin
+  inherited Create;
+  m_pModel := pRenderer.m_pModel;
+  m_pSelectedSubmesh := pRenderer.m_pSelectedSubmesh;
+end;
+
+constructor CalRenderer.Create( pModel : CalModel );
+begin
+  inherited Create;
+  m_pModel := pModel;
+  m_pSelectedSubmesh := nil;
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalRenderer.Destroy;
+begin
+  // destroy all active meshes
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Initialize the rendering of the model                                      //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.beginRendering : boolean;
+var
+  vectorMesh : CalMeshes;
+begin
+  vectorMesh := m_pModel.getVectorMesh;
+  // check if there are any meshes attached to the model
+  if Length( vectorMesh ) = 0 then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'renderer.imp', 108 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // select the default submesh
+  m_pSelectedSubmesh := vectorMesh[ 0 ].getSubmesh( 0 );
+  if ( m_pSelectedSubmesh = nil ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  result := true;
+end;
+
+//----------------------------------------------------------------------------//
+// End the rendering of the model                                             //
+//----------------------------------------------------------------------------//
+
+procedure CalRenderer.endRendering;
+begin
+  // clear selected submesh
+  m_pSelectedSubmesh := nil;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the ambient color of the selected mesh/submesh                         //
+//----------------------------------------------------------------------------//
+
+procedure CalRenderer.getAmbientColor( var pColorBuffer );
+var
+  pCoreMaterial : CalCoreMaterial;
+  colour : Color;
+begin
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    // write default values to the color buffer
+    Color( pColorBuffer ).Red := 0;
+    Color( pColorBuffer ).Green := 0;
+    Color( pColorBuffer ).Blue := 0;
+    Color( pColorBuffer ).Alpha := 0;
+    exit;
+  end;
+  // get the ambient color of the material
+  colour := pCoreMaterial.AmbientColor;
+
+  // write it to the color buffer
+  Color( pColorBuffer ).Red := colour.red;
+  Color( pColorBuffer ).Green := colour.green;
+  Color( pColorBuffer ).Blue := colour.blue;
+  Color( pColorBuffer ).Alpha := colour.alpha;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the diffuse color of the selected mesh/submesh                         //
+//----------------------------------------------------------------------------//
+
+procedure CalRenderer.getDiffuseColor( var pColorBuffer );
+var
+  pCoreMaterial : CalCoreMaterial;
+  colour : Color;
+begin
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    // write default values to the color buffer
+    Color( pColorBuffer ).Red := 192;
+    Color( pColorBuffer ).Green := 192;
+    Color( pColorBuffer ).Blue := 192;
+    Color( pColorBuffer ).Alpha := 192;
+    exit;
+  end;
+  // get the diffuse color of the material
+  colour := pCoreMaterial.DiffuseColor;
+
+  // write it to the color buffer
+  Color( pColorBuffer ).Red := colour.red;
+  Color( pColorBuffer ).Green := colour.green;
+  Color( pColorBuffer ).Blue := colour.blue;
+  Color( pColorBuffer ).Alpha := colour.alpha;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of faces of the selected mesh/submesh                       //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getFaceCount : integer;
+begin
+  result := m_pSelectedSubmesh.getFaceCount;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the faces of the selected mesh/submesh                                 //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getFaces : vectorFaces; //(var pFaceBuffer):integer;
+begin
+  result := m_pSelectedSubmesh.getFaces; //(pFaceBuffer);
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of maps in the selected mesh/submesh                        //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getMapCount : integer;
+var
+  pCoreMaterial : CalCoreMaterial;
+begin
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    result := 0;
+    exit;
+  end;
+
+  result := pCoreMaterial.getMapCount;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the user data stored in the given map of the selected mesh/submesh     //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getMapUserData( mapId : integer ) : CalUserData;
+var
+  pCoreMaterial : CalCoreMaterial;
+  vectorMap : Maps;
+begin
+  vectorMap := nil;
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    result := 0;
+    exit;
+  end;
+
+  // get the map vector
+  vectorMap := pCoreMaterial.getVectorMap;
+
+  // check if the map id is valid
+  if ( mapId < 0 ) or ( mapId >= length( vectorMap ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'renderer.imp', 279 );
+    {$ENDIF}
+    result := 0;
+    exit;
+  end;
+
+  result := vectorMap[ mapId ].userData;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of meshes                                                   //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getMeshCount : integer;
+begin
+  result := Length( m_pModel.getVectorMesh );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the transformed normals of the selected mesh/submesh                   //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getNormals : TNormals; //(var pNormalBuffer):integer;
+var
+  vectorNormal : TNormals;
+  normalCount, i : integer;
+begin
+  vectorNormal := nil;
+  // check if the submesh handles vertex data internally
+  if ( m_pSelectedSubmesh.hasInternalData ) then
+  begin
+    // get the normal vector of the submesh
+    vectorNormal := m_pSelectedSubmesh.getVectorNormal;
+
+    // get the number of normals (= number of vertices) in the submesh
+    normalCount := m_pSelectedSubmesh.getVertexCount;
+    setLength( Result, normalCount );
+
+    // copy the internal normal data to the provided normal buffer
+    for i := 0 to  normalCount - 1 do
+    begin
+      result[i].x := vectorNormal[i].x;
+      result[i].y := vectorNormal[i].y;
+      result[i].z := vectorNormal[i].z;
+    end;
+    //Result := Copy( vectorNormal, 0,  normalCount * sizeof( float ) );
+    exit;
+  end;
+
+  // submesh does not handle the vertex data internally, so let the physique calculate it now
+  m_pModel.getPhysique.calculateNormals( m_pSelectedSubmesh, Result );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the shininess factor of the selected core submesh                      //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getShininess : float;
+var
+  pCoreMaterial : CalCoreMaterial;
+begin
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    result := 50.0;
+    exit;
+  end;
+
+  result := pCoreMaterial.Shininess;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the specular color of the selected mesh/submesh                        //
+//----------------------------------------------------------------------------//
+
+procedure CalRenderer.getSpecularColor( var pColorBuffer );
+var
+  pCoreMaterial : CalCoreMaterial;
+  colour : Color;
+begin
+  // get the core material
+  pCoreMaterial := m_pModel.getCoreModel.getCoreMaterial( m_pSelectedSubmesh.CoreMaterialId );
+  if ( pCoreMaterial = nil ) then
+  begin
+    // write default values to the color buffer
+    Color( pColorBuffer ).Red := 255;
+    Color( pColorBuffer ).Green := 255;
+    Color( pColorBuffer ).Blue := 255;
+    Color( pColorBuffer ).Alpha := 0;
+    exit;
+  end;
+  // get the specular color of the material
+  colour := pCoreMaterial.SpecularColor;
+
+  // write it to the color buffer
+  Color( pColorBuffer ).Red   := colour.red;
+  Color( pColorBuffer ).Green := colour.green;
+  Color( pColorBuffer ).Blue  := colour.blue;
+  Color( pColorBuffer ).Alpha := colour.alpha;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of submeshes in a given mesh                                //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getSubmeshCount( meshId : integer ) : integer;
+var
+  vectorMesh : CalMeshes;
+begin
+  vectorMesh := m_pModel.getVectorMesh;
+  // check if the mesh id is valid
+  if((meshId < 0) or (meshId >= Length( vectorMesh ))) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'renderer.imp', 357 );
+    {$ENDIF}
+    result := 0;
+    exit;
+  end;
+
+  result := vectorMesh[ meshId ].getSubmeshCount;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the texture coordinates of a given map id of the selected mesh/submesh //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getTextureCoordinates( mapId : integer ) : TextureCoordinates; // var pTextureCoordinateBuffer):integer;
+var
+  vectorvectorTextureCoordinate : vectorTextureCoordinates;
+  textureCoordinateCount : integer;
+begin
+  // get the texture coordinate vector vector
+  vectorvectorTextureCoordinate := m_pSelectedSubmesh.getCoreSubmesh.m_VectorVectorTextureCoordinate;
+
+  // check if the map id is valid
+  if ( mapId < 0 ) or ( mapId >= Length( vectorvectorTextureCoordinate ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'renderer.imp', 342 );
+    {$ENDIF}
+    result := nil;
+    exit;
+  end;
+
+  // get the number of texture coordinates to result:=
+  textureCoordinateCount := m_pSelectedSubmesh.getVertexCount;
+
+  // copy the texture coordinate vector to the face buffer
+  Result := Copy( vectorvectorTextureCoordinate[ mapId ], 0, textureCoordinateCount  * sizeof( TextureCoordinate) );
+end;
+
+//----------------------------------------------------------------------------//
+// Get the number of vertices in a given mesh/meshid                          //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getVertexCount : integer;
+begin
+  result := m_pSelectedSubmesh.getVertexCount;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the transformed vertices of the selected mesh/submesh                  //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.getVertices : TVertices; //(var pVertexBuffer):integer;
+var
+  vectorVertex : TVertices;
+  vertexCount, i : integer;
+begin
+  vectorVertex := nil;
+
+  // check if the submesh handles vertex data internally
+  if ( m_pSelectedSubmesh.hasInternalData ) then
+  begin
+    // get the vertex vector of the submesh
+    vectorVertex := m_pSelectedSubmesh.getVectorVertex;
+
+    // get the number of vertices in the submesh
+    vertexCount := m_pSelectedSubmesh.getVertexCount;
+    SetLength( Result, vertexCount );
+
+    // copy the internal vertex data to the provided vertex buffer
+    for i := 0 to  vertexCount - 1 do
+    begin
+      result[i].x := vectorVertex[i].x;
+      result[i].y := vectorVertex[i].y;
+      result[i].z := vectorVertex[i].z;
+    end;
+    //Result := Copy( vectorVertex, 0, vertexCount * sizeof( TVertex ) );
+    exit;
+  end;
+
+  // submesh does not handle the vertex data internally, so let the physique calculate it now
+  m_pModel.getPhysique.calculateVertices( m_pSelectedSubmesh, Result );
+end;
+
+//----------------------------------------------------------------------------//
+// Select the current mess/submesh for data queries                           //
+//----------------------------------------------------------------------------//
+
+function CalRenderer.selectMeshSubmesh( meshId, submeshId : integer ) : boolean;
+var
+  vectorMesh : CalMeshes;
+begin
+  vectorMesh := m_pModel.getVectorMesh;
+  // check if the mesh id is valid
+  if ( meshId < 0 ) or ( meshId >= Length( vectorMesh ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'renderer.imp', 551 );
+    {$ENDIF}
+    result := false;
+    exit;
+  end;
+
+  // get the core submesh
+  m_pSelectedSubmesh := vectorMesh[ meshId ].getSubmesh( submeshId );
+  if ( m_pSelectedSubmesh = nil ) then
+  begin
+    result := false;
+    exit
+  end;
+
+  result := true;
+end;
+
+procedure CalRenderer.setNormalization( normalize : boolean );
+begin
+  m_pModel.getPhysique.setNormalization( normalize );
+end;
+
+function CalRenderer.getTangentSpaces( mapId : integer ) : vectorTangentSpaces;
+var
+  vectorvectorTangentSpace : vectorvectorTangentSpaces;
+  vectorTangentSpace : vectorTangentSpaces;
+  tangentSpaceCount : integer;
+begin
+  vectorTangentSpace := nil;
+  
+  // get the texture coordinate vector vector
+  vectorvectorTangentSpace := m_pSelectedSubmesh.getCoreSubmesh.getVectorVectorTangentSpace;
+
+  // check if the map id is valid
+  if ( ( mapId < 0 )
+    or ( mapId >= Length( vectorvectorTangentSpace ) )
+    or ( not m_pSelectedSubmesh.isTangentsEnabled( mapId ) ) ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'CalRenderer.getTangentSpaces', 476 );
+    {$ENDIF}
+    result := nil;
+    exit;
+  end;
+
+  // check if the submesh handles vertex data internally
+  if ( m_pSelectedSubmesh.hasInternalData ) then
+  begin
+    // get the normal vector of the submesh
+    vectorTangentSpace := m_pSelectedSubmesh.getVectorVectorTangentSpace[ mapId ];
+
+    // get the number of normals (= number of vertices) in the submesh
+    tangentSpaceCount := m_pSelectedSubmesh.getVertexCount;
+    SetLength( Result, tangentSpaceCount );
+
+    // copy the internal normal data to the provided normal buffer
+    {for i := 0 to tangentSpaceCount - 1 do
+    begin
+      Result[ i ].x := vectorTangentSpace[ i ].tangent.x;
+      Result[ i ].y := vectorTangentSpace[ i ].tangent.y;
+      Result[ i ].z := vectorTangentSpace[ i ].tangent.z;
+      Result[ i ].CrossFactor := vectorTangentSpace[ i ].CrossFactor;
+    end;}
+    result := Copy( vectorTangentSpace, 0, tangentSpaceCount * sizeof( TangentSpace ) );
+  end;
+
+  // submesh does not handle the vertex data internally, so let the physique calculate it now
+  m_pModel.getPhysique.calculateTangentSpaces( m_pSelectedSubmesh, mapId, result );
+end;
+
+function CalRenderer.getVerticesAndNormals : TVertices;
+var
+  vectorVertex : TVertices;
+  vectorNormal : TNormals;
+  vertexCount, i : integer;
+begin
+  vectorVertex := nil;
+  vectorNormal := nil;
+  
+  // check if the submesh handles vertex data internally
+  if(m_pSelectedSubmesh.hasInternalData) then
+  begin
+    // get the vertex vector of the submesh
+    vectorVertex := m_pSelectedSubmesh.getVectorVertex;
+
+    // get the normal vector of the submesh
+    vectorNormal := m_pSelectedSubmesh.getVectorNormal;
+
+    // get the number of vertices in the submesh
+    vertexCount := m_pSelectedSubmesh.getVertexCount;
+    SetLength( result, vertexCount );
+
+    // copy the internal vertex data to the provided vertex buffer
+    i := 0;
+    while i < vertexCount do
+    begin
+      //result := Copy( vectorVertex, i, sizeof( TVertices ) );
+      //result := Copy( vectorNormal, i + 3, sizeof( CalVectors ) );
+      
+      i := i + 6;
+    end;
+
+    exit;
+  end;
+
+  // submesh does not handle the vertex data internally, so let the physique calculate it now
+  m_pModel.getPhysique.calculateVerticesAndNormals( m_pSelectedSubmesh, result );
+end;
+
+function CalRenderer.getVerticesNormalsAndTexCoords( NumTexCoords : integer = 1 ) : CalVectors;
+begin
+
+end;
+
+function CalRenderer.isTangentsEnabled( mapId : integer ) : boolean;
+begin
+  result := m_pSelectedSubmesh.isTangentsEnabled( mapId );
+end;
+

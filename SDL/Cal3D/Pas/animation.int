@@ -1,0 +1,33 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// animation.h
+
+TType = ( TYPE_NONE, TYPE_CYCLE, TYPE_POSE, TYPE_ACTION );
+TState = ( STATE_NONE, STATE_SYNC, STATE_ASYNC, STATE_IN, STATE_STEADY, STATE_OUT, STATE_STOPPED );
+
+CalAnimation = class
+protected
+  m_pCoreAnimation : CalCoreAnimation;
+  m_type : TType;
+  m_state : TState;
+  m_time : float;
+  m_timeFactor : float;
+  m_weight : float;
+
+public
+  constructor Create( pCoreAnimation : CalCoreAnimation );
+  property getCoreAnimation : CalCoreAnimation read m_pCoreAnimation;
+  property getState : TState read m_state;
+  property getTime : float read m_time;
+  property getType : TType read m_type;
+  property getTimeFactor : float read m_timeFactor;
+  property getWeight : float read m_weight;
+end;
+

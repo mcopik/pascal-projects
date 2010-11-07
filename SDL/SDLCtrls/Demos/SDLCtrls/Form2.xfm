@@ -1,0 +1,177 @@
+object Form2: TForm2
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SDL Std Ctrls'
+  Color = 9154505
+  DestroyRImages = False
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  FocusColor = 11846620
+  Height = 320
+  StateImages = []
+  TitleBarHeight = 20
+  Width = 500
+  X = 130
+  Y = 130
+  object Gauge: TSDLGauge
+    BackColor = 5263440
+    BorderColor = 16777215
+    BorderForeSpace = 2
+    BorderWidth = 1
+    DragMode = sdmManual
+    ForeColor = 11846620
+    Height = 30
+    Kind = sbHorizontal
+    Progress = 50
+    Width = 250
+    X = 10
+    Y = 35
+    Z = 0
+  end
+  object sbAlpha: TSDLScrollBar
+    BackColor = 14344685
+    BorderWidth = 2
+    ButtonColor = 11846620
+    DragMode = sdmManual
+    Height = 32
+    ImageIndex = 0
+    Kind = sbHorizontal
+    LargeChange = 10
+    OnChange = sbAlphaChange
+    Position = 50
+    SmallChange = 1
+    WheelChange = 3
+    Width = 250
+    X = 10
+    Y = 75
+    Z = 1
+  end
+  object SDLComboBox1: TSDLComboBox
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    DropDownColor = 11846620
+    DropDownCount = 5
+    FocusColor = 11846620
+    Height = 30
+    ItemIndex = 0
+    Items = (
+      'Dephi'
+      'Kylix'
+      'Windows'
+      'Linux'
+      'Author'
+      'Igor'
+      'Stojkovic'
+      'SDL Std Ctrls'
+      'SDL'
+      'Standard'
+      'Controls'
+      'Thank to'
+      'Todd Lang'
+      'for his'
+      'font and'
+      'image'
+      'classes')
+    SelColor = 32768
+    StateImages = [siDown]
+    TabOrder = 0
+    Width = 200
+    X = 270
+    Y = 35
+    Z = 2
+  end
+  object SDLListBox1: TSDLListBox
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 200
+    Items = (
+      'Delphi'
+      'Kylix'
+      'Windows'
+      'Linux'
+      'Author'
+      'Igor'
+      'Stojkovic'
+      'SDL Std Ctrls'
+      'SDL'
+      'Standard'
+      'Controls'
+      'Thanks to'
+      'Todd Lang'
+      'for his'
+      'font and'
+      'image'
+      'classes')
+    MultiSelect = True
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 1
+    Width = 200
+    X = 270
+    Y = 115
+    Z = 3
+    object ScrollBar: TSDLScrollBar
+      BackColor = 14344685
+      BorderWidth = 2
+      ButtonColor = 11846620
+      DragMode = sdmManual
+      Height = 196
+      Kind = sbVertical
+      LargeChange = 12
+      Max = 5
+      Position = 0
+      SmallChange = 1
+      WheelChange = 3
+      Width = 20
+      X = 178
+      Y = 2
+      Z = 0
+    end
+  end
+  object SDLMemo1: TSDLMemo
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    CursorColor = 0
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 200
+    StateImages = []
+    TabOrder = 2
+    Text = 'Use this TSDLMemo. Just make its width pretty larger than letter width. You may get unexpected results otherwise.'
+    Width = 250
+    X = 10
+    Y = 115
+    Z = 4
+    object ScrollBar: TSDLScrollBar
+      BackColor = 14344685
+      BorderWidth = 2
+      ButtonColor = 11846620
+      DragMode = sdmManual
+      Height = 196
+      ImageIndex = 2
+      Kind = sbVertical
+      LargeChange = 12
+      Max = 0
+      Position = 0
+      SmallChange = 1
+      WheelChange = 3
+      Width = 20
+      X = 228
+      Y = 2
+      Z = 0
+    end
+  end
+end

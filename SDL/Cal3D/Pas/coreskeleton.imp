@@ -1,0 +1,322 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coreskeleton.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreSkeleton.Create( AFileName : string );
+begin
+  inherited Create;
+  if AFileName <> '' then
+    LoadFromFile( AFileName );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalCoreSkeleton.Destroy;
+var
+  i : integer;
+begin
+  // destroy all core animations
+  for i := 0 to length( m_vectorCoreBone ) - 1 do
+    m_vectorCoreBone[ i ].Free;
+
+  // clear root bone id list
+  m_vectorCoreBone := nil;
+  m_listRootCoreBoneId := nil;
+  inherited;
+end;
+
+function CalCoreSkeleton.addCoreBone( pCoreBone : CalCoreBone ) : integer;
+var
+  boneId, rootBoneId : integer;
+begin
+  // get next bone id
+  boneId := Length( m_vectorCoreBone );
+  SetLength( m_vectorCoreBone, boneId + 1 );
+
+  m_vectorCoreBone[ boneId ] := pCoreBone;
+
+  // if necessary, add the core bone to the root bone list
+  if ( pCoreBone.getParentId = -1 ) then
+  begin
+    rootBoneId := Length( m_listRootCoreBoneId );
+    SetLength( m_listRootCoreBoneId, rootBoneId + 1 );
+    m_listRootCoreBoneId[ rootBoneId ] := boneId;
+  end;
+
+  // add a reference from the bone's name to its id
+  mapCoreBoneName( boneId, pCoreBone.getName );
+
+  result := boneId;
+end;
+
+//----------------------------------------------------------------------------//
+// Calculate the state of the core skeleton                                   //
+//----------------------------------------------------------------------------//
+
+procedure CalCoreSkeleton.calculateState;
+var
+  i, CoreBoneCount : integer;
+begin
+  // calculate all bone states of the skeleton
+  CoreBoneCount := Length( m_listRootCoreBoneId );
+  for i := 0 to CoreBoneCount - 1 do
+  begin
+    m_vectorCoreBone[ m_listRootCoreBoneID[ i ] ].calculateState;
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the core bone for a given bone id                                      //
+//----------------------------------------------------------------------------//
+
+function CalCoreSkeleton.getCoreBone( boneId : integer ) : CalCoreBone;
+begin
+  result := m_vectorCoreBone[ boneId ];
+end;
+
+//----------------------------------------------------------------------------//
+// Get the core bone for a given bone name                                    //
+//----------------------------------------------------------------------------//
+
+function CalCoreSkeleton.getCoreBone( const strName : string ) : CalCoreBone;
+begin
+  result := getCoreBone( getCoreBoneId( strName ) );
+end;
+
+{*****************************************************************************
+ * Returns the ID of a specified core bone.
+ *
+ * This function returns the ID of a specified core bone.
+ *
+ * @param strName The name of the core bone that should be returned.
+ *
+ * @return One of the following values:
+ *         \li the \b ID of the core bone
+ *         \li \b -1 if an error happend
+ *****************************************************************************}
+
+function CalCoreSkeleton.getCoreBoneID( const strName : string ) : integer;
+var
+  i : integer;
+  m_mapCount : integer;
+begin
+  result := -1;
+  m_mapCount := Length( m_mapCoreBoneNames );
+  for i := 0 to m_mapCount - 1 do
+  begin
+    if ( m_mapCoreBoneNames[ i ] = strName ) then
+    begin
+      result := i;
+      break;
+    end;
+  end;
+end;
+
+procedure CalCoreSkeleton.LoadFromFile( AFileName : string );
+var
+  Stream : TFileStream;
+begin
+  Stream := CalOpen( AFileName, integer( SKELETON_FILE_MAGIC ) );
+  if Stream <> nil then
+  begin
+    LoadFromStream( Stream );
+    Stream.Free;
+  end
+  else
+  begin
+    LoadFromXMLFile( AFileName );
+  end;
+end;
+
+procedure CalCoreSkeleton.LoadFromXMLFile( AFileName : string );
+var
+  Parser : TXmlParser;
+  Magic : string;
+  Version, BoneID, NumBones, rootCount : integer;
+begin
+  Parser := TXmlParser.Create; // Create Parser Instance
+
+  // Tell the parser if you want content to be normalized
+  // (i.e. pack and trimm off Whitespaces)
+
+  Parser.Normalize := TRUE;
+
+  // Load the XML Document
+
+  Parser.LoadFromFile( AFileName ); // Load XML file
+
+  // Initialize for Scanning through the Document
+
+  Parser.StartScan; // Prepare Scanning through the document
+
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          // Sort out Header stuff
+          if Parser.CurName = 'HEADER' then
+          begin
+            Magic := Parser.CurAttr.Value( 'MAGIC' );
+            Version := StrToInt( Parser.CurAttr.Value( 'VERSION' ) );
+            if ( Magic <> SKELETON_XMLFILE_MAGIC )
+            or ( Version < EARLIEST_COMPATIBLE_FILE_VERSION )
+            or ( Version > CURRENT_FILE_VERSION ) then
+            begin
+              CalError.setLastError( INVALID_XML_FILE_FORMAT, 'CalCoreMaterial.LoadFromXMLFile', 104, AFilename );
+              break;
+            end;
+          end;
+
+          //
+          if Parser.CurName = 'SKELETON' then
+          begin
+            NumBones := StrToInt( Parser.CurAttr.Value( 'NUMBONES' ) );
+            SetLength( m_vectorCoreBone, NumBones );
+            SetLength( m_mapCoreBoneNames, NumBones );
+
+            Setlength( m_listRootCoreBoneId, NumBones );
+
+            for BoneID := 0 to NumBones - 1 do
+            begin
+              // load the core bone & set the core skeleton of the core bone instance
+              m_vectorCoreBone[ boneId ] := CalCoreBone.Create( Self );
+
+              // set the core skeleton of the core bone instance
+              // m_vectorCoreBone[ boneId ].CoreSkeleton := pCoreSkeleton; <-- Already done in constructor
+              m_vectorCoreBone[ boneId ].LoadFromXMLFile( Parser );
+
+              // add a core skeleton mapping of the bone's name for quick reference later
+              mapCoreBoneName( boneId, m_vectorCoreBone[ boneId ].getName );
+
+              // if necessary, add the core bone to the root bone list
+              if ( m_vectorCoreBone[ boneId ].getParentId = -1 ) then
+              begin
+                rootCount := Length( m_listRootCoreBoneId );
+                SetLength( m_listRootCoreBoneId, rootCount + 1 );
+                m_listRootCoreBoneId[ rootCount ] := boneId;
+              end;
+
+              {if ( m_vectorCoreBone[ i ].getParentId = -1 ) then
+              begin
+                m_listRootCoreBoneId[ rootCount ] := i;
+                inc( rootCount );
+              end;}
+            end;
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+          
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+  Parser.Free;
+end;
+
+procedure CalCoreSkeleton.LoadFromStream( AStream : TStream );
+var
+  boneCount : integer;
+  boneId : integer;
+  rootCount : integer;
+begin
+  // read the number of bones
+  AStream.ReadBuffer( boneCount, 4 );
+  SetLength( m_vectorCoreBone, boneCount );
+  SetLength( m_mapCoreBoneNames, boneCount );
+
+  Setlength( m_listRootCoreBoneId, boneCount );
+
+  //rootCount := 0;
+
+  // load all core bones
+  for boneId := 0 to boneCount - 1 do
+  begin
+    // load the core bone & set the core skeleton of the core bone instance
+    m_vectorCoreBone[ boneId ] := CalCoreBone.Create( Self );
+    // set the core skeleton of the core bone instance
+    // m_vectorCoreBone[ boneId ].CoreSkeleton := pCoreSkeleton; <-- Already done in constructor
+    m_vectorCoreBone[ boneId ].LoadFromStream( AStream );
+
+    // add a core skeleton mapping of the bone's name for quick reference later
+    mapCoreBoneName( boneId, m_vectorCoreBone[ boneId ].getName );
+
+    // if necessary, add the core bone to the root bone list
+    if ( m_vectorCoreBone[ boneId ].getParentId = -1 ) then
+    begin
+      rootCount := Length( m_listRootCoreBoneId );
+      SetLength( m_listRootCoreBoneId, rootCount + 1 );
+      m_listRootCoreBoneId[ rootCount ] := boneId;
+    end;
+
+    {if ( m_vectorCoreBone[ i ].getParentId = -1 ) then
+    begin
+      m_listRootCoreBoneId[ rootCount ] := i;
+      inc( rootCount );
+    end;}
+  end;
+  //Setlength( m_listRootCoreBoneId, rootCount );
+
+  // calculate state of the core skeleton
+  calculateState;
+end;
+
+function CalCoreSkeleton.mapCoreBoneName( coreBoneId : integer; const strName : string ) : boolean;
+begin
+  //Make sure the ID given is a valid corebone ID number
+  if ( ( coreBoneId < 0 ) or ( coreBoneId >= Length( m_vectorCoreBone ) ) ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  //Add the mapping or overwrite an existing mapping
+  m_mapCoreBoneNames[ coreBoneId ] := strName;
+
+  result := true;
+end;
+
+procedure CalCoreSkeleton.calculateBoundingBoxes( pCoreModel : CalCoreModel );
+var
+  boneId, CoreBoneCount : integer;
+begin
+  CoreBoneCount := Length( m_vectorCoreBone );
+  for boneId := 0 to CoreBoneCount - 1 do
+    m_vectorCoreBone[ boneId ].calculateBoundingBox( pCoreModel );
+end;
+
+procedure CalCoreSkeleton.scale( factor : float );
+var
+  iteratorRootCoreBoneId, CoreBoneCount : integer;
+begin
+  CoreBoneCount := Length( m_listRootCoreBoneId );
+  for iteratorRootCoreBoneId := 0 to CoreBoneCount - 1 do
+    m_vectorCoreBone[ iteratorRootCoreBoneId ].scale( factor );
+end;
+

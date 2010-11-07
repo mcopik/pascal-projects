@@ -1,0 +1,456 @@
+<!-- =================================================== -->
+
+<H1>-PAGE:TEAM_SDL_HOME=,,,JEDI-SDL Home Page</H1>
+<td>
+<table>
+<tr><td>
+<table>
+<!-- TOP MENU -->
+<tr><td align=center><font face="Verdana" size=1>
+<font color="darkgray">HOME <font color="black">- | - 
+%=JUMP|TEAM_SDL_MEMBERS|MEMBERS=% - | -
+%=JUMP|TEAM_SDL_DOCUMENTATION|DOCUMENTATION=% - | -
+%=JUMP|TEAM_SDL_DOWNLOADS|DOWNLOADS=% - | - 
+%=JUMP|TEAM_SDL_GALLERY|GALLERY=% - | - 
+%=JUMP|adminlicensing|Licensing =% 
+</td></tr>
+</table>
+</td></tr>
+<tr><td><hr size=1></td></tr>
+<!-- END OF TOP MENU -->
+
+<tr><td>
+<font face="Verdana" color="darkred">
+<H1>SDL Header Conversion Project</H1>
+<h5>Co-ordinator :  %=MAILTO|Dominique@SavageSoftware.com.au|Dominique Louis=%</h5>
+</td></tr>
+
+<tr><td><font face="Verdana" color="000000">
+<font size="+1">Welcome<br>
+<font  size="-1">Welcome to the <i>JEDI</i>-SDL Home page.<br /> 
+Here you should be able to find most things related to the JEDI-SDL API  Object Pascal header translations for 
+%=HREF|http://www.libsdl.org|SDL=%( Simple DirectMedia Library ). %=HREF|http://www.libsdl.org|SDL=% works on Linux, Win32, Playstation 2, BeOS, MacOS X, Solaris, IRIX, FreeBSD and AmigaOS.<br />
+Currently <i>JEDI</i>-SDL supports  %=HREF|http://www.borland.com/delphi/|Delphi=%, %=HREF|http://www.borland.com/kylix/|Kylix=% and the %=HREF|http://www.freepascal.org/|FreePascal=% compilers and the platforms that they support.<br /><br />
+<font size="+1">Status Report<br />
+<font size="-1">
+<font color="#009900"><b>3rd of January, 2005</b></font> - An unofficial Beta release of JEDI-SDLv1.0 is now available from %=HREF|http://prdownloads.sourceforge.net/jedi-sdl/JEDI-SDLv1.zip?download|SourceForge=%.<br />
+I think all headers are complete and up to date. The only thing left to add are the updated demos.<br />
+<br />
+<font color="#009900"><b>Wednesday 18th of August, 2004</b></font> - Just a quick note to say that through the excellent efforts of Jason Bell, we now have JEDI-SDL working on MacOS X, but using a customised version of FreePascal, rather than Delphi ( unfortunately - COME ON BORLAND! ).<br />
+<br />
+v1.0 of JEDI-SDL is due out later this year and we are ensuring that it compiles with Delphi, Kylix, FreePascal and even Gnu Pascal and making sure that it works on the Operating Systems that these Pascal compilers support.<br />
+<br />
+Currently JEDI-SDL works on Win32, Linux, FreeBSD and now MacOS X!<br />
+<br />
+A screen shot of Jason's work can be found in the %=JUMP|TEAM_SDL_GALLERY|GALLERY=%.<br />
+<br />
+
+<font color="#009900"><b>Thursday 8th of April, 2004</b></font> - This project is still ALIVE!<br />
+I know his page has been fairly quiet, but work is continuing on JEDI-SDL and we are about to release a v1.0 beta.<br />
+If you are interested in an Alpha version of just the latest Headers you can grab them from %=HREF|http://groups.yahoo.com/group/JEDI-SDL/files/JEDI-SDLv1.0/JEDI-SDLv1.zip|here=%.<br />
+You may have to %=HREF|http://groups.yahoo.com/group/JEDI-SDL/join|join=%, if you have don't done so already.<br />
+<br />
+Other Great news is that thanks to help from Marco van de voort of the FreePascal team, we now have JEDI-SDL working on FreeBSD.<br/>
+A screen shot of the JEDI-SDL Blockout clone demo, running on FreeBSD, can be found on the %=JUMP|TEAM_SDL_GALLERY|GALLERY=% page.<br />
+<br />
+
+<font color="#009900"><b>Monday 17th of August, 2003</b></font> - Update to JEDI-SDL Gallery page!<br />
+The %=JUMP|TEAM_SDL_GALLERY|GALLERY=% page now has more links and a few screen shots. I will put more up as people send them in.
+<br />
+<br />
+
+<font color="#009900"><b>Saturday 10th of August, 2002</b></font> - JEDI-SDL v0.5 has now available for public consumption!<br />
+The feature list for v0.5 is as follows...<br />
+<ul>
+  <li>The JEDI-SDL project is now also set up on Sourceforge ( %=HREF|http://sf.net/projects/jedi-sdl/|http://sf.net/projects/jedi-sdl/=% ) so the latest code is always available from there.</li>
+  <li>Windows - We now have a semi-automated setup under Windows ( thanks to David House and the Jedi JCL team ). Once you have extracted the zip file, simply double click on the "JEDISDLWin32Installer.exe" to have the correct paths added to your respective IDEs. All IDEs from Delphi 4 - 7 are supported and it also adds a link to the .CHM help file under the Tools menu.</li>
+  <li>Linux - Alternatively if you use Linux or want to to manually install the paths, then make sure you read the "Getting Started.html" file ( ideal for those who are new to JEDI-SDL ) and is now included as a guide to help getting everything setup for smooth compilation.</li>    
+  <li>Also included is a guide of how to use Sourceforge using TortoiseCVS under Windows ( Linux guide is under development ).
+Both documents can be found in the "documentation" directory.</li>
+  <li>Improved FreePascal support has been added.</li>
+  <li>Various bug fixes as pointed out on the JEDI-SDL mailing list.</li>
+  <li>SDL_Mixer has been updated to version 1.2.1 and includes an Effects API.</li>
+  <li>Demo directories are now split into 2D and 3D related sub-directories.</li>
+  <li>There are now both Kylix ( K prefix )  and Delphi ( D prefix ) project groups for all the demos. They can be found in Demos and the 2D and 3D directories.</li>  
+  <li>New Units
+    <ul>
+      <li>SDLStreams.pas - Chris Bruner has created a wrapper that uses Streams to load BMPs.</li>
+      <li>SDLUtils.pas - Pascal only version of some Utility functions.</li>
+      <li>SDLi386Utils.pas - Intel Assembler versions of the SDLUtils.pas functions.</li>
+      <li>SDL_ttf.pas - Port of the SDL True Type font support unit.</li>
+      <li>SDL_Sound.pas - Port of the SDL Sound library ( untested ).</li>
+    </ul>
+  </li>
+  <li>New 2D Demos
+    <ul>
+      <li>Pan and Zoom Demo - How to Pan and Zoom an SDL surface.</li>
+      <li>Isometric Demo - I ported my old DelphiX isometric demo over to SDL.</li>
+      <li>TestTimer demo - Shows hows how to use AddTimer and RemoveTimer.</li>
+      <li>MpegPlayer - I have updated and improved Anders Ohlsson's MPegPlayer and component and it now works and installs into D4, D5, D6, D7, K1, K2 & K3.</li>
+      <li>Showfont - Demo to show how to use SDL_ttf.dll.</li>
+      <li>SmpegPlayer - A console MPEG player that uses smpeg and SDL_Mixer.</li>
+    </ul>
+  </li>
+  <li>New 3D Demos
+    <ul>
+      <li>DeathTruckTion 1.1 - A slightly updated version of this fully functional 3D network game.</li>
+      <li>TerrainDemo - Terrain demo ported from the book "OpenGL Game programming" by Hawkins and Astle.</li>
+      <li>TestGL - the standard SDL/OpenGL Test demo. Shows how to mix 2D and 3D rendering using OpenGL.</li>
+      <li>glfont - Demo to show how to us SDL_ttf with OpenGL.</li>
+      <li>Particle Engine - Ariel Jacob's OpenGL Particle Engine.</li>
+      <li>Motion Blur - Phil Freeman's Motion Blur Demo.</li>
+      <li>Dynamic Light - Phil Freeman's Dynamic Light Demo.</li>
+      <li>Environment Map - Phil Freeman's Environment Map Demo</li>
+      <li>GLMovie - is an MPEG Player that uses OpenGL to render the movie.</li>
+      <li>NeHe - Quite a few more NeHe demos are now included.</li>
+    </ul>
+  </li>
+  <li> New Network Demos
+    <ul>
+      <li>There are now 3 SDL_Net Server demos and 4 SDL_Client demos as submitted by Dean Ellis.</li>
+    </ul>
+  </li>
+</ul>
+<font color="#009900"><b>Friday 22nd of February, 2002</b></font> - Just a quick note to say that Work is progressing on Version 0.5 beta and should be out soon.<br />
+I think I have fixed the links to the beta 4 release files, in the %=JUMP|TEAM_SDL_DOWNLOADS|downloads=% section.<br />
+<br />
+<font color="#009900"><b>Tuesday 6th of November 2001</b></font> - I am pleased to announce that JEDI-SDL Beta 4 has been included on the soon to be released Kylix 2, Companion CD.<br />
+My thanks go out to everyone who worked to make this possible.
+<br />
+Dominique Louis.<br />
+<br />
+<font color="#009900"><b>Wednesday 10th of October 2001</b></font> - In the %=JUMP|TEAM_SDL_DOWNLOADS|downloads=% section you should find the latest beta
+        of the headers ( currently at Beta 4 ). Beta 4 brings the
+        following enhancements...<br />
+<ul>
+         <li>The JEDI-SDL home page is now located @ http://www.delphi-jedi.org/Jedi:TEAM_SDL_HOME </li>
+         <li>All Demos ( including OpenGL Demos ) now compile under both Kylix and Delphi.</li>
+         <li>I have added quite a few more OpenGL examples, we are now up to Nehe tutorial 12.</li>
+         <li>All OpenGL demos also show how to handle Window resizing.</li> 
+         <li>Included an OpenGL demo called Puntos by Gustavo Maximo.</li>
+         <li>I Ported Jan Horn's OpenGL MetaBalls and also SkyBox demo to SDL.</li>
+         <li>I Ported Ilkka Tuomioja's OpenGL Quake 2 Model Viewer/Animator to SDL.</li> 
+         <li>NOTE : All OpenGL demos require Mike Lischke's OpenGL12.pas, which is now included in the distribution.</li>
+         <li>I also fixed a conversion bug to do with SDL_MustLock and also a conversion omission to do with various events.</li>
+         <li>Fixed a conversion bug with SDL_CDOpen ( as suggested on the mailing list ).</li>
+         <li>Added the GetPixel and PuxPixel functions to the SDLUtils.pas file.</li>
+         <li>Jason Farmer has donated SFont, a simple, yet effective Font library he converted for JEDI-SDL. It contains 4 Demos show how to best use it.</li>
+         <li>Added TUInt8Array and PUIntArray to SDL.pas after suggestions from Matthias Thoma and Eric Grange.</li>
+         <li>In the %=JUMP|TEAM_SDL_DOWNLOADS|downloads=% section there is a fully functional 3D network game called %=HREF|%=mcFTPRoot=%api/Cross_Platform/files/JEDI-SDL/Demos/Dttsrc.zip|DeathTrucTion v1.0=% written by the TNTeam that makes use of JEDI-SDL and is just too big to include with this distribution but is well worth looking at as it works under Windows and Linux!</li>         
+         <li>Gustavo Maxima is working on translating the JEDI-SDL Documentation to Spanish and Portugese.</li>
+         <li>The Mouse Demo has now been speeded up considerably and it is very responsive now.</li>
+         <li>Róbert Kisnémeth, has been hard at work, and has donated some new demos he has created with a SpriteEngine ( which he also donated ). He has also donated a couple of games called BlitzBomber and Oxygene ( which uses the SpriteEngine ) and added a couple of useful functions to SDLUtils.pas. The Functions added are SDL_FlipV, SDL_FlipH, SDL_NewPutPixel ( assembler version ), SDL_AddPixel, SDL_SubPixel, SDL_DrawLine, SDL_AddLine, SDL_SubLine, SDL_AddSurface, SDL_SubSurface, SDL_MonoSurface & SDL_TexturedSurface. He has also donated a Font Blitting class and demo called SDL_MonoFonts which supports alignment like Left, Right and Center.</li>
+         <li>Jason Farmer has donated a set of Image Filtering functions which add quite a few interesting effects. Check the SDL_Filter sub-directory for more info.</li>
+         <li>Christian Hackbart also donated an OpenGL BlockOut clone.</li>
+</ul>
+<font color="#009900"><b>Monday 10th of July 2001</b></font> - In the %=JUMP|TEAM_SDL_DOWNLOADS|downloads=% section you should find the latest beta
+        of the headers ( currently at Beta 3 ). Beta 3 brings the
+        following enhancements...<br />
+<ul>
+          <li>I have added conversions for SDL_env.h, SDL_Mixer.h
+          and SDL_Net.h while Matthias Thoma has added conversions
+          for SDL_Image.h and SMPEG.h.</li>
+
+          <li>This version is also SDL version 1.2.0
+          compliant.</li>
+
+          <li>This release also adds demos for the SDL_Image,
+          SDL_Mixer and SDL_Net libraries.</li>
+
+          <li>There are now also some OpenGL demos that make some
+          use of SDL as well as a demo on how to use the Mouse with
+          Clickable regions.</li>
+
+          <li>A conversion bug, that was pointed out by Clem
+          Vasseur, has also been fixed.</li>
+
+          <li>There is now a mailing list that has been set up at
+          %=HREF|http://groups.yahoo.com/group/JEDI-SDL/join/|http://groups.yahoo.com/group/JEDI-SDL/join/=%
+          so we can all learn from each other how to use these
+          libraries.</li>
+
+          <li>There is also a documentation directory that is
+          currently in HTML format. All code examples in the
+          documentation have been converted to Object Pascal but
+          are untested.</li>
+
+          <li>I Also fixed a few conversion bugs which I came
+          across while converting the documentation.</li>
+        </ul>
+        There are now 5 standard examples included with this
+        JEDI-SDL distribution.<br />
+         
+
+        <ol>
+          <li>Is the TestWin application, which is based on the
+          testwin application that comes with the SDL SDK, only my
+          version has a gui front end to the options available and
+          has been compiled under Delphi 4.03. It should be
+          compatible with Delphi 3.0 onwards ( though Delphi 2
+          compatibility has not been tested ).</li>
+
+          <li>A Plasma example which was converted from one found
+          on the Demos page of the SDL site.</li>
+
+          <li>A Voxel terrain following demo, which was converted
+          from one found on the Demos page of the SDL site. This
+          one should be of interest to others as it shows how to
+          handle keyboard events when using SDL.</li>
+
+          <li>A Mouse handling demo that shows how to use
+          transparency and clickable regions.</li>
+
+          <li>A Space Invaders style game called Aliens which shows
+          the use of SDL, SDL_Image and SDL_Mixer. This game shows
+          how to handle sound, keyboards and some basic collision
+          detection. It is a conversion of one found on the SDL
+          Demos page.<br />
+          </li>
+        </ol>
+        There are also 4 OpenGL demos that are based on the %=HREF|http://nehe.gamedev.net|NeHe tutorials=%.<br />
+        <br />
+        &nbsp; The Latest Stable Release version of the
+        JEDI-SDL.zip file can always be found in the %=JUMP|TEAM_SDL_DOWNLOADS|downloads=% section
+        of this site.<br />
+        <br />
+         The Latest Alpha/Unstable version of the JEDI-SDLu.zip
+        file can always be found in the %=HREF|http://groups.yahoo.com/group/JEDI-SDL/files/|JEDI-SDL
+        mailing list=%'s file area.<br />
+        <br />
+So crank up Delphi, Kylix or FreePascal and %=JUMP|TEAM_SDL_DOWNLOADS|download=% these headers.  Your help on the testing panel would be welcome!  Please contact the %=MAILTO|ma.thoma@gmx.de|Testing Coordinator=% (Matthias Thoma).
+<p>
+<font size="+1">Other SDL Work<br>
+<font size="-1">
+
+%=MAILTO|nitrogen@nrj.com|Clem Vasseur=%, one of the members of the %=HREF|http://groups.yahoo.com/group/JEDI-SDL/join|JEDI-SDL mailing=%, has just released %=HREF|http://dtt.spinet.org|DeathTruckTion v1.0=% which is a 3D network game he and a few friends put together for a school project. <br>
+<table cellpadding=3><tr>
+<td width=320 valign=middle align=center>
+
+<img src="http://deathtrucktion.spinet.org/pics/screenshots/sshot7.jpg" width=320 height=240></td>
+<td><font face="Verdana" size="-1">
+This is what he had to say....
+      BTW, my school project is finished... it's a "crappy" 3D game using OpenGL, SDL ( and of
+course %=HREF|http://www.delphi-jedi.org/Jedi:TEAM_SDL_HOME|JEDI-SDL=% :-), FMod and Indy ( network components for server and client ), which works great under Windows and
+Linux. The game itself is uninteresting, but maybe the source is :).
+I have no idea about the license, because I am using graphics from other
+games which is not quite legal anyway. Since I didn't figure out how to
+upload the ( source ) file to the yahoogroup thingy, I _temporarily_ uploaded it %=HREF|http://www.savagesoftware.com.au/DelphiGamer/dodownload.php?link=ftp://delphi-jedi.org/api/Cross_Platform/files/JEDI-SDL/Demos/Dttsrc.zip&ID=102|here=%.
+</td></tr>
+</table>
+<p><font face="Verdana" size="-1">
+Basically you can do whatever you want with the code... but I don't
+think it's a good demo for JEDI-SDL, it may be a little bit too complex
+for a demo :). Anyway, if you
+find something interesting in it you are free to use it in your own
+projects, or release some part like you want.
+For those who are trying to do some 3D with Delphi/OpenGL, the
+TNT-3D engine might be interesting... but it's completely undocumented.
+If someone wants to write a tutorial about it or something like that I
+will explain the inner working of the engine :)
+<p>
+Clem does not have any time to continue developing the game and engine so I suggested he create a SourceForge account so that others who may be interested can develop the game, engine change the textures etc further.
+The current homepage of the TNTeam and it's demo can be found @
+%=HREF|http://dtt.spinet.org|http://dtt.spinet.org=% and you can cop a look at some screen shots @
+%=HREF|http://deathtrucktion.spinet.org/screenshots.php|http://deathtrucktion.spinet.org/screenshots.php=%.<br> 
+<br>
+If anyone finds this interesting or would like to lead such a project, please let me know so we can set up a project of sorts for people to get
+involved in.<br>
+BTW. If you are going to play with the demo make sure you start up the game server first.
+<p>
+<font size="+1">Notes from the Current Readme.txt (11 June 2001)<br>
+<font size="-1">
+<ol>
+<li><u>RELEASE HISTORY</u><br>
+<ul>
+<li> 10th of July, 2001 - Beta 3 Release
+</ul>
+
+<li><u>KNOWN ISSUES</u><br>
+OpenGL demos were not tested under Linux. This will be rectified by Beta Release 4.
+<br>
+<font face="Verdana" size="-1">
+<li><u>TESTER REPORTS</u><br>
+Still awaiting more feedback
+<br>
+
+</ol>
+<a name="feedback">
+<font size="+1">Feedback<br>
+<font size="-1">
+I'm looking for more converters to help with some more demos and also want to hear from you if you use JEDI-SDL in any of your projects.  Contact me: %=MAILTO|Dominique@SavageSoftware.com.au|Dominique Louis=%
+<hr size=1>
+</td></tr>
+
+</table>
+</td>
+<!-- =================================================== -->
+
+<H1>-PAGE:TEAM_SDL_MEMBERS=,,,JEDI-SDL API Team Members</H1>
+<td><table>
+<tr><td>
+<table>
+<!-- TOP MENU -->
+<tr><td align=center><font face="Verdana" size=1>
+%=JUMP|TEAM_SDL_HOME|HOME=% - | - 
+<font color="darkgray">MEMBERS<font color="black">- | -
+%=JUMP|TEAM_SDL_DOCUMENTATION|DOCUMENTATION=% - | - 
+%=JUMP|TEAM_SDL_DOWNLOADS|DOWNLOADS=% - | - 
+%=JUMP|TEAM_SDL_GALLERY|GALLERY=% - | - 
+%=JUMP|adminlicensing|Licensing =% 
+</td></tr>
+</table>
+</td></tr>
+<tr><td><hr size=1></td></tr>
+<!-- END OF TOP MENU -->
+
+<tr><td>
+<font face="Verdana" size="+2">JEDI-SDL API Team Members<p>&nbsp;</td></tr>
+<tr><td>
+<table border=0>
+<tr><td width="40%"><font face="Verdana" size="-1">Dominique Louis (Team Captain)</td>
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|Dominique@SavageSoftware.com.au|Dominique@SavageSoftware.com.au=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Matthias Thoma ( Converter )</td>
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|ma.thoma@gmx.de|ma.thoma@gmx.de=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Jason Farmer ( Converter )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|jason@cerebral-bicycle.co.uk|jason@cerebral-bicycle.co.uk=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Gustavo Maximo ( Spanish and Portugese Documentation Translator )</td>
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|gmaximo@secretariaplus.com|gmaximo@secretariaplus.com=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Róbert Kisnémeth ( Contributer )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|mikrobi@freemail.hu|mikrobi@freemail.hu=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Dean Ellis ( FreePascal Compiler Compatability Tester )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|dean_ellis@yahoo.com|dean_ellis@yahoo.com=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">David House ( Tester )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|david@dahsoftware.com|david@dahsoftware.com=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">Chris Bruner ( Tester )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|cryst@golden.net|cryst@golden.net=%</td></tr>
+
+<tr><td width="40%"><font face="Verdana" size="-1">August Logan Bear Jr. ( Tester )</td> 
+<td width="60%"><font face="Verdana" size="-1">%=MAILTO|augustjr@columbus.rr.com|augustjr@columbus.rr.com=%</td></tr>
+</table>
+</td></tr>
+
+<tr><td><hr size=1></td></tr>
+
+</table>
+</td>
+<!-- =================================================== -->
+<H1>-PAGE:TEAM_SDL_DOCUMENTATION=,,,JEDI-SDL Documentation</H1>
+<td><table>
+<tr><td>
+<table>
+<!-- TOP MENU -->
+<tr><td align=center><font face="Verdana" size=1>
+%=JUMP|TEAM_SDL_HOME|HOME=% - | - 
+%=JUMP|TEAM_SDL_MEMBERS|MEMBERS=% - | -
+<font color="darkgray">DOCUMENTATION<font color="black">- | - 
+%=JUMP|TEAM_SDL_DOWNLOADS|DOWNLOADS=% - | - 
+%=JUMP|TEAM_SDL_GALLERY|GALLERY=% - | - 
+%=JUMP|adminlicensing|Licensing =% 
+</td></tr>
+</table>
+</td></tr>
+<tr><td><hr size=1></td></tr>
+<!-- END OF TOP MENU -->
+
+<tr><td>
+<font face="Verdana" size="+2">JEDI-SDL API Documentation<p>&nbsp;</td></tr>
+<tr><td>
+<table border=0>
+<tr><td width="30%"><font face="Verdana" size="+1">%=HREF|%=mcFTPRoot=%api/Cross_Platform/JEDI-SDL/Documentation/JEDI-SDLDocumentation.zip|HTML=%</td></tr>
+</table>
+</td></tr>
+
+<tr><td><hr size=1></td></tr>
+
+</table>
+</td>
+<!-- =================================================== -->
+<H1>-PAGE:TEAM_SDL_DOWNLOADS=,,,JEDI-SDL Downloads</H1>
+<td><table>
+<tr><td>
+<table>
+<!-- TOP MENU -->
+<tr><td align=center><font face="Verdana" size=1>
+%=JUMP|TEAM_SDL_HOME|HOME=% - | - 
+%=JUMP|TEAM_SDL_MEMBERS|MEMBERS=% - | -
+%=JUMP|TEAM_SDL_DOCUMENTATION|DOCUMENTATION=% - | -  
+<font color="darkgray">DOWNLOADS<font color="black"> - | - 
+%=JUMP|TEAM_SDL_GALLERY|GALLERY=% - | - 
+%=JUMP|adminlicensing|Licensing =% 
+</td></tr>
+</table>
+</td></tr>
+<tr><td><hr size=1></td></tr>
+<!-- END OF TOP MENU -->
+<tr><td><font face="Verdana" size="+2">
+JEDI-SDL API Downloads<p>
+<font face="Verdana" size="-1">
+<ul>
+<li>%=HREF|http://prdownloads.sourceforge.net/jedi-sdl/JEDI-SDLv0.5.zip?download|Latest JEDI-SDL Release=% ( ~16.5MB ). The whole JEDI-SDL package in one zip file ( Includes SDL headers, All Demos, SDL_Image header, SDL_Mixer header, SDL_Net, SFont, SMpeg, SDL_Filter, SDL_MonoFonts, Documentation and it also includes Runtime Win32 DLLs and Linux OSs ).</li><br /><br />
+<li>Documentation
+  <ul>
+    <li>%=HREF|http://prdownloads.sourceforge.net/jedi-sdl/JEDI-SDL_Documentation.zip?download|Latest Documentation=% ( Only the Documentation )</li>
+    <li>HLP ( Not yet available, Coming soon )</li>
+  </ul>
+</li><br />
+</td></tr>
+<tr><td><hr size=1></td></tr>
+</table>
+</td>
+
+<!-- =================================================== -->
+
+<H1>-PAGE:TEAM_SDL_GALLERY=,,,JEDI-SDL API Team Gallery</H1>
+<td><table>
+<tr><td>
+<table>
+<!-- TOP MENU -->
+<tr><td align=center><font face="Verdana" size=1>
+%=JUMP|TEAM_SDL_HOME|HOME=% - | - 
+%=JUMP|TEAM_SDL_MEMBERS|MEMBERS=% - | - 
+%=JUMP|TEAM_SDL_DOCUMENTATION|DOCUMENTATION=% - | - 
+%=JUMP|TEAM_SDL_DOWNLOADS|DOWNLOADS=% - | - 
+<font color="darkgray">GALLERY<font color="black"> - | - 
+%=JUMP|adminlicensing|Licensing =% 
+</td></tr>
+</table>
+</td></tr>
+<tr><td><hr size=1></td></tr>
+<!-- END OF TOP MENU -->
+
+<tr><td>
+<font face="Verdana" size="+2">JEDI-SDL API Team Gallery<p>&nbsp;</td></tr>
+<tr><td>
+<table border=0>
+<tr><td><font face="Verdana" size="-1">
+<h2>Projects that use JEDI-SDL</h2>
+%=HREF|http://www.cerebral-bicycle.co.uk/links.asp?cat=20|Anomolous=%<br /><br />
+%=HREF|http://deathtrucktion.spinet.org/|DeathTruckTion=%<br /><br />
+%=HREF|http://glscene.org/|GLScene=%<br /><br />
+%=HREF|http://kichy.150m.com/jedi-sdl_e.htm|KiCHY's JEDI-SDL page=%<br /><br />
+%=HREF|http://www.global-rd.com/catapults/|Catapults=%<br /><br />
+%=HREF|http://udcnet.dyn.dhs.org/~dackl/qsmp3/|QSMP3=%<br /><br />
+%=HREF|http://www.smace.hpg.ig.com.br/port/programacao.htm|SWAR=%<br /><br />
+%=HREF|http://www.norwaresolutions.com/games/thewordmatrix/The Word Matrix=%<br /><br />
+<br />
+And some Game and Demo screen shots...<br />
+<center>
+  <img src='http://www.global-rd.com/catapults/high_ss3.jpg'><br />[ Catapults ]<br /><br /><img src='http://nehe.gamedev.net/data/contests/2002_lotr/paul_robello.jpg'>[ Lord of the Rings Demo ]<br /><br />
+  <img src='http://www.norwaresolutions.com/games/thewordmatrix/gameshot_full.jpg'><br />[ The Word Matrix ]<br /><br /><img src='http://www.savagesoftware.com.au/DelphiGamer/images/YaSrLinux2.png'><br />[ OpenGL BSP Renderer Under Linux ]<br /><br />
+  <img src='http://www.flipcode.com/iotd/01-08-2002.jpg'><br />[ Oxygene ]<br /><br /><img src='http://groups.yahoo.com/group/JEDI-SDL/files/ModelViewer1.png'><br />[ Quake II Model Viewer ]<br /><br />
+  <img src='http://www.stack.nl/~marcov/blockout.png' width='640' height='480'><br />[ BlockOut on FreeBSD ]<br /><br />
+  <img src='http://www.savagesoftware.com.au/DelphiGamer/images/macosxsdlandopengl.jpg' width='640' height='480'><br />[ JEDI-SDL on MacOS X ]<br /><br />
+<center>
+</td></tr>
+</table>
+</td></tr>
+<tr><td>
+</td></tr>
+</table>

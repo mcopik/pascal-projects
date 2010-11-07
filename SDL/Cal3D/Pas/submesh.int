@@ -1,0 +1,57 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// submesh.h
+
+/// The submesh PhysicalProperty.
+  SubmeshPhysicalProperty = record
+    position : CalVector;
+    positionOld : CalVector;
+    force : CalVector;
+  end;
+  vectorSubmeshPhysicalProperty = array of SubmeshPhysicalProperty;
+
+CalSubmesh = class
+protected
+  m_pCoreSubmesh : CalCoreSubmesh;
+  m_vectorMorphTargetWeight : Floats;
+  m_vectorVertex : TVertices;
+  m_vectorNormal : TNormals;
+  m_vectorvectorTangentSpace : vectorvectorTangentSpaces;
+  m_vectorFace : vectorFaces;
+  m_vectorPhysicalProperty : vectorSubmeshPhysicalProperty;
+  m_vertexCount : integer;
+  m_faceCount : integer;
+  m_coreMaterialId : integer;
+  m_bInternalData : boolean;
+public
+  constructor Create( pCoreSubmesh : CalCoreSubmesh );
+  destructor Destroy; override;
+
+  property getCoreSubmesh : CalCoreSubmesh read m_pCoreSubmesh;
+  property CoreMaterialId : integer read m_coreMaterialID write m_coreMaterialID;
+  property getFaceCount : integer read m_faceCount;
+  function getFaces : vectorFaces; //(var pFaceBuffer{:integer}):integer;
+  function getVectorVertex : TVertices;
+  function getVectorNormal : TNormals;
+  property getVectorVectorTangentSpace : vectorvectorTangentSpaces read m_vectorvectorTangentSpace;
+  property getVertexCount : integer read m_vertexCount;
+  property  hasInternalData : boolean read m_bInternalData;
+  procedure disableInternalData;
+  procedure setLodLevel( lodLevel : float );
+  function getBaseWeight : float;
+  function getVectorMorphTargetWeight : Floats;
+  function getMorphTargetWeight( blendId  : integer ): float;
+  function getMorphTargetWeightCount : integer;
+  property getVectorPhysicalProperty : vectorSubmeshPhysicalProperty read m_vectorPhysicalProperty;
+  procedure setMorphTargetWeight( blendId : integer; weight : float);
+  function isTangentsEnabled( mapId : integer ) : boolean;
+  function enableTangents( mapId : integer; enabled : boolean ) : boolean;
+end;
+

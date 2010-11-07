@@ -1,0 +1,51 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// corematerial.h
+
+// misc
+Color = record
+  red : byte;
+  green : byte;
+  blue : byte;
+  alpha : byte;
+end;
+
+Map = record
+  strFilename : string;
+  userData : CalUserData;
+end;
+Maps = array of Map;
+
+CalCoreMaterial = class
+protected
+  m_ambientColor : Color;
+  m_diffuseColor : Color;
+  m_specularColor : Color;
+  m_shininess : float;
+  m_vectorMap : Maps;
+  m_userData : CalUserData;
+  
+public
+  constructor Create( AFileName : string );
+  property AmbientColor : Color read m_ambientColor write m_ambientColor;
+  property DiffuseColor : Color read m_diffuseColor write m_diffuseColor;
+  function getMapCount : integer;
+  function getMapFilename( mapId : integer ) : string;
+  property Shininess : float read m_shininess write m_shininess;
+  property SpecularColor : Color read m_specularColor write m_specularColor;
+  property getUserData : CalUserData read m_userData;
+  property getVectorMap : Maps read m_vectorMap;
+  procedure setMapUserData( mapId : integer; userData : CalUserData );
+
+  procedure LoadFromFile( AFileName : string );
+  procedure LoadFromXMLFile( AFileName : string );
+  procedure LoadFromStream( AStream : TStream );
+end;
+

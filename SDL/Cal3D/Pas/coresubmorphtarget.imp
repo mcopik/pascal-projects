@@ -1,0 +1,55 @@
+//****************************************************************************//
+// coresubmorphtarget.cpp                                                     //
+// Copyright (C) 2001, 2002 Bruno 'Beosil' Heidelberger                       //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+
+constructor CalCoreSubMorphTarget.Create;
+begin
+  inherited;
+  
+end;
+
+destructor CalCoreSubMorphTarget.Destroy;
+begin
+  SetLength( m_vectorBlendVertex, 0 );
+  inherited;
+end;
+
+
+function CalCoreSubMorphTarget.getBlendVertexCount : integer;
+begin
+  result := Length( m_vectorBlendVertex )
+end;
+
+function CalCoreSubMorphTarget.getVectorBlendVertex : vectorBlendVertexes;
+begin
+  result := m_vectorBlendVertex;
+end;
+
+function CalCoreSubMorphTarget.reserve( blendVertexCount : integer ) : boolean;
+begin
+  // reserve the space needed in all the vectors
+  SetLength( m_vectorBlendVertex, blendVertexCount );
+
+  result := true;
+end;
+
+function CalCoreSubMorphTarget.setBlendVertex( vertexId : integer; const vertex : BlendVertex ) : boolean;
+begin
+  if ( ( vertexId < 0 ) or ( vertexId >= Length( m_vectorBlendVertex ) ) ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  m_vectorBlendVertex[ vertexId ] := vertex;
+
+  result := true;
+end;
+

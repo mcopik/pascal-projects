@@ -1,0 +1,215 @@
+object Form1: TForm1
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SDL Images'
+  Color = 9154505
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  FocusColor = 11846620
+  Height = 480
+  Movable = False
+  StateImages = []
+  TabOrder = 6
+  TitleBarHeight = 20
+  Width = 640
+  X = 0
+  Y = 0
+  object Menu: TSDLMenu
+    AlwaysDown = False
+    AlwaysUp = True
+    BorderWidth = 1
+    Color = 11846620
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 20
+    StateImages = []
+    TabOrder = 0
+    Width = 636
+    X = 2
+    Y = 22
+    Z = 0
+    object : TSDLMenuItem
+      BorderWidth = 2
+      Caption = 'File'
+      object : TSDLPopupMenu
+        AlwaysDown = False
+        AlwaysUp = False
+        BorderWidth = 2
+        Color = 11846620
+        DisabledColor = 11842740
+        DragMode = sdmManual
+        FocusColor = 11846620
+        StateImages = []
+        TabOrder = 12
+        Visible = False
+        object miNew: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'New List'
+          OnClick = miNewClick
+        end
+        object miOpen: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Open...'
+          OnClick = miOpenClick
+        end
+        object miSave: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Save'
+          OnClick = miSaveClick
+        end
+        object miSaveAs: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Save As...'
+          OnClick = miSaveAsClick
+        end
+        object miExit: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Exit'
+          OnClick = miExitClick
+        end
+      end
+    end
+    object : TSDLMenuItem
+      BorderWidth = 2
+      Caption = 'Edit'
+      object : TSDLPopupMenu
+        AlwaysDown = False
+        AlwaysUp = False
+        BorderWidth = 2
+        Color = 11846620
+        DisabledColor = 11842740
+        DragMode = sdmManual
+        FocusColor = 11846620
+        StateImages = []
+        TabOrder = 13
+        Visible = False
+        object miAdd: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Add Images...'
+          OnClick = miAddClick
+        end
+        object miRemove: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Remove Image'
+          OnClick = miRemoveClick
+        end
+        object miProps: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Image Properties...'
+          OnClick = miPropsClick
+        end
+        object miSort: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Sort List'
+          GroupIndex = 1
+          OnClick = miSortClick
+        end
+        object miComp: TSDLMenuItem
+          BorderWidth = 2
+          Caption = 'Compressed'
+          GroupIndex = 1
+          OnClick = miCompClick
+        end
+      end
+    end
+  end
+  object lbImageList: TSDLListBox
+    AlwaysDown = True
+    AlwaysUp = False
+    BorderWidth = 2
+    Color = 9154505
+    DisabledColor = 11842740
+    DragMode = sdmManual
+    FocusColor = 11846620
+    Height = 420
+    Hint = 'Double Click to edit image properties.'
+    Items = ()
+    OnClick = lbItemsClick
+    OnDblClick = miPropsClick
+    OnKeyDown = lbItemsKeyDown
+    SelColor = 32768
+    StateImages = []
+    TabOrder = 1
+    Width = 170
+    X = 7
+    Y = 50
+    Z = 1
+    object ScrollBar: TSDLScrollBar
+      BackColor = 14344685
+      BorderWidth = 2
+      ButtonColor = 11846620
+      DragMode = sdmManual
+      Height = 416
+      Kind = sbVertical
+      LargeChange = 26
+      Max = 0
+      Position = 0
+      SmallChange = 1
+      WheelChange = 3
+      Width = 20
+      X = 148
+      Y = 2
+      Z = 0
+    end
+  end
+  object Picture: TSDLLabel
+    Alignment = taLeft
+    BorderWidth = 0
+    Caption = '  Width: Height:'
+    DragMode = sdmManual
+    DrawOption = doCenter
+    Height = 416
+    Hint = 'Double Click to edit image properties.'
+    Layout = tlTop
+    OnDblClick = miPropsClick
+    Width = 400
+    WordWrap = False
+    X = 232
+    Y = 52
+    Z = 2
+  end
+  object btUp: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = '/\'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 30
+    OnClick = btUpClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 2
+    Width = 30
+    X = 189
+    Y = 190
+    Z = 3
+  end
+  object btDown: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = '\/'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 30
+    OnClick = btDownClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 3
+    Width = 30
+    X = 189
+    Y = 280
+    Z = 4
+  end
+end

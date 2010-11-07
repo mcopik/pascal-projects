@@ -1,0 +1,221 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// quaternion.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalQuaternion.Create( const mx, my, mz, mw : float );
+begin
+  inherited Create;
+  x := mx;
+  y := my;
+  z := mz;
+  w := mw;
+end;
+
+constructor CalQuaternion.Create( const quaternion : CalQuaternion );
+begin
+  inherited Create;
+  x := quaternion.x;
+  y := quaternion.y;
+  z := quaternion.z;
+  w := quaternion.w;
+end;
+
+constructor CalQuaternion.Create( const quaternion : string );
+var
+  i : integer;
+  local : string;
+begin
+  inherited Create;
+  local := quaternion;
+  i := Pos( ' ', local );
+  x:= StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  i := Pos( ' ', local );
+  y :=  StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  i := Pos( ' ', local );
+  z :=   StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  w :=  StrToInt( Copy( local, 0, Length( local ) ) );
+end;
+
+procedure CalQuaternion.Assign( const Quaternion : string );
+var
+  i : integer;
+  local : string;
+begin
+  local := quaternion;
+  i := Pos( ' ', local );
+  x:= StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  i := Pos( ' ', local );
+  y :=  StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  i := Pos( ' ', local );
+  z :=   StrToInt( Copy( local, 0, i - 1 ) );
+  local := Copy( local, i + 1,  Length( local ) - i + 1);
+  w :=  StrToInt( Copy( local, 0, Length( local ) ) );
+end;
+
+procedure CalQuaternion.assign( const quaternion : CalQuaternion );
+begin
+  x := quaternion.x;
+  y := quaternion.y;
+  z := quaternion.z;
+  w := quaternion.w;
+end;
+
+//----------------------------------------------------------------------------//
+// Interpolate between two quaternions                                        //
+//----------------------------------------------------------------------------//
+
+procedure CalQuaternion.blend( factor : float; q : CalQuaternion );
+var
+  norm : float;
+  bFlip : boolean;
+  inv_factor : float;
+  theta : float;
+  s : float;
+begin
+  norm := x * q.x + y * q.y + z * q.z + w * q.w;
+
+  bFlip := false;
+
+  if ( norm < 0.0 ) then
+  begin
+    norm := -norm;
+    bFlip := true;
+  end;
+
+  if ( 1.0 - norm < 0.000001 ) then
+  begin
+    inv_factor := 1.0 - factor;
+  end
+  else
+  begin
+    theta := arccos( norm );
+    s := 1.0 / sin( theta );
+    inv_factor := sin( ( 1.0 - factor ) * theta ) * s;
+    factor := sin( factor * theta ) * s;
+  end;
+
+  if ( bFlip ) then
+    factor := -factor;
+
+  x := inv_factor * x + factor * q.x;
+  y := inv_factor * y + factor * q.y;
+  z := inv_factor * z + factor * q.z;
+  w := inv_factor * w + factor * q.w;
+end;
+
+//----------------------------------------------------------------------------//
+// Multiply with a given quaternion                                           //
+//----------------------------------------------------------------------------//
+
+procedure CalQuaternion.mult( q : CalQuaternion );
+var
+  mx, my, mz, mw : float;
+begin
+  mx := x;
+  my := y;
+  mz := z;
+  mw := w;
+
+  x := mw * q.x + mx * q.w + my * q.z - mz * q.y;
+  y := mw * q.y - mx * q.z + my * q.w + mz * q.x;
+  z := mw * q.z + mx * q.y - my * q.x + mz * q.w;
+  w := mw * q.w - mx * q.x - my * q.y - mz * q.z;
+end;
+
+procedure CalQuaternion.mult( v : CalVector );
+var
+  qx, qy, qz, qw : float;
+begin
+  qx := x;
+  qy := y;
+  qz := z;
+  qw := w;
+  x := qw * v.x + qy * v.z - qz * v.y;
+  y := qw * v.y - qx * v.z + qz * v.x;
+  z := qw * v.z + qx * v.y - qy * v.x;
+  w := -qx * v.x - qy * v.y - qz * v.z;
+end;
+
+//----------------------------------------------------------------------------//
+// Multiply with given attributes                                             //
+//----------------------------------------------------------------------------//
+
+procedure CalQuaternion.mult( tx, ty, tz : float );
+var
+  mx, my, mz, mw : float;
+begin
+  mx := x;
+  my := y;
+  mz := z;
+  mw := w;
+
+  x := mw * tx + my * tz - mz * ty;
+  y := mw * ty - mx * tz + mz * tx;
+  z := mw * tz + mx * ty - my * tx;
+  w := -mx * tx - my * ty - mz * tz;
+end;
+
+procedure CalQuaternion.LoadFromStream( AStream : TStream );
+begin
+  AStream.ReadBuffer( x, sizeof( x ) );
+  AStream.ReadBuffer( y, sizeof( y ) );
+  AStream.ReadBuffer( z, sizeof( z ) );
+  AStream.ReadBuffer( w, sizeof( w ) );
+end;
+
+procedure CalQuaternion.clear;
+begin
+  x := 0.0;
+  y := 0.0;
+  z := 0.0;
+  w := 1.0;
+end;
+
+procedure CalQuaternion.conjugate;
+begin
+  x := -x;
+  y := -y;
+  z := -z;
+end;
+
+procedure CalQuaternion.invert;
+var
+  norm, inv_norm : float;
+begin
+  conjugate;
+  norm := ( x * x ) + ( y * y ) + ( z * z ) + ( w * w );
+
+  if ( norm = 0.0 ) then
+    exit;
+
+  inv_norm := 1 / norm;
+  x := x * inv_norm;
+  y := y * inv_norm;
+  z := z * inv_norm;
+  w := w * inv_norm;
+end;
+
+procedure CalQuaternion.set_( qx, qy, qz, qw : float );
+begin
+  x := qx;
+  y := qy;
+  z := qz;
+  w := qw;
+end;
+

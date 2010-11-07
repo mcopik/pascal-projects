@@ -1,0 +1,28 @@
+STATUS INFO : @ 22:15:04 MSG : Starting Application IN : Initialization
+
+STATUS INFO : @ 22:15:04 MSG : Starting Initialization IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : Command line not found IN : CheckCommandLine
+
+STATUS INFO : @ 22:15:04 MSG : SDL_MIXER Initialization was successful IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : SDL_MIXER: hooking RestartMusic was successful IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : Setting video mode 640x480 was successful IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : Creating surfaces... IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : Creating surfaces was successful IN : Initialize
+
+STATUS INFO : @ 22:15:04 MSG : Initialization was successful IN : Initialize
+
+STATUS INFO : @ 22:15:05 MSG : Loading was successful: Caverns/0.lev IN : Initialize
+
+STATUS INFO : @ 22:15:05 MSG : SDL_MIXER: loading Music/Title.xm was successful IN : LoadMusic
+
+STATUS INFO : @ 22:15:09 MSG : Starting finalization IN : Finalize
+
+STATUS INFO : @ 22:15:09 MSG : Finalization went OK IN : Finalize
+
+STATUS INFO : @ 22:15:09 MSG : Terminating Application IN : Finalization
+

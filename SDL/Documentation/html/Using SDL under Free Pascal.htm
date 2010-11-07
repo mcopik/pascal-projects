@@ -1,0 +1,483 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Using JEDI-SDL under Free Pascal</title>
+</head>
+<body link="blue" vlink="purple">
+<h2>Using
+JEDI-SDL under Free
+Pascal&nbsp; by&nbsp; Dean&nbsp; Ellis, RRC2Soft and Dominique Louis.</h2>
+<p style="margin-left: 40px;">This article will provide
+you with a basic
+introduction into using the Simple Direct Media Library (SDL) with <a
+ href="http://www.freepascal.org/">Free Pascal</a>.
+For those of you who don't know what <a
+ href="http://www.freepascal.org/">Free Pascal</a> is, it is a cross
+platform compiler
+based on the Object Pascal language. <a
+ href="http://www.freepascal.org/">Free Pascal</a>&nbsp;&nbsp; (aka FPK
+Pascal)
+is a 32 bit pascal compiler. It is available for different
+processors (Intel 80386 and compatibles and Motorola 680x0) and
+operating systems
+(Linux, FreeBSD, NetBSD, DOS, Win32, OS/2, BeOS, SunOS (Solaris), QNX
+and Classic Amiga),&nbsp; and even the Zaurus PDA. The IDE ( only
+supported
+on certain OSes ) is very much like Borland's Turbo
+Pascal 7.0 (TP7), and it has many of the same features, such as
+integrated
+debugging. It also includes some features more common in modern IDE&#8217;s
+like
+simple code completion. Using <a href="http://www.freepascal.org/">Free
+Pascal</a> with SDL is
+advantageous as SDL is also a cross platform games development library,
+which
+gives developers a standard interface to the many different API's
+available
+under different platforms. For example, under Windows, SDL would
+utilize DirectX,
+but under Linux it would interface with X Windows or some other
+graphics
+library. What you end up with is code that could with only minor
+changes run on many operating systems.</p>
+<p style="margin-left: 40px;">You can download the 1.9.2 aka
+2.0.0-Beta2 release for the following
+operating systems : </p>
+<ul style="margin-left: 40px;">
+  <li><a href="http://www.freepascal.org/down2-linux-i386.html">Linux
+(Intel X86)</a> </li>
+  <li><a href="http://www.freepascal.org/down2-linux-powerpc.html">Linux
+(PowerPC)</a> </li>
+  <li><a href="http://www.freepascal.org/down2-win32-i386.html">Win32</a>
+(Windows 95, 98, ME,
+2000, NT) </li>
+  <li><a href="http://www.freepascal.org/down2-fbsd-i386.html">FreeBSD</a>
+(FreeBSD 4.x and
+probably 5.x too) </li>
+</ul>
+<p style="margin-left: 40px;">Linux users : It is recommended that you
+install the "<span style="font-weight: bold;">sdl-devel</span>" version
+of SDL when working with FreePascal<br>
+</p>
+<p style="margin-left: 40px;">When working with <a
+ href="http://www.freepascal.org/">Free Pascal</a>,
+you can either use
+it via the traditional command line ( all OSes ) or via an IDE ( only
+supported on certain
+OSes ). </p>
+<p style="margin-left: 40px;">Before proceeding, it is assumed that you
+have followed the FreePascal
+standard installation instructions and that the ../fpc/bin directory
+path has been
+added to the system path.</p>
+<ul style="margin-left: 40px;">
+  <li><a href="#commandline">Setting
+up the FreePascal command line compiler to use JEDI-SDL</a> </li>
+  <li><a href="#ide">Setting up the Free Pascal IDE to use JEDI-SDL</a></li>
+  <li><a href="#faq">FAQ</a></li>
+  <li><a href="#batch">Batch File/Shell examples</a><br>
+  </li>
+</ul>
+<h3> <a name="commandline"></a>Setting up
+the FreePascal command line compiler
+to use JEDI-SDL</h3>
+<p style="margin-left: 40px;">After corrrect
+installtion type "<span style="font-weight: bold;">fpc -i</span>" on
+the command line to test
+that everything
+has worked. Issusing this command should list the compiler information
+and should look similar to...</p>
+<p style="margin-left: 80px; font-style: italic;">Free Pascal Compiler
+version 1.9.2<br>
+<br>
+Compiler Date&nbsp; : 2004/01/08</p>
+<p style="margin-left: 80px; font-style: italic;">Compiler Target: i386</p>
+<p style="margin-left: 80px; font-style: italic;"><br>
+Supported targets:</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; GO32 V2 DOS
+extender</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; Linux for i386</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; OS/2</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; Win32 for i386</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; FreeBSD/ELF
+for i386</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; SunOS/ELF for
+i386 (under
+development)</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; Beos for i386
+(under
+development)</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; NetBSD for
+i386 (under
+development)</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; Netware for
+i386</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; WDOSX DOS
+extender</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; OS/2 via EMX</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp; Watcom
+compatible DOS extenders</p>
+<p style="margin-left: 40px;"><br>
+If this or something similar appears, then chances are that the
+FreePascal installtion
+went smoothly. Next we will need to ammend the FreePascal compiler
+configuration file known as "<span style="font-weight: bold;">fpc.cfg</span>"
+which is usually located in the <span style="font-weight: bold;">../fpc/bin</span>
+directory. Find it and
+make a back up copy of it just in case you wish to revert back to it's
+original settings. Then using your favorite text editor open up the "<span
+ style="font-weight: bold;">fpc.cfg</span>" file for editing.</p>
+<p style="margin-left: 40px;">Within the "<span
+ style="font-weight: bold;">fpc.cfg</span>" file there are 2 sections
+that we will need to customise for JEDI-SDL support...</p>
+<ol style="margin-left: 40px;">
+  <ol>
+    <li>
+      <p>search path
+for include files</p>
+    </li>
+    <li>
+      <p>search path
+for units and other system dependent things</p>
+    </li>
+  </ol>
+</ol>
+<!--[endif]-->
+<p style="margin-left: 40px;">&nbsp;
+Find the section
+with the
+"<span style="font-weight: bold;">fpc.cfg</span>" file that is labeled
+as " # searchpath for includefiles" .
+In this section you will need to
+add the path to the "<span style="font-weight: bold;">jedi-sdl.inc</span>"
+file and for FreePascal to accept this as an include file during
+compilation, you need to specify the <span style="font-weight: bold;">-Fi</span>
+compiler directive. So my entry in this section, looks like
+this...</p>
+<p style="margin-left: 80px; font-style: italic;">-FiE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL/Pas</p>
+<p style="margin-left: 40px;"><br>
+Now find the section that is labeled as " # searchpath for units and
+other system
+dependent things". In this section we will need to add the path
+to all the JEDI-SDL header units that we plan to use in our projects.
+Files like "<span style="font-weight: bold;">sdl.pas</span>", "<span
+ style="font-weight: bold;">sdl_mixer.pas</span>", "<span
+ style="font-weight: bold;">sdl_image.pas</span>" etc. For
+FreePascal to accept these files during compilation, you need to
+specify the <span style="font-weight: bold;">-Fu</span> compiler
+directive. So my entries in this
+section look like this...</p>
+<p style="margin-left: 80px; font-style: italic;"><span
+ style="font-weight: bold;">UPDATE</span> : CragWolf, on the JEDI-SDL
+mailing list, pointed out that on Linux you can also do the following...<br>
+-Fu/home/cragwolf/JEDI-SDLv1.0/*/Pas<br>
+as a shortcut to this...<br>
+</p>
+<p style="margin-left: 80px; font-style: italic;">-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL_Mixer/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL_Image/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL_Net/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL_ttf/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/smpeg/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SFont/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDL_Sound/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDLMonoFonts/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDLSpriteEngine/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/SDLFilter/Pas</p>
+<p style="margin-left: 80px; font-style: italic;">&nbsp;-FuE:/Development/Pascal/Headers/JEDI-SDLv1.0/ODE/Pas<br>
+</p>
+<p style="margin-left: 80px; font-style: italic;"><span
+ style="font-weight: bold;"></span><br>
+<br>
+</p>
+<p style="margin-left: 40px;">Obviously the paths
+above
+will need to be changed appropriately if you are using a Linux
+environment, but the basic principals remains the same.</p>
+<p style="margin-left: 40px;">After these changes, you can now save and
+close your "<span style="font-weight: bold;">fpc.cfg</span>"
+file.&nbsp; </p>
+<p style="margin-left: 40px;"><br>
+You are now ready to compile your first JEDI-SDL&nbsp; program via the
+command line.&nbsp; In order to support Delphi style syntax, the
+FreePascal compiler uses the <span style="font-weight: bold;">-Sd</span>
+compiler
+directive. So on the command line this would look like...</p>
+<p style="margin-left: 80px;">&nbsp;<span style="font-weight: bold;">fpc
+-Sd
+&lt;program name&gt;</span></p>
+<p style="margin-left: 40px;">So in the case of the
+program listed <a href="#listing">below</a> that would be... </p>
+<div style="margin-left: 80px;"><span style="font-weight: bold;">fpc
+-Sd SDLTest.dpr</span>
+<br>
+</div>
+<p style="margin-left: 40px;">or<br>
+</p>
+<div style="margin-left: 80px;"><span style="font-weight: bold;">fpc
+-Sd SDLTest.pas</span><br>
+</div>
+<p style="margin-left: 40px;">depending if you
+saved it
+witha <span style="font-weight: bold;">.dpr</span> or <span
+ style="font-weight: bold;">.pas</span> extension. </p>
+<h3> <a name="ide"></a>Setting up the
+Free
+Pascal IDE to use JEDI-SDL</h3>
+<p style="margin-left: 40px;">Before trying to use
+SDL
+you will need to make some
+changes to the way Free Pascal compiles and links. Firstly go to the
+Options |
+Compiler menu item, and open the compiler switches page. On the Syntax
+tab you
+will need to ensure that the following options are set ON.<span
+ style="font-weight: bold;"></span></p>
+<h4 style="margin-left: 40px;">Delphi 2 extensions</h4>
+<h4 style="margin-left: 40px;">Delphi
+compatibility </h4>
+<div style="margin-left: 40px;">Now move to the
+Assembler Tab and
+switch <i>Assembler Reader</i> to <i>Intel style Assembler</i> and
+the <i>Assembler
+Output</i> to <i>precoff</i>. Finally add FPC to the conditional
+defines box at
+the bottom of the page. Then close the compiler switches page.
+Now go to Options |
+Linker. The
+only thing you need to do on this page is set the <i>Preferred Library
+Type</i> to <i>Smart Libraries</i>. Close the linker page and open Options |
+Directories. In the <i>unit directories</i> box you will need to
+ensure that
+the path where the JEDI-SDL units exists is added. You may also have to
+add a path for the jedi-sdl.inc include file.<br>
+</div>
+<p style="margin-left: 40px;">That&#8217;s it for the
+settings in
+the <a href="http://www.freepascal.org/">Free Pascal</a> IDE. You are
+now ready to write your first program.
+</p>
+<p class="MsoNormal" style="margin-left: 1in;"> </p>
+<h3>Basic Program Structure</h3>
+<div style="margin-left: 40px;">The basic structure
+of a
+Free Pascal program is
+exactly the same as it is in TP7 and Delphi. The unit begins with
+program
+&lt;name&gt; and contains a set of begin and end statements. program
+test; begin
+end . You will soon realise
+that programs written in Free
+Pascal will usually port directly to Delphi, although the reverse may
+not always
+be true. Between the begin and end statements is where we will
+initialise the
+SDL library and create a screen. All the other aspects of the Pascal
+language
+are the same; this includes the way you declare procedures and
+functions. Before heading into SDL I
+would like to point out that
+for the most part Free Pascal uses the extension .pp for it's units,
+however
+you can make use of .pas and .dpr if you wish, it may also make
+conversion
+simpler. Initialising SDL Before trying to
+initialise SDL, we must first add a
+few units to the uses clause. The uses clause is very much like the
+include
+statement in C and C++, in order to use SDL we must add SDL to the uses
+clause
+of our main program and any other units that use the library. <br>
+<br>
+<code><span style="font-weight: bold;">program</span>
+test; </code><br>
+<code></code><br>
+<code><span style="font-weight: bold;">uses</span> </code><br>
+<code>&nbsp; sdl, </code><br>
+<code>&nbsp; sdlutils; </code><br>
+<code></code><br>
+<code><span style="font-weight: bold;">begin</span>
+</code><br>
+<code><span style="font-weight: bold;">end</span></code>. <br>
+<br>
+Notice that we have also
+included <span style="font-weight: bold;">sdlutils</span>. This is a
+utility unit provided by the JEDI-SDL team, which includes some useful
+procedures and functions. Creating a Window Creating a window can be
+very simple or complex
+depending on whether you want to check the video modes you want to use
+first.
+For this example we are going to assume that and video mode of 640x480
+is
+available in 16bit mode. Before creating a window we need to initialise
+the SDL
+video system using <i>SDL_Init</i><span style="font-style: italic;">SDL_INIT_VIDEO</span>.
+Once
+this is
+complete we can then call the <i>SDL_SetVideoMode</i> function to
+create our
+screen. We will need a variable to store the reference to the surface
+that <i>SDL_SetVideoMode</i>
+creates, we can then test this variable to see if the screen was
+created. Now depending on whether
+you created the window with
+the <span style="font-style: italic;">SDL_DOUBLEBUF</span> flag or
+not, you can either call <span style="font-style: italic;">SDL_Flip</span>
+or <span style="font-style: italic;">SDL_UpdateRect</span> to refresh
+the screen. For more information on double buffering see the
+JEDI-SDL documentation.
+</div>
+<h3>Handling events</h3>
+<p style="margin-left: 40px;" class="MsoBodyTextIndent">Now that we
+know how to create and screen,
+we need
+to be able to handle input events. SDL provides a mechanism for
+checking mouse,
+joystick and keyboard events, as well as checking for window events. In
+the
+SDLTest program at the end of this document we use this facility to
+check when
+the user closes the window. The important function in this case is <i>SDL_PollEvent</i>,
+this function queries SDL&#8217;s event queue and returns an event if one
+occurred.
+In our little demo we check the type of this event against <span
+ style="font-style: italic;">SDL_QUITEV</span>.
+</p>
+<h3>Shutting Down SDL</h3>
+<p style="margin-left: 40px;">Closing SDL is
+simple, a
+call to <i>SDL_Quit</i> will
+shut down all open systems (Video, Audio etc). However as good
+programmers we
+always clean up after ourselves (don&#8217;t we), we free the _screen
+variable using <i>SDL_FreeSurface</i>
+function prior to calling <i>SDL_Quit</i>.
+</p>
+<h3><a name="faq"></a>FAQ</h3>
+<div style="margin-left: 40px;"><span style="font-weight: bold;">Q</span>.
+In Linux, during compilation, I get and error that mentions <span
+ style="font-style: italic;">pthreads.<br>
+</span><span style="font-weight: bold;">A</span>. You are probably
+using an older version of JEDI-SDL. Try to upgrade to a newer version.
+If you cannot, just add this line to the flags in your "<span
+ style="font-weight: bold;">fpc.cfg</span>" in the appropriate
+section...<br>
+<span style="font-style: italic;">-Fi"[fpc_dir]/src/fpc-1.9.2/rtl/linux/"<br>
+</span>where [fpc_dir] is the directory where FreePascal is installed.<span
+ style="font-style: italic;"><br>
+</span><br>
+<span style="font-style: italic;"></span></div>
+<br>
+<h3> Final comments</h3>
+<p style="margin-left: 40px;">This document has only
+given a brief introduction into using SDL. More information can be found on the JEDI-SDL web site at <a
+ href="http://jedi-sdl.pascalgamedevelopment.com">http://jedi-sdl.pascalgamedevelopment.com</a>. 
+The listing for the Free Pascal SDLTest program is listed <a
+ href="#listing">below</a>. For details on how to use the functions not covered in this guide, have a look at
+the <a
+ href="http://jedi-sdl.pascalgamedevelopment.com/docs.php#Docs">documentation</a> that comes with the JEDI-SDL headers. The JEDI-SDL
+library comes
+with many demos of how to use SDL. But the team is working on the
+problems and hopefully we will be able to put together a complete set
+of demos that will compile under Delphi, Kylix and <a
+ href="http://www.freepascal.org/">Free Pascal</a> and some also
+compile under <a href="http://www.tmtpascal.com">TMT Pascal</a> and <a
+ href="http://www.GnuPascal.org">GnuPascal</a>.
+</p>
+<h3> <a name="listing"></a>SDLTest
+program
+listing</h3>
+<code><span style="font-weight: bold;">program</span> SDLtest;<br>
+&nbsp;<br>
+<span style="font-weight: bold;">uses</span> <br>
+&nbsp; sdl, <br>
+&nbsp; sdlutils; <br>
+<br>
+<span style="font-weight: bold;">var</span> &nbsp; <br>
+&nbsp; _screen : PSDL_Surface;<br>
+&nbsp; event : TSDL_Event; <br>
+&nbsp; Done : Boolean = False; <br>
+<br>
+<span style="font-weight: bold;">begin</span>&nbsp;
+<br>
+&nbsp; <span style="font-style: italic; color: rgb(192, 192, 192);">//
+Initialise the SDL video sub-system </span> <br>
+&nbsp; <span style="font-weight: bold;">if</span> ( SDL_Init(
+SDL_INIT_VIDEO) &lt; 0 ) <span style="font-weight: bold;">then</span><br>
+&nbsp; <span style="font-weight: bold;">begin</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; exit;
+&nbsp;&nbsp; <br>
+&nbsp; <span style="font-weight: bold;">end;</span>
+&nbsp;&nbsp; <br>
+<br>
+&nbsp; <span style="font-style: italic; color: rgb(192, 192, 192);">//
+Set the Window Width, Height, Colour Depth and turn on double buffering</span><br>
+&nbsp; _screen := SDL_SetVideoMode(
+640, 480, 16, SDL_DOUBLEBUF );<br>
+&nbsp; <br>
+&nbsp; <span style="font-weight: bold;">if</span> ( _screen &lt;&gt;
+nil
+) <span style="font-weight: bold;">then</span><br>
+&nbsp; <span style="font-weight: bold;">begin</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">repeat</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="font-style: italic; color: rgb(192, 192, 192);">// This is
+where we check for Screen, Keyboard and Mouse events</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">while</span>
+( SDL_PollEvent( @event ) = 1 ) <span style="font-weight: bold;">do</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">begin</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if
+( event.type_ = SDL_QUITEV ) then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Done :=
+True;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">end;</span>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SDL_Flip(_screen);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">until</span>
+Done;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; <span
+ style="font-style: italic; color: rgb(192, 192, 192);">// Since we are
+finished with it we need to free it</span><br>
+&nbsp;&nbsp;&nbsp; SDL_FreeSurface(_screen);
+&nbsp;&nbsp; <br>
+&nbsp; <span style="font-weight: bold;">end;<br>
+</span>&nbsp; <br>
+&nbsp; <span style="font-style: italic; color: rgb(192, 192, 192);">//
+Shut Down SDL and exit</span>&nbsp; <br>
+&nbsp; SDL_Quit;
+<br>
+<span style="font-weight: bold;">end.<br>
+<br>
+</span></code>
+<h3><a name="batch"></a>Batch and Shell examples ( sFPC = Shell for FPC
+)<br>
+</h3>
+<span style="font-weight: bold;"><span
+ style="text-decoration: underline;">Win32<br>
+</span></span>
+<div style="margin-left: 40px;">&lt;File: sFPC.bat&gt;<br>
+fpc -Sd %1 <br>
+&lt;/File: sFPC.bat&gt;<br>
+<br>
+<br>
+</div>
+<span style="font-weight: bold;"><span
+ style="text-decoration: underline;">Unix<br>
+</span></span>
+<div style="margin-left: 40px;">&lt;File: sFPC.sh&gt;<br>
+fpc -Sd %1 <br>
+&lt;/File: sFPC.sh&gt;<br>
+<br>
+<br>
+</div>
+</body>
+</html>

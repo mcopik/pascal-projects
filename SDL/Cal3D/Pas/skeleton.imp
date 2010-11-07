@@ -1,0 +1,212 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// skeleton.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalSkeleton.Create( pCoreSkeleton : CalCoreSkeleton );
+var
+  vectorCoreBone : CalCoreBones;
+  boneCount : integer;
+  i : integer;
+begin
+  inherited Create;
+  m_pCoreSkeleton := pCoreSkeleton;
+
+  // clone the skeleton structure of the core skeleton
+  vectorCoreBone := pCoreSkeleton.getVectorCoreBone;
+
+  // get the number of bones
+  boneCount := length( vectorCoreBone );
+
+  // reserve space in the bone vector
+  setLength( m_vectorBone, boneCount );
+
+  // clone every core bone
+  for i := 0 to boneCount - 1 do
+    m_vectorBone[ i ] := CalBone.Create( Self, vectorCoreBone[ i ] );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalSkeleton.Destroy;
+var
+  i : integer;
+begin
+ // destroy all bones
+  for i := 0 to length( m_vectorBone ) - 1 do
+    m_vectorBone[ i ].Free;
+  SetLength( m_vectorBone, 0 );
+  m_pCoreSkeleton := nil;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Calculate the state of the skeleton                                        //
+//----------------------------------------------------------------------------//
+
+procedure CalSkeleton.calculateState;
+var
+  listRootCoreBoneId : Integers;
+  i : integer;
+  RootCoreBoneCount : integer;
+begin
+  // calculate all bone states of the skeleton
+  listRootCoreBoneId := m_pCoreSkeleton.getListRootCoreBoneId;
+
+  RootCoreBoneCount := Length( listRootCoreBoneId );
+
+  for i := 0 to RootCoreBoneCount - 1 do
+    m_vectorBone[ listRootCoreBoneId[ i ] ].calculateState;
+
+  m_isBoundingBoxesComputed := false;
+end;
+
+//----------------------------------------------------------------------------//
+// Clear the state of the skeleton                                            //
+//----------------------------------------------------------------------------//
+
+procedure CalSkeleton.clearState;
+var
+  i, BoneCount : integer;
+begin
+  // clear all bone states of the skeleton
+  BoneCount := Length( m_vectorBone );
+  for i := 0 to BoneCount - 1 do
+    m_vectorBone[ i ].clearState;
+
+  m_isBoundingBoxesComputed := false;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the bone for a given bone id                                           //
+//----------------------------------------------------------------------------//
+
+function CalSkeleton.getBone( boneId : integer ) : CalBone;
+begin
+  result := m_vectorBone[ boneId ];
+end;
+
+//----------------------------------------------------------------------------//
+// Lock the state of the skeleton                                             //
+//----------------------------------------------------------------------------//
+
+procedure CalSkeleton.lockState;
+var
+  i, BoneCount : integer;
+begin
+  // lock all bone states of the skeleton
+  BoneCount := Length( m_vectorBone );
+  for i := 0 to BoneCount - 1 do
+    m_vectorBone[ i ].lockState;
+end;
+
+procedure CalSkeleton.ForEachBonePoint( proc : TPointProc );
+var
+  i : integer;
+begin
+  for i := 0 to length( m_vectorBone ) - 1 do
+    with m_vectorBone[ i ].getTranslationAbsolute do
+      proc( x, y, z );
+end;
+
+procedure CalSkeleton.ForEachBoneLine( proc : TLineProc );
+var
+  i : integer;
+  parentId : integer;
+  translation : CalVector;
+  translationParent : CalVector;
+begin
+  translation := CalVector.Create;
+  translationParent := CalVector.Create;
+  for i := 0 to Length( m_vectorBone ) - 1 do
+  begin
+    parentId := m_vectorBone[ i ].getCoreBone.getParentId;
+    if ( parentId <> -1 ) then
+    begin
+      translation.assign( m_vectorBone[ i ].getTranslationAbsolute );
+      translationParent.assign( m_vectorBone[ parentId ].getTranslationAbsolute );
+      proc(
+        translationParent.x, translationParent.y, translationParent.z,
+        translation.x, translation.y, translation.z
+        );
+    end;
+  end;
+  translation.Free;
+  translationParent.Free;
+end;
+
+procedure CalSkeleton.calculateBoundingBoxes;
+var
+  i : integer;
+  BoneCount : integer;
+begin
+  if ( m_isBoundingBoxesComputed ) then
+    exit;
+
+  BoneCount := Length( m_vectorBone );
+  for i := 0 to BoneCount - 1 do
+  begin
+    m_vectorBone[ i ].calculateBoundingBox;
+  end;
+  m_isBoundingBoxesComputed := true;
+end;
+
+procedure CalSkeleton.getBoneBoundingBox( var min : CalVector; var max : CalVector );
+var
+  vectorBoneCount : integer;
+  translation : CalVector;
+  i : integer;
+begin
+  if ( not m_isBoundingBoxesComputed ) then
+  begin
+    calculateBoundingBoxes;
+  end;
+
+  translation := CalVector.Create;
+  vectorBoneCount := Length( m_vectorBone );
+  if ( vectorBoneCount > 0 ) then
+  begin
+    translation.assign( m_vectorBone[ 0 ].getTranslationAbsolute );
+
+    min.x := translation.x;
+    max.x := translation.x;
+    min.y := translation.y;
+    max.y := translation.y;
+    min.z := translation.z;
+    max.z := translation.z;
+  end;
+
+  for i := 1 to vectorBoneCount - 1 do
+  begin
+    translation.assign( m_vectorBone[ i ].getTranslationAbsolute );
+
+    if ( translation.x > max.x ) then
+      max.x := translation.x
+    else if ( translation.x < min.x ) then
+      min.x := translation.x;
+
+    if ( translation.y > max.y ) then
+      max.y := translation.y
+    else if ( translation.y < min.y ) then
+      min.y := translation.y;
+
+    if ( translation.z > max.z ) then
+      max.z := translation.z
+    else if ( translation.z < min.z ) then
+      min.z := translation.z;
+  end;
+  translation.Free;
+end;
+

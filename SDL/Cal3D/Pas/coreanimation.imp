@@ -1,0 +1,193 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// coreanimation.cpp
+
+function CalCoreAnimation.addCoreTrack( pCoreTrack : CalCoreTrack ) : boolean;
+var
+  newid : integer;
+begin
+  newid := Length( m_listCoreTrack );
+  SetLength( m_listCoreTrack, newid + 1 );
+  m_listCoreTrack[ newid ] := pCoreTrack;
+
+  result := true;
+end;
+
+function CalCoreAnimation.getCoreTrack( coreBoneId : integer ) : CalCoreTrack;
+var
+  pCoreTrack : CalCoreTrack;
+  i, TrackCount : integer;
+begin
+  // loop through all core track
+  TrackCount := Length( m_listCoreTrack );
+  for i := 0 to TrackCount - 1 do
+  begin
+    // get the core bone
+    pCoreTrack := m_listCoreTrack[ i ];
+
+    // check if we found the matching core bone
+    if( pCoreTrack.getCoreBoneId = coreBoneId ) then
+    begin
+      result := pCoreTrack;
+      exit;
+    end;
+  end;
+
+  // no match found
+  result := nil;
+end;
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreAnimation.Create( AFileName : string );
+begin
+  inherited Create;
+  if AFileName <> '' then
+    LoadFromFile( AFileName );
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalCoreAnimation.Destroy;
+var
+  i, TrackCount : integer;
+begin
+  TrackCount := Length( m_listCoreTrack );
+  for i := 0 to TrackCount - 1 do
+    m_listCoreTrack[ i ].Free;
+    
+  inherited;
+end;
+
+procedure CalCoreAnimation.LoadFromFile( AFileName : string );
+var
+  Stream : TStream;
+begin
+  Stream := CalOpen( AFileName, integer( ANIMATION_FILE_MAGIC ) );
+  if Stream <> nil then
+  begin
+    LoadFromStream( Stream );
+    Stream.Free;
+  end
+  else
+  begin
+    LoadFromXMLFile( AFileName );
+  end;
+end;
+
+procedure CalCoreAnimation.LoadFromXMLFile( AFileName : string );
+var
+  Parser : TXmlParser;
+  Magic : string;
+  Version, NumTracks, TrackID : integer;
+begin
+  Parser := TXmlParser.Create; // Create Parser Instance
+
+  // Tell the parser if you want content to be normalized
+  // (i.e. pack and trimm off Whitespaces)
+
+  Parser.Normalize := TRUE;
+
+  // Load the XML Document
+
+  Parser.LoadFromFile( AFileName ); // Load XML file
+
+  // Initialize for Scanning through the Document
+
+  Parser.StartScan; // Prepare Scanning through the document
+
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          // Sort out Header stuff
+          if Parser.CurName = 'HEADER' then
+          begin
+            Magic := Parser.CurAttr.Value( 'MAGIC' );
+            Version := StrToInt( Parser.CurAttr.Value( 'VERSION' ) );
+            if ( Magic <> ANIMATION_XMLFILE_MAGIC )
+            or ( Version < EARLIEST_COMPATIBLE_FILE_VERSION )
+            or ( Version > CURRENT_FILE_VERSION ) then
+            begin
+              {$IFDEF DEBUG_CAL3D}
+              CalError.setLastError( INVALID_XML_FILE_FORMAT, 'CalCoreMaterial.LoadFromXMLFile', 104, AFilename );
+              {$ENDIF}
+              break;
+            end;
+          end;
+
+          //
+          if Parser.CurName = 'ANIMATION' then
+          begin
+
+            m_duration := StrToFloat( Parser.CurAttr.Value( 'DURATION' ) );
+
+            NumTracks := StrToInt( Parser.CurAttr.Value( 'NUMTRACKS' ) );
+            SetLength( m_listCoreTrack, NumTracks );
+            
+            // load all core bones
+            for TrackID := 0 to NumTracks - 1 do
+              m_listCoreTrack[ TrackID ] := CalCoreTrack.Create( Parser );
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+  Parser.Free;
+end;
+
+
+procedure CalCoreAnimation.LoadFromStream( AStream : TStream );
+var
+  trackCount : integer;
+  i : integer;
+begin
+  // get the duration of the core animation
+  AStream.ReadBuffer( m_duration, 4 );
+
+  // read the number of tracks
+  AStream.ReadBuffer( trackCount, 4 );
+  SetLength( m_listCoreTrack, TrackCount );
+
+  // load all core bones
+  for i := 0 to trackCount - 1 do
+    m_listCoreTrack[ i ] := CalCoreTrack.Create( AStream );
+end;
+
+procedure CalCoreAnimation.scale( factor : float );
+var
+  i, TrackCount : integer;
+begin
+  // loop through all core track
+  TrackCount := Length( m_listCoreTrack );
+  for i := 0 to TrackCount - 1 do
+    m_listCoreTrack[ i ].scale( factor );
+end;

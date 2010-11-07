@@ -1,0 +1,49 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// mixer.h
+
+CalAbstractMixer = class
+public
+  constructor Create( pModel : CalModel ); virtual;
+  destructor Destroy; override;
+
+  function isDefaultMixer : boolean; virtual;
+  procedure updateAnimation( deltaTime : float ); virtual;
+  procedure updateSkeleton; virtual;
+end;
+
+CalMixer = class( CalAbstractMixer )
+public
+  m_pModel : CalModel;
+  m_vectorAnimation : CalAnimations;
+  m_listAnimationAction : Tlist; // of CalAnimationAction
+  m_listAnimationCycle : TList; // of CalAnimationCycle
+  m_animationTime : float;
+  m_animationDuration : float;
+  m_timeFactor : float;
+
+public
+  constructor Create( pModel : CalModel ); override;
+  destructor Destroy; override;
+
+  function blendCycle( id : integer; weight, delay : float ) : boolean;
+  function clearCycle( id : integer; delay : float ) : boolean;
+  function executeAction( id : integer; delayIn, delayOut : float;  weightTarget : float = 1.0; autoLock : boolean = false ) : boolean;
+
+  function isDefaultMixer : boolean; override;
+  procedure updateAnimation( deltaTime : float ); override;
+  procedure updateSkeleton; override;
+
+  function getAnimationDuration : float;
+
+  property AnimationTime : float  read m_animationTime write m_animationTime;
+  property TimeFactor : float  read m_timeFactor write m_timeFactor;
+end;
+

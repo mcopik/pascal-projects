@@ -1,0 +1,315 @@
+//****************************************************************************//
+// springsystem.cpp                                                           //
+// Copyright (C) 2001, 2002 Bruno 'Beosil' Heidelberger                       //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+constructor CalSpringSystem.Create( pModel : CalModel );
+var
+  pCoreModel : CalCoreModel;
+begin
+  inherited Create;
+  m_vGravity := CalVector.Create( 0.0, 0.0, -98.1 );
+
+  // We add this force to simulate some movement
+  m_vForce := CalVector.Create( 0.0, 0.5, 0.0 );
+
+  m_pModel := pModel;
+
+
+  pCoreModel := m_pModel.getCoreModel;
+  if ( pCoreModel = nil ) then
+  begin
+    {$IFDEF DEBUG_CAL3D}
+    CalError.setLastError( INVALID_HANDLE, 'springsystem.int', 27 );
+    {$ENDIF}
+    exit;
+  end;
+end;
+
+destructor CalSpringSystem.Destroy;
+begin
+  m_vGravity.Free;
+
+  m_vForce.Free;
+
+  m_pModel := nil;
+  inherited;
+end;
+
+procedure CalSpringSystem.calculateForces( var pSubmesh : CalSubmesh; deltaTime : float );
+var
+  vectorVertex : TVertices;
+  vectorPhysicalProperty : vectorSubmeshPhysicalProperty;
+  vectorCorePhysicalProperty : vectorPhysicalProperties;
+  vertexId, VertexCount : integer;
+  PP : SubMeshPhysicalProperty;
+  corePP : PhysicalProperty;
+  gravmult, forceadd : CalVector;
+begin
+  // get the vertex vector of the submesh
+  vectorVertex := pSubmesh.getVectorVertex;
+
+  // get the vertex vector of the submesh
+  vectorPhysicalProperty := pSubmesh.getVectorPhysicalProperty;
+
+  // get the physical property vector of the core submesh
+  vectorCorePhysicalProperty := pSubmesh.getCoreSubmesh.getVectorPhysicalProperty;
+
+  // loop through all the vertices
+  VertexCount := Length( vectorVertex );
+  for vertexId := 0 to VertexCount - 1 do
+  begin
+    // get the physical property of the vertex
+    PP := vectorPhysicalProperty[ vertexId ];
+
+    // get the physical property of the core vertex
+    corePP := vectorCorePhysicalProperty[ vertexId ];
+
+    // only take vertices with a weight > 0 into account
+    if ( corePP.weight > 0.0 ) then
+    begin
+      gravmult := CalVector.Create( m_vGravity.x * corePP.weight, m_vGravity.y * corePP.weight, m_vGravity.z * corePP.weight );
+      forceadd := CalVector.Create( gravmult.x + m_vForce.x, gravmult.y + m_vForce.y, gravmult.z + m_vForce.z );
+      PP.force.assign( forceadd );
+      gravmult.Free;
+      forceadd.Free;
+    end;
+  end;
+end;
+
+procedure CalSpringSystem.calculateVertices( var pSubmesh : CalSubmesh; deltaTime : float );
+const
+  ITERATION_COUNT = 2;
+var
+  vectorVertex : TVertices;
+  vectorPhysicalProperty : vectorSubmeshPhysicalProperty;
+  vectorCorePhysicalProperty : vectorPhysicalProperties;
+  vertexId, vectorVertexCount : integer;
+  vertex : TVertex;
+  position, postemp, postemp2, forcetemp, sumtemp, distancetemp : CalVector;
+  PP : SubMeshPhysicalProperty;
+  corePP : PhysicalProperty;
+  vectorSpring : vectorSprings;
+  iteration, iteratorSpring : integer;
+  _spring : Spring;
+  distance : CalVector;
+  _length : float;
+  factor : array[ 0..1 ] of float;
+  SpringCount : integer;
+begin
+  // get the vertex vector of the submesh
+  vectorVertex := pSubmesh.getVectorVertex;
+
+  // get the physical property vector of the submesh
+  vectorPhysicalProperty := pSubmesh.getVectorPhysicalProperty;
+
+  // get the physical property vector of the core submesh
+  vectorCorePhysicalProperty := pSubmesh.getCoreSubmesh.getVectorPhysicalProperty;
+
+  position := CalVector.Create;
+  // loop through all the vertices
+  vectorVertexCount := Length( vectorVertex );
+  for vertexId := 0 to vectorVertexCount - 1 do
+  begin
+    // get the vertex
+    vertex := vectorVertex[ vertexId ];
+
+    // get the physical property of the vertex
+    PP := vectorPhysicalProperty[ vertexId ];
+
+    // get the physical property of the core vertex
+    corePP := vectorCorePhysicalProperty[ vertexId ];
+
+    // store current position for later use
+    position.assign( PP.position );
+
+    // only take vertices with a weight > 0 into account
+    if ( corePP.weight > 0.0 ) then
+    begin
+      // do the Verlet step
+      // physicalProperty.position += (position - physicalProperty.positionOld) * 0.99f + physicalProperty.force / corePhysicalProperty.weight * deltaTime * deltaTime;
+      postemp := CalVector.Create( position.x - PP.positionOld.x, position.y - PP.positionOld.y, position.z - PP.positionOld.z );
+      postemp2 := CalVector.Create( postemp.x * 0.99, postemp.y * 0.99, postemp.z * 0.99 );
+      forcetemp := CalVector.Create( PP.force.x / ( corePP.weight * deltaTime * deltaTime ), PP.force.y / ( corePP.weight * deltaTime * deltaTime ), PP.force.z / ( corePP.weight * deltaTime * deltaTime ) );
+      sumtemp := CalVector.Create( postemp2.x + forcetemp.x, postemp2.y + forcetemp.y, postemp2.z + forcetemp.z );
+      PP.position.add( sumtemp );
+      postemp.free;
+      forcetemp.free;
+      sumtemp.free;
+      postemp2.free;
+    end
+    else
+    begin
+      PP.position.x := vectorVertex[ vertexId ].x;
+      PP.position.y := vectorVertex[ vertexId ].y;
+      PP.position.z := vectorVertex[ vertexId ].z;
+    end;
+
+    // make the current position the old one
+    PP.positionOld.assign( position );
+
+    // set the new position of the vertex
+    vertex.x := PP.position.x;
+    vertex.y := PP.position.y;
+    vertex.z := PP.position.z;
+
+    // clear the accumulated force on the vertex
+    PP.force.clear;
+  end;
+  position.free;
+
+  // get the spring vector of the core submesh
+  vectorSpring := pSubmesh.getCoreSubmesh.getVectorSpring;
+
+  // iterate a few times to relax the constraints
+  distance := CalVector.Create;
+  for iteration := 0 to ITERATION_COUNT - 1 do
+  begin
+    // loop through all the springs
+    SpringCount := Length( vectorSpring );
+    for iteratorSpring := 0 to SpringCount - 1 do
+    begin
+      // get the spring
+      _spring := vectorSpring[ iteratorSpring ];
+
+      // compute the difference between the two spring vertices
+      distance.x := vectorVertex[ _spring.vertexId[ 1 ] ].x - vectorVertex[ _spring.vertexId[ 0 ] ].x;
+      distance.y := vectorVertex[ _spring.vertexId[ 1 ] ].y - vectorVertex[ _spring.vertexId[ 0 ] ].y;
+      distance.z := vectorVertex[ _spring.vertexId[ 1 ] ].z - vectorVertex[ _spring.vertexId[ 0 ] ].z;
+
+      // get the current length of the spring
+      _length := distance.length;
+
+      if ( _length > 0.0 ) then
+      begin
+        factor[ 0 ] := ( _length - _spring.idleLength ) / _length;
+        factor[ 1 ] := factor[ 0 ];
+
+        if ( vectorCorePhysicalProperty[ _spring.vertexId[ 0 ] ].weight > 0.0 ) then
+        begin
+          factor[ 0 ] := factor[ 0 ] / 2.0;
+          factor[ 1 ] := factor[ 1 ] / 2.0;
+        end
+        else
+        begin
+          factor[ 0 ] := 0.0;
+        end;
+
+        if ( vectorCorePhysicalProperty[ _spring.vertexId[ 1 ] ].weight <= 0.0 ) then
+        begin
+          factor[ 0 ] := factor[ 0 ] * 2.0;
+          factor[ 1 ] := 0.0;
+        end;
+
+        distancetemp := CalVector.Create( distance.x * factor[ 0 ], distance.y * factor[ 0 ], distance.z * factor[ 0 ] );
+        vectorVertex[ _spring.vertexId[ 0 ] ].x := vectorVertex[ _spring.vertexId[ 0 ] ].x + distancetemp.x;
+        vectorVertex[ _spring.vertexId[ 0 ] ].y := vectorVertex[ _spring.vertexId[ 0 ] ].y + distancetemp.y;
+        vectorVertex[ _spring.vertexId[ 0 ] ].z := vectorVertex[ _spring.vertexId[ 0 ] ].z + distancetemp.z;
+        vectorPhysicalProperty[ _spring.vertexId[ 0 ] ].position.x := vectorVertex[ _spring.vertexId[ 0 ] ].x;
+        vectorPhysicalProperty[ _spring.vertexId[ 0 ] ].position.y := vectorVertex[ _spring.vertexId[ 0 ] ].y;
+        vectorPhysicalProperty[ _spring.vertexId[ 0 ] ].position.z := vectorVertex[ _spring.vertexId[ 0 ] ].z;
+        distancetemp.Free;
+
+        distancetemp := CalVector.Create( distance.x * factor[ 1 ], distance.y * factor[ 1 ], distance.z * factor[ 1 ] );
+        vectorVertex[ _spring.vertexId[ 1 ] ].x  := vectorVertex[ _spring.vertexId[ 1 ] ].x - distancetemp.x;
+        vectorVertex[ _spring.vertexId[ 1 ] ].y  := vectorVertex[ _spring.vertexId[ 1 ] ].y - distancetemp.x;
+        vectorVertex[ _spring.vertexId[ 1 ] ].z  := vectorVertex[ _spring.vertexId[ 1 ] ].z - distancetemp.x;
+        vectorPhysicalProperty[ _spring.vertexId[ 1 ] ].position.x := vectorVertex[ _spring.vertexId[ 1 ] ].x;
+        vectorPhysicalProperty[ _spring.vertexId[ 1 ] ].position.y := vectorVertex[ _spring.vertexId[ 1 ] ].y;
+        vectorPhysicalProperty[ _spring.vertexId[ 1 ] ].position.z := vectorVertex[ _spring.vertexId[ 1 ] ].z;
+        distancetemp.Free;
+      end;
+    end;
+  end;
+  distance.free;
+(* DEBUG-CODE ********************
+  CalVector spherePosition(Sphere.x, Sphere.y, Sphere.z);
+  float sphereRadius = Sphere.radius;
+
+  // loop through all the vertices
+  for(vertexId = 0; vertexId < (int)vectorVertex.size; ++vertexId)
+  {
+    // get the vertex
+    CalVector& vertex = vectorVertex[vertexId];
+
+    // get the physical property of the vertex
+    CalSubmesh::PhysicalProperty& physicalProperty = vectorPhysicalProperty[vertexId];
+
+    // get the physical property of the core vertex
+    CalCoreSubmesh::PhysicalProperty& corePhysicalProperty = vectorCorePhysicalProperty[vertexId];
+
+    // only take vertices with a weight > 0 into account
+    if(corePhysicalProperty.weight > 0.0f)
+    {
+      CalVector position;
+      position = physicalProperty.position;
+      position -= spherePosition;
+
+      float length;
+      length = position.normalize;
+
+      if(length < sphereRadius)
+      {
+        position *= sphereRadius;
+        position += spherePosition;
+
+        physicalProperty.position = position;
+        physicalProperty.positionOld = position;
+        vertex = physicalProperty.position;
+      }
+    }
+  }*)
+end;
+
+procedure CalSpringSystem.update( deltaTime : float );
+var
+  vectorMesh : CalMeshes;
+  iteratorMesh, iteratorSubmesh : integer;
+  vectorSubmesh : CalSubMeshes;
+  MeshCount, SubMeshCount : integer;
+begin
+  vectorSubmesh := nil;
+  
+  // get the attached meshes vector
+  vectorMesh := m_pModel.getVectorMesh;
+
+  // loop through all the attached meshes
+  MeshCount := Length( vectorMesh );
+  for iteratorMesh := 0 to MeshCount - 1 do
+  begin
+    // get the ssubmesh vector of the mesh
+    vectorSubmesh := vectorMesh[ iteratorMesh ].getVectorSubmesh;
+
+    // loop through all the submeshes of the mesh
+    SubMeshCount := Length( vectorSubmesh );
+    for iteratorSubmesh := 0 to SubMeshCount - 1 do
+    begin
+      // check if the submesh contains a spring system
+      if ( vectorSubmesh[ iteratorSubmesh ].getCoreSubmesh.getSpringCount > 0 )
+        and ( vectorSubmesh[ iteratorSubmesh ].hasInternalData ) then
+      begin
+        // calculate the new forces on each unbound vertex
+        calculateForces( vectorSubmesh[ iteratorSubmesh ], deltaTime );
+
+        // calculate the vertices influenced by the spring system
+        calculateVertices( vectorSubmesh[ iteratorSubmesh ], deltaTime );
+      end;
+    end;
+  end;
+end;
+
+procedure CalSpringSystem.setGravityVector( const vGravity : CalVector );
+begin
+  m_vGravity.assign( vGravity );
+end;
+
+procedure CalSpringSystem.setForceVector( const vForce : CalVector );
+begin
+  m_vForce.assign( vForce );
+end;
+

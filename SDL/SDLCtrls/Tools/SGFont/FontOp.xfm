@@ -1,0 +1,144 @@
+object SDLForm1: TSDLForm1
+  AlwaysDown = False
+  AlwaysUp = True
+  BorderWidth = 2
+  Caption = 'SGF File Operator'
+  Color = 9154505
+  DisabledColor = 11842740
+  DragMode = sdmManual
+  FocusColor = 11846620
+  Height = 480
+  Movable = False
+  StateImages = []
+  TabOrder = 6
+  TitleBarHeight = 20
+  Width = 640
+  X = 0
+  Y = 0
+  object btChoose: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Choose File...'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 40
+    OnClick = btChooseClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 0
+    Width = 580
+    X = 20
+    Y = 200
+    Z = 0
+  end
+  object btAdd: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    OnClick = btAddClick
+    Caption = 'Add Data file to an end of Image file'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 40
+    Spacing = 0
+    StateImages = []
+    TabOrder = 1
+    Width = 580
+    X = 20
+    Y = 260
+    Z = 1
+  end
+  object btRemove: TSDLButton
+    AlwaysDown = False
+    AlwaysUp = False
+    BorderWidth = 2
+    Caption = 'Extract data from an Image file to Data file (NO CHECK)'
+    Color = 9154505
+    DisabledColor = 11842740
+    Down = False
+    DragMode = sdmManual
+    FocusColor = 11846620
+    GroupIndex = 0
+    Height = 40
+    OnClick = btRemoveClick
+    Spacing = 0
+    StateImages = []
+    TabOrder = 2
+    Width = 580
+    X = 20
+    Y = 320
+    Z = 2
+  end
+  object SDLLabel1: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = 'Image File:'
+    DragMode = sdmManual
+    Height = 24
+    Layout = tlCenter
+    Width = 580
+    WordWrap = False
+    X = 20
+    Y = 50
+    Z = 3
+  end
+  object SDLLabel2: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    DragMode = sdmManual
+    Height = 24
+    Layout = tlCenter
+    Width = 580
+    WordWrap = False
+    X = 20
+    Y = 80
+    Z = 4
+  end
+  object SDLLabel3: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = 'Data File:'
+    DragMode = sdmManual
+    Height = 24
+    Layout = tlCenter
+    Width = 580
+    WordWrap = False
+    X = 20
+    Y = 110
+    Z = 5
+  end
+  object SDLLabel4: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    DragMode = sdmManual
+    Height = 24
+    Layout = tlCenter
+    Width = 580
+    WordWrap = False
+    X = 20
+    Y = 140
+    Z = 6
+  end
+  object SDLLabel5: TSDLLabel
+    Alignment = taCenter
+    BorderWidth = 0
+    Caption = 'Status:'
+    DragMode = sdmManual
+    Height = 24
+    Layout = tlCenter
+    Width = 580
+    WordWrap = False
+    X = 20
+    Y = 400
+    Z = 7
+  end
+end

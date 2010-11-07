@@ -1,0 +1,159 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// error.cpp
+
+var
+  m_lastErrorCode : TError = OK;
+  m_strLastErrorFile : string;
+  m_lastErrorLine : integer = -1;
+  m_strLastErrorText : string;
+
+//----------------------------------------------------------------------------//
+// Get the error code of the last error                                       //
+//----------------------------------------------------------------------------//
+
+class function CalError.getLastErrorCode : TError;
+begin
+  result := m_lastErrorCode;
+end;
+
+//----------------------------------------------------------------------------//
+// Get a descriptive error message of the last error                          //
+//----------------------------------------------------------------------------//
+
+class function CalError.getLastErrorDescription : string;
+begin
+  case m_lastErrorCode of
+    OK :
+      result := 'No error found';
+
+    INTERNAL :
+      result := 'Internal error';
+
+    INVALID_HANDLE :
+      result := 'Invalid handle as argument';
+
+    MEMORY_ALLOCATION_FAILED :
+      result := 'Memory allocation failed';
+
+    FILE_NOT_FOUND :
+      result := 'File not found';
+
+    INVALID_BINARY_FILE_FORMAT :
+      result := 'Invalid binary file format';
+
+    INVALID_XML_FILE_FORMAT :
+      result := 'Invalid XML file format';
+
+    INVALID_FILE_FORMAT :
+      result := 'Invalid file format';
+
+    FILE_PARSER_FAILED :
+      result := 'Parser failed to process file';
+
+    INDEX_BUILD_FAILED :
+      result := 'Building of the index failed';
+
+    NO_PARSER_DOCUMENT :
+      result := 'There is no document to parse';
+
+    INVALID_ANIMATION_DURATION :
+      result := 'The duration of the animation is invalid';
+
+    BONE_NOT_FOUND :
+      result := 'Bone not found';
+
+    INVALID_ATTRIBUTE_VALUE :
+      result := 'Invalid attribute value';
+
+    INVALID_KEYFRAME_COUNT :
+      result := 'Invalid number of keyframes';
+
+    INVALID_ANIMATION_TYPE :
+      result := 'Invalid animation type';
+
+    FILE_CREATION_FAILED :
+      result := 'Failed to create file';
+
+    FILE_WRITING_FAILED :
+      result := 'Failed to write to file';
+
+    INCOMPATIBLE_FILE_VERSION :
+      result := 'Incompatible file version';
+
+    NO_MESH_IN_MODEL :
+      result := 'No mesh attached to the model';
+
+    INVALID_MIXER_TYPE :
+      result := 'The CalModel mixer is not a valid CalMixer instance';
+
+  else
+    result := 'Unknown error';
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the error file of the last error                                       //
+//----------------------------------------------------------------------------//
+
+class function CalError.getLastErrorFile : string;
+begin
+  result := m_strLastErrorFile;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the line of the last error                                             //
+//----------------------------------------------------------------------------//
+
+class function CalError.getLastErrorLine : integer;
+begin
+  result := m_lastErrorLine;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the error text of the last error                                       //
+//----------------------------------------------------------------------------//
+
+class function CalError.getLastErrorText : string;
+begin
+  result := m_strLastErrorText;
+end;
+
+//----------------------------------------------------------------------------//
+// Print the last error to stdout                                             //
+//----------------------------------------------------------------------------//
+
+class procedure CalError.printLastError;
+begin
+  log.logstatus( 'cal3d : ', getLastErrorDescription );
+
+  if ( m_strLastErrorText <> '' ) then
+  begin
+    writeln( ' ''', m_strLastErrorText, '''' );
+  end;
+
+  writeln( ' in ', m_strLastErrorFile, '(', m_lastErrorLine, ')' );
+end;
+
+//----------------------------------------------------------------------------//
+// Set the "last" error                                                       //
+//----------------------------------------------------------------------------//
+
+class procedure CalError.setLastError( code : TError; strFile : string; line : integer; strText : string );
+begin
+  if ( code >= MAX_ERROR_CODE ) then
+    code := INTERNAL;
+  m_lastErrorCode := code;
+  m_strLastErrorFile := strFile;
+  m_lastErrorLine := line;
+  m_strLastErrorText := strText;
+  log.logstatus(  getLastErrorDescription + ' : ' + strText + ' ( ' + IntToStr( line ) + ' ) ', strFile );
+end;
+

@@ -1,0 +1,341 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// corebone.cpp
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalCoreBone.Create( CoreSkeleton : CalCoreSkeleton );
+var
+  i : integer;
+begin
+  m_pCoreSkeleton := CoreSkeleton;
+  m_parentId := -1;
+  m_translation := CalVector.Create( 0, 0, 0 );
+  m_rotation := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_translationabsolute := CalVector.Create( 0, 0, 0 );
+  m_rotationabsolute := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_translationBoneSpace := CalVector.Create( 0, 0, 0 );
+  m_rotationBoneSpace := CalQuaternion.Create( 0, 0, 0, 0 );
+  m_boundingBox := CalBoundingBox.Create;
+  m_boundingBoxPrecomputed := false;
+  for i := 0 to 5 do
+    m_boundingPosition[ i ] := CalVector.Create;
+end;
+
+//----------------------------------------------------------------------------//
+// Destructor                                                                 //
+//----------------------------------------------------------------------------//
+
+destructor CalCoreBone.Destroy;
+var
+  i : integer;
+begin
+  m_translation.Free;
+  m_rotation.Free;
+  m_translationAbsolute.Free;
+  m_rotationAbsolute.Free;
+  m_translationBoneSpace.Free;
+  m_rotationBoneSpace.Free;
+  m_boundingBox.Free;
+  for i := 0 to 5 do
+    m_boundingPosition[ i ].Free;
+end;
+
+//----------------------------------------------------------------------------//
+// Calculate the state of the core bone                                       //
+//----------------------------------------------------------------------------//
+
+procedure CalCoreBone.calculateState;
+var
+  pParent : CalCoreBone;
+  i, ChildCount : integer;
+begin
+  if ( m_parentId = -1 ) then
+  begin
+    // no parent, this means absolute state == relative state
+    m_translationAbsolute.assign( m_translation );
+    m_rotationAbsolute.assign( m_rotation );
+  end
+  else
+  begin
+    // get the parent bone
+    pParent := m_pCoreSkeleton.getCoreBone( m_parentId );
+
+    // transform relative state with the absolute state of the parent
+    m_translationAbsolute.assign( m_translation );
+    m_translationAbsolute.mult( pParent.getRotationAbsolute );
+    m_translationAbsolute.add( pParent.getTranslationAbsolute );
+
+    m_rotationAbsolute.assign( pParent.getRotationAbsolute );
+    m_rotationAbsolute.mult( m_rotation );
+  end;
+
+  // calculate all child bones
+  ChildCount := Length( m_listChildId );
+  for i := 0 to ChildCount - 1 do
+    m_pCoreSkeleton.getCoreBone( m_listChildId[ i ] ).calculateState;
+end;
+
+procedure CalCoreBone.LoadFromXMLFile( Parser : TXmlParser );
+var
+  NumChildren, i : integer;
+begin
+  while Parser.Scan do
+  begin
+    case Parser.CurPartType of // Here the parser tells you what it has found
+      ptStartTag,
+        ptEmptyTag : // Process Parser.CurName and Parser.CurAttr (see below) fields here
+        begin
+          //
+          if Parser.CurName = 'BONE' then
+          begin
+
+            //m_coreBoneId := StrToInt( Parser.CurAttr.Value( 'ID' ) );
+            m_strName := Parser.CurAttr.Value( 'NAME' );
+            NumChildren := StrToInt( Parser.CurAttr.Value( 'NUMCHILD' ) );
+            SetLength( m_listChildId, NumChildren );
+
+            for i := 0 to NumChildren - 1 do
+            begin
+              // LoadChildrenFromXMLFile( Parser : TXmlParser );
+            end;
+          end;
+        end;
+
+      ptContent,
+        ptCData :
+        begin
+          if Parser.CurName = 'TRANSLATION' then
+          begin
+            m_translation.assign( Parser.CurContent );
+          end;
+
+          if Parser.CurName = 'ROTATION' then
+          begin
+            m_rotation.assign( Parser.CurContent );
+          end;
+
+          if Parser.CurName = 'LOCALTRANSLATION' then
+          begin
+            m_translationAbsolute.assign( Parser.CurContent );
+          end;
+
+          if Parser.CurName = 'LOCALROTATION' then
+          begin
+            m_rotationAbsolute.assign( Parser.CurContent );
+          end;
+          
+          if Parser.CurName = 'LOCALROTATION' then
+          begin
+            m_parentId := StrToInt( Parser.CurContent );
+          end;
+        end;
+
+      ptEndTag : // Process End-Tag here (Parser.CurName)
+        begin
+          if Parser.CurName = 'BONE' then
+          begin
+            break;
+          end;
+        end;
+
+      ptPI : // Process PI here (Parser.CurName is the target, Parser.CurContent)
+        begin
+
+        end;
+    end;
+  end;
+end;
+
+procedure CalCoreBone.LoadFromStream( AStream : TStream );
+var
+  i : integer;
+begin
+  // read the name of the bone
+  AStream.ReadBuffer( i, sizeof( i ) );
+  SetLength( m_strName, i );
+  AStream.ReadBuffer( m_strName[ 1 ], i );
+
+  // get the translation of the bone
+  m_translation.LoadFromStream( AStream );
+
+  // get the rotation of the bone
+  m_rotation.LoadFromStream( AStream );
+
+  // get the Local translation of the bone
+  m_translationAbsolute.LoadFromStream( AStream );
+
+  // get the Local rotation of the bone
+  m_rotationAbsolute.LoadFromStream( AStream );
+
+  // get the parent bone id
+  AStream.ReadBuffer( m_parentId, sizeof( i ) );
+
+  m_translationBoneSpace.assign( m_translationAbsolute );
+  m_rotationBoneSpace.assign( m_rotationAbsolute );
+
+  // read the number of children
+  AStream.ReadBuffer( i, sizeof( i ) );
+  SetLength( m_listChildId, i );
+
+  // load all children ids
+  AStream.ReadBuffer( m_listChildId[ 0 ], i * sizeof( integer ) );
+end;
+
+function CalCoreBone.getBoundingData( planeId : integer ) : CalVector;
+begin
+  result := m_boundingPosition[ planeId ];
+end;
+
+procedure CalCoreBone.calculateBoundingBox( pCoreModel : CalCoreModel );
+var
+  boneId, meshId, submeshId, vertexId, influenceId, planeId : integer;
+  rot : CalQuaternion;
+  dir : CalVector;
+  pCoreMesh : CalCoreMesh;
+  pCoreSubmesh : CalCoreSubmesh;
+  vectorVertex : vectorVertexes;
+  MeshCount, SubMeshCount, VertexCount, InfluenceCount : integer;
+begin
+  vectorVertex := nil;
+  boneId := m_pCoreSkeleton.getCoreBoneId( m_strName );
+
+  rot := CalQuaternion.Create;
+  rot.assign( m_rotationBoneSpace );
+
+  rot.invert;
+
+  dir := CalVector.Create( 1.0, 0.0, 0.0 );
+  dir.mult( rot );
+  m_boundingBox.plane[ 0 ].setNormal( dir );
+
+  dir.x := -1.0;
+  dir.y := 0.0;
+  dir.z := 0.0;
+
+  dir.mult( rot );
+  m_boundingBox.plane[ 1 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 1.0;
+  dir.z := 0.0;
+  dir.mult( rot );
+  m_boundingBox.plane[ 2 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := -1.0;
+  dir.z := 0.0;
+  dir.mult( rot );
+  m_boundingBox.plane[ 3 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 0.0;
+  dir.z := 1.0;
+  dir.mult( rot );
+  m_boundingBox.plane[ 4 ].setNormal( dir );
+
+  dir.x := 0.0;
+  dir.y := 0.0;
+  dir.z := -1.0;
+  dir.mult( rot );
+  m_boundingBox.plane[ 5 ].setNormal( dir );
+
+  dir.Free;
+
+  MeshCount := pCoreModel.getCoreMeshCount;
+  for meshId := 0 to MeshCount - 1 do
+  begin
+    pCoreMesh := pCoreModel.getCoreMesh( meshId );
+
+    SubmeshCount := pCoreMesh.getCoreSubmeshCount;
+    for submeshId := 0 to SubmeshCount - 1 do
+    begin
+      pCoreSubmesh := pCoreMesh.getCoreSubmesh( submeshId );
+
+      if ( pCoreSubmesh.getSpringCount = 0 ) then
+      begin
+
+        vectorVertex := pCoreSubmesh.getVectorVertex;
+        VertexCount := Length( vectorVertex );
+        for vertexId := 0 to VertexCount - 1 do
+        begin
+          InfluenceCount := Length( vectorVertex[ vertexId ].vectorInfluence );
+          for influenceId := 0 to InfluenceCount - 1 do
+          begin
+            if ( vectorVertex[ vertexId ].vectorInfluence[ influenceId ].boneId = boneId ) then
+            begin
+              for planeId := 0 to 5 do
+              begin
+                if ( m_boundingBox.plane[ planeId ].eval( vectorVertex[ vertexId ].position ) < 0.0 ) then
+                begin
+                  m_boundingBox.plane[ planeId ].setPosition( vectorVertex[ vertexId ].position );
+                  m_boundingPosition[ planeId ].assign( vectorVertex[ vertexId ].position );
+                end;
+              end;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+  rot.Free;
+  m_boundingBoxPrecomputed := true;
+end;
+
+procedure CalCoreBone.scale( factor : float );
+var
+  iterator : integer;
+  ChildCount : integer;
+begin
+  m_translation.mult( factor );
+  m_translationAbsolute.mult( factor );
+  m_translationBoneSpace.mult( factor );
+
+  // calculate all child bones
+  ChildCount := Length( m_listChildId );
+  for iterator := 0 to ChildCount - 1 do
+  begin
+    m_pCoreSkeleton.getCoreBone( m_listChildId[ iterator ] ).scale( factor );
+  end;
+end;
+
+function CalCoreBone.addChildId( childId : integer ) : boolean;
+var
+  childno : integer;
+begin
+  childno := Length( m_listChildId );
+  SetLength( m_listChildId, childno + 1 );
+
+  m_listChildId[childno] := childId ;
+
+  result := true;
+end;
+
+procedure CalCoreBone.setRotation( const rotation : CalQuaternion );
+begin
+  m_rotation.assign( rotation );
+end;
+
+procedure CalCoreBone.setRotationBoneSpace( const rotation : CalQuaternion );
+begin
+  m_rotationBoneSpace.assign( rotation );
+end;
+
+procedure CalCoreBone.setTranslation( const translation : CalVector );
+begin
+  m_translation.assign( translation );
+end;
+
+procedure CalCoreBone.setTranslationBoneSpace( const translation : CalVector );
+begin
+   m_translationBoneSpace.assign( translation );
+end;
+

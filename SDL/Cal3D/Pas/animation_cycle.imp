@@ -1,0 +1,106 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// animation_cycle.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalAnimationCycle.Create( pCoreAnimation : CalCoreAnimation );
+begin
+  inherited;
+  m_type := TYPE_CYCLE;
+  m_state := STATE_SYNC;
+
+  // set default weights and delay
+  m_weight := 0.0;
+  m_targetDelay := 0.0;
+  m_targetWeight := 0.0;
+end;
+
+//----------------------------------------------------------------------------//
+// Blend the cycle animation to the given weight in delay time                //
+//----------------------------------------------------------------------------//
+
+function CalAnimationCycle.blend( weight, delay : float ) : boolean;
+begin
+  m_targetWeight := weight;
+  m_targetDelay := delay;
+  result := true;
+end;
+
+//----------------------------------------------------------------------------//
+// Set the state to async for a given animation time and duration             //
+//----------------------------------------------------------------------------//
+
+procedure CalAnimationCycle.setAsync( time, duration : float );
+begin
+  // check if thie animation cycle is already async
+  if ( m_state <> STATE_ASYNC ) then
+  begin
+    if ( duration = 0.0 ) then
+    begin
+      m_timeFactor := 1.0;
+      m_time := 0.0;
+    end
+    else
+    begin
+      m_timeFactor := m_pCoreAnimation.Duration / duration;
+      m_time := time * m_timeFactor;
+    end;
+
+    m_state := STATE_ASYNC;
+  end;
+end;
+
+//----------------------------------------------------------------------------//
+// Update the animation cycle with a given delta time                         //
+//----------------------------------------------------------------------------//
+
+function CalAnimationCycle.update( deltaTime : float ) : boolean;
+var
+  factor : float;
+begin
+  if ( m_targetDelay <= abs( deltaTime ) ) then
+  begin
+    // we reached target delay, set to full weight
+    m_weight := m_targetWeight;
+    m_targetDelay := 0.0;
+
+    // check if we reached the cycles end
+    if ( m_weight = 0.0 ) then
+    begin
+      result := false;
+      exit;
+    end;
+  end
+  else
+  begin
+    // not reached target delay yet, interpolate between current and target weight
+    factor := deltaTime / m_targetDelay;
+    m_weight := ( 1.0 - factor ) * m_weight + factor * m_targetWeight;
+    m_targetDelay := m_targetDelay - deltaTime;
+  end;
+
+  // update animation cycle time if it is in async state
+  if ( m_state = STATE_ASYNC ) then
+  begin
+    m_time := m_time + ( deltaTime * m_timeFactor );
+    if ( m_time >= m_pCoreAnimation.Duration ) then
+    begin
+      m_time := fmod( m_time, m_pCoreAnimation.Duration );
+    end;
+    if (m_time < 0) then
+      m_time := m_time + m_pCoreAnimation.Duration;
+  end;
+
+  result := true;
+end;
+

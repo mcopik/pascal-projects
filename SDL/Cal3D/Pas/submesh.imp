@@ -1,0 +1,277 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// submesh.cpp
+
+//----------------------------------------------------------------------------//
+// Constructors                                                               //
+//----------------------------------------------------------------------------//
+
+constructor CalSubmesh.Create( pCoreSubmesh : CalCoreSubmesh );
+var
+  morphTargetId, SubMorphTargetCount, vertexId, VertexCount : integer;
+  vectorVertex : vectorVertexes;
+begin
+  inherited Create;
+  vectorVertex := nil;
+
+  m_pCoreSubmesh := pCoreSubmesh;
+
+  // reserve memory for the face vector
+  setlength( m_vectorFace, m_pCoreSubmesh.getFaceCount );
+  setlength( m_vectorvectorTangentSpace, 0 );
+
+  // set the initial lod level
+  setLodLevel( 1.0 );
+
+  m_coreMaterialId := -1;
+
+  //Setting the morph target weights
+  SetLength( m_vectorMorphTargetWeight, m_pCoreSubmesh.getCoreSubMorphTargetCount );
+
+  SubMorphTargetCount := m_pCoreSubmesh.getCoreSubMorphTargetCount;
+  for morphTargetId := 0 to SubMorphTargetCount - 1 do
+  begin
+    m_vectorMorphTargetWeight[ morphTargetId ] := 0.0;
+  end;
+
+  VertexCount := m_pCoreSubmesh.getVertexCount;
+
+  // check if the submesh instance must handle the vertex and normal data internally
+  if ( m_pCoreSubmesh.getSpringCount > 0 ) then
+  begin
+    SetLength( m_vectorVertex, VertexCount );
+
+    SetLength( m_vectorNormal, VertexCount );
+
+    SetLength( m_vectorvectorTangentSpace, VertexCount );
+
+    SetLength( m_vectorPhysicalProperty, VertexCount );
+
+    // get the vertex vector of the core submesh
+    vectorVertex := m_pCoreSubmesh.getVectorVertex;
+
+    // copy the data from the core submesh as default values
+    for vertexId := 0 to VertexCount - 1 do
+    begin
+      // copy the vertex data
+      m_vectorVertex[ vertexId ].x := vectorVertex[ vertexId ].position.x;
+      m_vectorVertex[ vertexId ].y := vectorVertex[ vertexId ].position.y;
+      m_vectorVertex[ vertexId ].z := vectorVertex[ vertexId ].position.z;
+      m_vectorPhysicalProperty[ vertexId ].position := CalVector.Create( vectorVertex[ vertexId ].position );
+      m_vectorPhysicalProperty[ vertexId ].positionOld := CalVector.Create( vectorVertex[ vertexId ].position );
+      m_vectorPhysicalProperty[ vertexId ].force := CalVector.Create;
+
+      // copy the normal data
+      m_vectorNormal[ vertexId ].x := vectorVertex[ vertexId ].normal.x;
+      m_vectorNormal[ vertexId ].y := vectorVertex[ vertexId ].normal.y;
+      m_vectorNormal[ vertexId ].z := vectorVertex[ vertexId ].normal.z;
+    end;
+
+    m_bInternalData := true;
+  end
+  else
+  begin
+    m_bInternalData := false;
+  end;
+end;
+
+destructor CalSubmesh.Destroy;
+begin
+  SetLength( m_vectorFace, 0 );
+
+  if ( m_bInternalData ) then
+  begin
+    SetLength( m_vectorVertex, 0 );
+    SetLength( m_vectorNormal, 0 );
+    SetLength( m_vectorvectorTangentSpace, 0 );
+    SetLength( m_vectorPhysicalProperty, 0 );
+  end;
+
+  m_pCoreSubmesh := nil;
+  inherited;
+end;
+
+//----------------------------------------------------------------------------//
+// Get the faces of the submesh                                               //
+//----------------------------------------------------------------------------//
+
+function CalSubmesh.getFaces : vectorFaces;
+begin
+  // copy the face vector to the face buffer
+  Result := Copy( m_vectorFace, 0, m_faceCount );
+end;
+
+//----------------------------------------------------------------------------//
+// Set the lod level of this submesh                                          //
+//----------------------------------------------------------------------------//
+
+procedure CalSubmesh.setLodLevel( lodLevel : float );
+var
+  lodcount, VertexCount : integer;
+  vectorFace : vectorFaces;
+  vectorVertex : vectorVertexes;
+  vertexId : integer;
+  faceId : integer;
+  collapsedVertexId : integer;
+begin
+  // clamp the lod level to [0.0, 1.0]
+  if ( lodLevel < 0.0 ) then
+    lodLevel := 0.0;
+
+  if ( lodLevel > 1.0 ) then
+    lodLevel := 1.0;
+
+  // get the lod count of the core submesh
+  lodCount := m_pCoreSubmesh.LodCount;
+
+  // calculate the target lod count
+  lodCount := round( ( 1.0 - lodLevel ) * lodCount );
+
+  // calculate the new number of vertices
+  m_vertexCount := m_pCoreSubmesh.getVertexCount - lodCount;
+
+  // get face vector of the core submesh
+  vectorFace := m_pCoreSubmesh.getVectorFace;
+
+  // get face vector of the core submesh
+  vectorVertex := m_pCoreSubmesh.getVectorVertex;
+
+  // calculate the new number of faces
+  m_faceCount := Length( vectorFace );
+
+  VertexCount := length( vectorVertex );
+  for vertexId := VertexCount - 1 downto m_vertexCount do
+  begin
+    dec( m_faceCount, vectorVertex[ vertexId ].faceCollapseCount );
+  end;
+
+  // fill the face vector with the collapsed vertex ids
+  for faceId := 0 to m_faceCount - 1 do
+  begin
+    for vertexId := 0 to 2 do
+    begin
+      // get the vertex id
+      collapsedVertexId := vectorFace[ faceId ].vertexId[ vertexId ];
+
+      // collapse the vertex id until it fits into the current lod level
+      while ( collapsedVertexId >= m_vertexCount ) do
+        collapsedVertexId := vectorVertex[ collapsedVertexId ].collapseId;
+
+      // store the collapse vertex id in the submesh face vector
+      m_vectorFace[ faceId ].vertexId[ vertexId ] := collapsedVertexId;
+    end;
+  end;
+end;
+
+function CalSubmesh.getVectorVertex : TVertices;
+begin
+  Result := m_vectorVertex;
+  //Result := Copy( m_vectorVertex, 0, m_vertexCount );
+end;
+
+function CalSubmesh.getVectorNormal : TNormals;
+begin
+  Result := m_vectorNormal;
+end;
+
+function CalSubmesh.getBaseWeight : float;
+var
+  baseWeight : float;
+  morphTargetCount, morphTargetId : integer;
+begin
+  baseWeight := 1.0;
+  morphTargetCount := getMorphTargetWeightCount;
+  for morphTargetId := 0 to morphTargetCount - 1 do
+  begin
+    baseWeight := baseWeight - m_vectorMorphTargetWeight[ morphTargetId ];
+  end;
+  Result := baseWeight;
+end;
+
+function CalSubmesh.getMorphTargetWeightCount : integer;
+begin
+  result := Length( m_vectorMorphTargetWeight );
+end;
+
+function CalSubmesh.getVectorMorphTargetWeight : Floats;
+begin
+  Result := m_vectorMorphTargetWeight;
+end;
+
+function CalSubmesh.getMorphTargetWeight( blendId : integer ) : float;
+begin
+  Result := m_vectorMorphTargetWeight[ blendId ];
+end;
+
+procedure CalSubmesh.disableInternalData;
+begin
+  if ( m_bInternalData ) then
+  begin
+    SetLength( m_vectorVertex, 0 );
+    SetLength( m_vectorNormal, 0 );
+    SetLength( m_vectorvectorTangentSpace, 0 );
+    SetLength( m_vectorPhysicalProperty, 0 );
+    m_bInternalData := false;
+  end;
+end;
+
+procedure CalSubmesh.setMorphTargetWeight( blendId : integer; weight : float );
+begin
+  m_vectorMorphTargetWeight[ blendId ] := weight;
+end;
+
+function CalSubmesh.isTangentsEnabled( mapId : integer ) : boolean;
+begin
+  result := m_pCoreSubmesh.isTangentsEnabled( mapId );
+end;
+
+function CalSubmesh.enableTangents( mapId : integer; enabled : boolean ) : boolean;
+var
+  vectorTangentSpace : vectorTangentSpaces;
+  vertexId, vertexCount : integer;
+begin
+  vectorTangentSpace := nil;
+
+  if ( not m_pCoreSubmesh.enableTangents( mapId, enabled ) ) then
+  begin
+    result := false;
+    exit;
+  end;
+
+  if ( not m_bInternalData ) then
+  begin
+    result := true;
+    exit;
+  end;
+
+  if ( not enabled ) then
+  begin
+    SetLength( m_vectorvectorTangentSpace, 0 );
+    result := true;
+    exit;
+  end;
+
+  SetLength( m_vectorvectorTangentSpace, m_pCoreSubmesh.getVertexCount );
+
+  // get the tangent space vector of the core submesh
+  vectorTangentSpace := m_pCoreSubmesh.getVectorVectorTangentSpace[ mapId ];
+
+  // copy the data from the core submesh as default values
+  vertexCount := m_pCoreSubmesh.getVertexCount;
+  for vertexId := 0 to vertexCount - 1 do
+  begin
+    // copy the tangent space data
+    m_vectorvectorTangentSpace[ mapId ][ vertexId ].tangent.assign( vectorTangentSpace[ vertexId ].tangent );
+    m_vectorvectorTangentSpace[ mapId ][ vertexId ].crossFactor := vectorTangentSpace[ vertexId ].crossFactor;
+  end;
+
+  result := true;
+end;
+

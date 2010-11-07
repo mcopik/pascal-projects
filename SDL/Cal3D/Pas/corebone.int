@@ -1,0 +1,60 @@
+//----------------------------------------------------------------------------//
+// Copyright (C) 2001 Paul TOTH                        Delphi translation     //
+// Copyright (C) 2001 Bruno 'Beosil' Heidelberger      original C version     //
+//----------------------------------------------------------------------------//
+// This program is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU General Public License as published by the Free //
+// Software Foundation; either version 2 of the License, or (at your option)  //
+// any later version.                                                         //
+//----------------------------------------------------------------------------//
+// corebone.h
+
+CalCoreBone = class
+protected
+  m_strName : string;
+  m_pCoreSkeleton : CalCoreSkeleton;
+  m_parentId : integer;
+  m_listChildId : Integers;
+  m_translation : CalVector;
+  m_rotation : CalQuaternion;
+  m_translationAbsolute : CalVector;
+  m_rotationAbsolute : CalQuaternion;
+  m_translationBoneSpace : CalVector;
+  m_rotationBoneSpace : CalQuaternion;
+  m_userData : CalUserData;
+
+  m_boundingBox : CalBoundingBox;
+  m_boundingPosition : array[0..5] of CalVector;
+  m_boundingBoxPrecomputed : Boolean;
+public
+  constructor Create( CoreSkeleton : CalCoreSkeleton );
+  destructor Destroy; override;
+
+  function addChildId( childId : integer ) : boolean;
+  procedure calculateState;
+  procedure setRotation( const rotation : CalQuaternion );
+  procedure setRotationBoneSpace( const rotation : CalQuaternion );
+  procedure setTranslation( const translation : CalVector );
+  procedure setTranslationBoneSpace( const translation : CalVector );
+  property isBoundingBoxPrecomputed : boolean read m_boundingBoxPrecomputed;
+
+  property getListChildId : {TList} integers read m_listChildId;
+  property getName : string read m_strName;
+  property getParentId : integer read m_parentId write m_parentId;
+  property Rotation : CalQuaternion read m_rotation write setRotation;
+  property getRotationAbsolute : CalQuaternion read m_rotationAbsolute;
+  property Translation : CalVector read m_translation write setTranslation;
+  property getTranslationAbsolute : CalVector read m_translationabsolute;
+  property UserData : CalUserData read m_userData write m_userData;
+  property CoreSkeleton : CalCoreSkeleton read m_pCoreSkeleton write m_pCoreSkeleton;
+  property getBoundingBox : CalBoundingBox read m_boundingBox;
+  property TranslationBoneSpace : CalVector read m_translationBoneSpace write setTranslationBoneSpace;
+  property RotationBoneSpace : CalQuaternion read m_rotationBoneSpace write setRotationBoneSpace;
+  function getBoundingData( planeId : integer ) : CalVector;
+  procedure calculateBoundingBox( pCoreModel : CalCoreModel );
+  procedure scale( factor : float );
+
+  procedure LoadFromStream( AStream : TStream );
+  procedure LoadFromXMLFile( Parser : TXmlParser );
+end;
+

@@ -1,0 +1,27 @@
+//****************************************************************************//
+// physique.h                                                                 //
+// Copyright (C) 2001, 2002 Bruno 'Beosil' Heidelberger                       //
+//****************************************************************************//
+// This library is free software; you can redistribute it and/or modify it    //
+// under the terms of the GNU Lesser General Public License as published by   //
+// the Free Software Foundation; either version 2.1 of the License, or (at    //
+// your option) any later version.                                            //
+//****************************************************************************//
+
+CalPhysique = class
+public
+  m_pModel : CalModel;
+  m_Normalize : boolean;
+
+  constructor Create( pModel : CalModel );
+  destructor Destroy; override;
+
+  procedure calculateTangentSpaces( var pSubmesh : CalSubmesh; mapId : integer; var TangentSpaces : vectorTangentSpaces  );
+  procedure calculateNormals( var pSubmesh : CalSubmesh; var Normals : TNormals ) ;
+  procedure calculateVertices( var pSubmesh : CalSubmesh; var Vertices : TVertices ) ;
+  function calculateVertex( var pSubmesh : CalSubmesh; vertexId : integer ) : CalVector;
+  procedure calculateVerticesAndNormals( var pSubmesh : CalSubmesh; var Vertices : TVertices );
+  procedure calculateVerticesNormalsAndTexCoords( var pSubmesh : CalSubmesh; var Vertices : TVertices; NumTexCoords : integer = 1 );
+  procedure Update;
+  procedure SetNormalization( normalize : boolean );
+end;

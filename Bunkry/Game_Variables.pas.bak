@@ -1,0 +1,22 @@
+unit Game_Variables;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils,
+  sdl,sdlutils,sdlttf;
+var
+   gameStatus : (gMenu,gAiming,gShooting,gHit,gQuit);
+   mainScreen: PSDL_SURFACE;
+   background: PSDL_SURFACE;
+   FPS:integer = 25;
+   event : TSDL_Event;
+   font: PTTF_Font;
+type   surfacePointer=^PSDL_SURFACE;
+       weaponType=(BULLET,ROCKET);
+implementation
+
+end.
+

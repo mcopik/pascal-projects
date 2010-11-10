@@ -1,0 +1,113 @@
+unit Game;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils,
+  sdl,sdlutils,sdl_ttf,
+  Game_Variables,Game_Objects,Graphic_Functions;
+
+  var weapons:array of TWeapon;
+implementation
+
+function Init(x,y,bpp:integer;caption:pchar): boolean;
+              begin
+                   if SDL_Init(SDL_INIT_VIDEO) <> -1 then
+                   begin
+                        mainScreen := SDL_SetVideoMode(x, y, bpp, SDL_SWSURFACE);
+                        if mainScreen <> NIL then
+                        begin
+                              SDL_WM_SetCaption(caption,NIL);
+                        end
+                        else
+                        begin
+                        WriteLn('Blad utworzenia okna');
+                        Init := TRUE;
+                        end;
+                   end
+                   else
+                   begin
+                   WriteLn('Blad inicjalizacji SDL');
+                   Init := TRUE;
+                   end;
+                   Init := FALSE;
+              end;
+
+procedure Load_Files();
+              begin
+
+              end;
+
+procedure Load_Data();
+      begin
+           SetLength(weapons,1);
+           weapons[0] := TWeapon.Create('Pocisk kalibru 45 mm',0,0,BULLET);
+      end;
+
+      function Get_Delay(fps:integer): integer;
+      begin
+           Get_Delay := trunc(1000/FPS);
+      end;
+
+      procedure proceedEvents();
+      begin
+           while( SDL_PollEvent(@event)>0) do
+           begin
+                case event.type_ of
+                SDL_KEYUP:
+                begin
+
+                end;
+                SDL_KEYDOWN:
+                begin
+
+                end;
+                SDL_QUITEV:
+                gameStatus := gQuit;
+                end;
+
+           end;
+      end;
+
+  begin
+  //riteLn('Program');W
+  if Init(800,600,32,'Bunkry 0.1 ALPHA') <> TRUE  then
+  begin
+       TTF_Init();
+       gameStatus := gMenu;
+       Load_Files();
+       Load_Data();
+
+       repeat
+         SDL_Delay(Get_Delay(FPS));
+         case gameStatus of
+         gMenu:
+         begin
+         proceedEvents();
+         end;
+         gAiming:
+         begin
+         proceedEvents();
+         end;
+         gShooting:
+         begin
+         proceedEvents();
+         end;
+         gHit:
+         begin
+         proceedEvents();
+         end;
+         end;
+         //DrawScreen();
+       until (gameStatus = gQuit);
+       TTF_Quit;
+       SDL_Quit;
+
+
+  end
+  else
+  SDL_Quit;
+  //ReadLn();
+  end.

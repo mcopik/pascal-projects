@@ -1,0 +1,17 @@
+unit Graphic_Functions;
+
+ {$mode objfpc}{$H+}
+
+interface
+
+uses
+  sdl,sdlutils,sdl_ttf;
+    function Load_Font(): PTTF_FONT;
+implementation
+              function Load_Font(): PTTF_FONT;
+              begin
+                   SDL_Delay(1000);
+              end;
+
+end.
+

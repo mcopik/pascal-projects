@@ -1,0 +1,320 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <UseDefaultCompilerOptions Value="True"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication Use="True" PathPlusParams="/usr/bin/gnome-terminal -t 'Lazarus Run Output' -e '$(LazarusDir)/tools/runwait.sh $(TargetCmdLine)'"/>
+      </local>
+    </RunParams>
+    <Units Count="12">
+      <Unit0>
+        <Filename Value="project1.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="project1"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="7" Y="21"/>
+        <UsageCount Value="37"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="Game_Objects.pas"/>
+        <UnitName Value="Game_Objects"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="31" Y="70"/>
+        <UsageCount Value="20"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="graphic_functions.pas"/>
+        <UnitName Value="Graphic_Functions"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4"/>
+        <CursorPos X="7" Y="10"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="Game.pas"/>
+        <UnitName Value="Game"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="7" Y="113"/>
+        <UsageCount Value="19"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../SDL/SDL/Pas/sdl.pas"/>
+        <UnitName Value="sdl"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2429"/>
+        <CursorPos X="11" Y="2451"/>
+        <UsageCount Value="19"/>
+        <Loaded Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="Game_Functions.pas"/>
+        <UnitName Value="Game_Functions"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="7" Y="12"/>
+        <UsageCount Value="18"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="Game_Variables.pas"/>
+        <UnitName Value="Game_Variables"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="3"/>
+        <UsageCount Value="20"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="Graphic_Functions.pas"/>
+        <UnitName Value="Graphic_Functions"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="25" Y="14"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="game_variables.pas"/>
+        <UnitName Value="Game_Variables"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="12" Y="13"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="18"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="game_objects.pas"/>
+        <UnitName Value="Game_Objects"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="168"/>
+        <CursorPos X="41" Y="176"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="18"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../SDL/SDL_ttf/Pas/sdl_ttf.pas"/>
+        <UnitName Value="sdl_ttf"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="432"/>
+        <CursorPos X="11" Y="453"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="game_functions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Game_Functions"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="37" Y="10"/>
+        <UsageCount Value="30"/>
+        <Loaded Value="True"/>
+      </Unit11>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="150" Column="29" TopLine="137"/>
+      </Position1>
+      <Position2>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="158" Column="46" TopLine="137"/>
+      </Position2>
+      <Position3>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="164" Column="30" TopLine="143"/>
+      </Position3>
+      <Position4>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="152" Column="25" TopLine="128"/>
+      </Position4>
+      <Position5>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="157" Column="22" TopLine="136"/>
+      </Position5>
+      <Position6>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="89" Column="21" TopLine="68"/>
+      </Position6>
+      <Position7>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="169" Column="21" TopLine="136"/>
+      </Position7>
+      <Position8>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="155" Column="16" TopLine="134"/>
+      </Position8>
+      <Position9>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="157" Column="20" TopLine="136"/>
+      </Position9>
+      <Position10>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="165" Column="39" TopLine="144"/>
+      </Position10>
+      <Position11>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="89" Column="21" TopLine="68"/>
+      </Position11>
+      <Position12>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="165" Column="28" TopLine="144"/>
+      </Position12>
+      <Position13>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="167" Column="17" TopLine="147"/>
+      </Position13>
+      <Position14>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="179" Column="32" TopLine="149"/>
+      </Position14>
+      <Position15>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="175" Column="12" TopLine="154"/>
+      </Position15>
+      <Position16>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="174" Column="35" TopLine="154"/>
+      </Position16>
+      <Position17>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="190" Column="8" TopLine="149"/>
+      </Position17>
+      <Position18>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="187" Column="19" TopLine="166"/>
+      </Position18>
+      <Position19>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="47" Column="14" TopLine="26"/>
+      </Position19>
+      <Position20>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="187" Column="19" TopLine="166"/>
+      </Position20>
+      <Position21>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="188" Column="28" TopLine="150"/>
+      </Position21>
+      <Position22>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="186" Column="52" TopLine="165"/>
+      </Position22>
+      <Position23>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="184" Column="50" TopLine="165"/>
+      </Position23>
+      <Position24>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="187" Column="36" TopLine="166"/>
+      </Position24>
+      <Position25>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="195" Column="23" TopLine="170"/>
+      </Position25>
+      <Position26>
+        <Filename Value="project1.lpr"/>
+        <Caret Line="14" Column="13" TopLine="1"/>
+      </Position26>
+      <Position27>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="265" Column="24" TopLine="240"/>
+      </Position27>
+      <Position28>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="259" Column="31" TopLine="229"/>
+      </Position28>
+      <Position29>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="244" Column="49" TopLine="223"/>
+      </Position29>
+      <Position30>
+        <Filename Value="game_objects.pas"/>
+        <Caret Line="250" Column="39" TopLine="229"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <Target>
+      <Filename Value="project1"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="../SDL/SDL/Pas/;../SDL/SDL_ttf/Pas/"/>
+      <OtherUnitFiles Value="../SDL/SDL/Pas/;../SDL/SDL_ttf/Pas/"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Source Value="Game.pas"/>
+        <Line Value="61"/>
+      </Item1>
+    </BreakPoints>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

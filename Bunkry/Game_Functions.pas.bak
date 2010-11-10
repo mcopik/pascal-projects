@@ -1,0 +1,39 @@
+unit Game_Functions;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils,
+  sdl,sdlutils,
+  Game_Variables,Game_Objects,Graphic_Functions;
+implementation
+      function Init(x,y,bpp:integer;caption:pchar): boolean;
+              begin
+                   if SDL_Init(SDL_INIT_VIDEO) <> -1 then
+                   begin
+                        mainScreen := SDL_SetVideoMode(x, y, bpp, SDL_SWSURFACE);
+                        if mainScreen <> NIL then
+                        begin
+                              SDL_WM_SetCaption(caption,NIL);
+                        end
+                        else
+                        begin
+                        WriteLn('Blad utworzenia okna');
+                        Init := TRUE;
+                        end;
+                   end
+                   else
+                   begin
+                   WriteLn('Blad inicjalizacji SDL');
+                   Init := TRUE;
+                   end;
+                   Init := FALSE;
+              end;
+      procedure Load_Files();
+              begin
+
+              end;
+end.
+

@@ -1,0 +1,75 @@
+unit Game_Objects;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils,sdl_ttf,Game_Variables,Graphic_Functions;
+  type
+    TWeapon = class
+    Name:pchar;
+    Damage, Speed:real;
+    X,Y,Angle:integer;
+    Direction: boolean; //FALSE-LEWO;TRUE-PRAWO
+    Kind : weaponType;
+    procedure Draw(surface:surfacePointer);
+    function Calculate():integer;
+    function GetY():integer;
+    procedure Shoot(x1,y1,angle1:integer;direction1:boolean);
+    constructor Create(name1:pchar;damage1,speed1:real;kind1:weaponType);
+    end;
+
+    TMap = object
+    Heights : array of integer;
+    MaxLow,MaxHigh :integer;
+    procedure Init();
+    procedure Draw();
+    end;
+
+implementation
+   procedure TWeapon.Draw(surface:surfacePointer);
+   begin
+
+   end;
+
+   procedure TWeapon.Shoot(x1,y1,angle1:integer;direction1:boolean);
+   begin
+
+   end;
+
+   function TWeapon.Calculate():integer;
+   begin
+
+   end;
+
+   function TWeapon.GetY():integer;
+   begin
+
+   end;
+
+   constructor TWeapon.Create(name1:pchar;damage1,speed1:real;kind1:weaponType);
+   begin
+        Kind := kind1;
+        Name := name1;
+        Damage := damage1;
+        Speed:= speed1;
+        X := 0;
+        Y := 0;
+        Angle := 0;
+        Direction := FALSE;
+   end;
+
+   procedure TMap.Init();
+   begin
+
+   end;
+
+   procedure TMap.Draw();
+   begin
+   Load_Font();//'font.ttf');
+   end;
+
+
+end.
+

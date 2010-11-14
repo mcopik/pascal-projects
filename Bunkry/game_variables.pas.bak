@@ -6,11 +6,11 @@ interface
 
 uses
   Classes, SysUtils,
-  sdl,sdlutils,sdl_ttf;
+  sdl,sdlutils;
 type   //surfacePointer=PSDL_SURFACE;
        //fontPointer=PTTF_FONT;
        //colorPointer=PSDL_Color;
-       weapononType=(BULLET,ROCKET);
+       weaponType=(BULLET,ROCKET);
        colors=(WHITE,BLUE,GREEN,BLACK);
 
 var

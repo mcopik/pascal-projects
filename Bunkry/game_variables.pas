@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  sdl,sdlutils,sdl_ttf;
+  sdl;
 type   //surfacePointer=PSDL_SURFACE;
        //fontPointer=PTTF_FONT;
        //colorPointer=PSDL_Color;

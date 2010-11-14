@@ -7,15 +7,28 @@ uses
 
   var game:TGame;
   begin
+  game := TGame.Create();
+  //if game = NIL then
+  //WriteLn('fuck');
+  //WriteLn(IntToStr(PtrUInt(game)));
   if Game.Init('bunkry.cfg') <> TRUE  then
   begin
 
-       Game.Load_Data('data.cfg');
-       Delay(1000);
-       //Game.Loop();
+       if Game.Load_Data('data.cfg') <> TRUE then
+       begin
+            Game.Loop();
+            Game.Close();
+       end
+       else
+       begin
+       WriteLn('Terminating...');
        Game.Close();
+       end;
   end
   else
+  begin
+  WriteLn('Terminating...');
   Game.Close();
-
+  end;
+  game.Free;
   end.

@@ -7,7 +7,7 @@ interface
 uses
   sdl,sdlutils,sdl_ttf,Game_Variables;
 
-    procedure Write_Text(surf:PSDL_SURFACE;font:PTTF_FONT;color:PSDL_COLOR;x,y:integer;text:pchar);
+    //procedure Write_Text(surf:PSDL_SURFACE;font:PTTF_FONT;color:PSDL_COLOR;x,y:integer;text:pchar);
     procedure Draw_Surface(x,y:integer;src,dst:PSDL_SURFACE);
     procedure Set_Color(col:colors;color:PSDL_COLOR);
     procedure Fill_Surface(surf:PSDL_SURFACE;color:PSDL_COLOR);
@@ -20,7 +20,7 @@ implementation
                    SDL_BlitSurface(src,NIL,dst,@rect);
               end;
 
-              procedure Set_Color(col:colors;color:PSDL_COLOR);
+              procedure Set_Color(col:colors,color:PSDL_COLOR);
               begin
                    case col of
                    WHITE:

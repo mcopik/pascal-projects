@@ -6,6 +6,9 @@ uses
   sdl,sdlutils,sdl_ttf,Game_Objects;//Graphic_Functions,Game_Variables,Game_Objects,Game_Functions;
 
   var game:TGame;
+
+{$R *.res}
+
   begin
   game := TGame.Create();
   //if game = NIL then

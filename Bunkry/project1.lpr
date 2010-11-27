@@ -10,7 +10,7 @@ uses
 {$R *.res}
 
   begin
-  game := TGame.Create();
+  //game := TGame.Create();
   //if game = NIL then
   //WriteLn('fuck');
   //WriteLn(IntToStr(PtrUInt(game)));
@@ -33,5 +33,5 @@ uses
   WriteLn('Terminating...');
   Game.Close();
   end;
-  game.Free;
+  //game.Free;
   end.

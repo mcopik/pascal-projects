@@ -1,0 +1,32 @@
+unit TTuring;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses Classes, SysUtils;
+
+
+type
+  TOrder =record
+  Direction:boolean;//FALSE-LEFT,TRUE-RIGHT
+  State:integer;
+  Write:char;
+  end;
+
+  TTuring = object
+  Symbols: array of char;
+  HeadStatesNumber:integer;
+  HeadState:integer; // from 0 to HeadStatesNumber-1
+  Tape: array of char;
+  Orders: array of TOrder; //HeadState*HeadStatesNumber + SymbolNumber
+  function GetNumber(symbol:char):integer;
+  procedure Move(direction:boolean);
+  function Read():char;
+  procedure Write(symbol:char);
+
+  end;
+implementation
+
+end.
+

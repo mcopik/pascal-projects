@@ -5,9 +5,9 @@ unit Game_Objects;
 interface
 
 uses
-  Classes, SysUtils,sdl,sdl_ttf,Game_Variables,Graphic_Functions,Game_Functions;
+  Classes, SysUtils,sdl,sdlutils,sdl_ttf,Game_Variables,Graphic_Functions,Game_Functions;
   type
-    TWeapon = class
+    TWeapon = object
     Name:string;
     Damage, Speed:real;
     X,Y,Angle:integer;
@@ -20,7 +20,7 @@ uses
     procedure Init(name1:string;damage1,speed1:real;kind1:weaponType);
     end;
 
-    TMap = class
+    TMap = object
     Heights : array of integer;
     Min,Max :integer;
     Color: TSDL_Color;
@@ -28,13 +28,13 @@ uses
     Background_Fill:TSDL_Color;
     Background_Path:string;
     procedure Init(mi,ma,r,g,b,width:integer);
-    procedure Draw();
+    procedure Draw(Width,Height:integer;screen:PSDL_SURFACE);
     procedure SetBackground(r,g,b:integer);
     procedure SetBackground(path1:string);
     end;
 
-    TFont = class
-    Font: PTTF_FONT;
+    TFont = object
+    Font: PSDL_SURFACE;
     Path:string;
     Size:integer;
     Color:TSDL_COLOR;
@@ -45,7 +45,7 @@ uses
     procedure Write(surf:PSDL_SURFACE;x,y:integer;text:string);
     end;
 
-    TFile = class
+    TFile = object
     Path: string;
     Handle: Text;
     procedure Init(path1:string);
@@ -54,10 +54,11 @@ uses
     function FindString(name:string):string;
     end;
 
-    TGame = class
+    TGame = object
     Width,Height,Bpp:integer;
     Caption:string;
     gameStatus : (gMenu,gAiming,gShooting,gHit,gQuit);
+    menuStatus : string;
     mainScreen: PSDL_SURFACE;
     background: PSDL_SURFACE;
     Weapons: array of TWeapon;
@@ -125,21 +126,28 @@ implementation
         Color.r := r;
         Color.g := g;
         Color.b := b;
-        WriteLn(width);
         SetLength(Heights,width);
         randomize();
         for i := 1 to width do
         begin
              repeat
              Heights[i-1] := random(Max);
-             until Heights[i-1] < Min;
-             //WriteLn(Heights[i]);
+             until Heights[i-1] > Min;
+        end;
+        for i := 1 to width - 1 do
+        begin
+             //Heights[i] := sqrt(3/(Heights[i-1]*Heights[i-1] + Heights[
         end;
    end;
 
-   procedure TMap.Draw();
+   procedure TMap.Draw(Width,Height:integer;screen:PSDL_SURFACE);
+   var i : integer;
    begin
-
+        for i := 0 to Width-1 do
+        begin
+             //WriteLn(Heights[i]);
+             SDL_DrawLine(screen, i, Height - 1, i, Height - 1 - Heights[i], 111111);
+        end;
    end;
 
    procedure TMap.SetBackground(r,g,b:integer);
@@ -160,24 +168,27 @@ implementation
    begin
         Path := path1;
         Size := size1;
-        Font := TTF_OpenFont(pchar(Path),Size);
+        //!Font := Load_Bitmap(Path);
+        //Font := TTF_OpenFont(pchar(Path),Size);
    end;
 
    procedure TFont.Resize(size1:integer);
    begin
         Close();
         Size := size1;
-        Font := TTF_OpenFont(pchar(Path),Size);
+        //Font := TTF_OpenFont(pchar(Path),Size);
    end;
 
    procedure TFont.Close();
    begin
-        TTF_CloseFont(Font);
+        SDL_FreeSurface(Font);
+        //TTF_CloseFont(Font);
    end;
 
    procedure TFont.Write(surf:PSDL_SURFACE;x,y:integer;text:string);
    begin
-        msg := TTF_RenderText_Solid(Font,pchar(text),Color);
+        //msg := TTF_RenderText_Solid(Font,pchar(text),Color);
+
         Draw_Surface(x,y,msg,surf);
    end;
 
@@ -192,18 +203,15 @@ implementation
        line,temp:string;
    begin
         Reset(Handle);
-        //FileMode := fmOpenRead;
         FindInteger := -1;
         while not EOF(Handle) do
         begin
              x := 1;
              ReadLn(Handle,line);
-             //WriteLn(line);
              if(Length(line) > 0) then
              begin
              for i := 1 to Length(line) do
              begin
-                  //WriteLn(line,' ',i,' ',name,' ',x);
                   if line[i] = name[x] then
                   begin
                        if x = (Length(name)) then
@@ -225,20 +233,14 @@ implementation
                        i := x + 2;
                        x := i;
                        repeat
-                             //WriteLn(temp,' ',line[x],' ',x);
-                             //WriteLn(temp+line[x]);
-                             //temp := String(temp + line[x]);
-                             //WriteLn(temp,' ',line[x],' ',x);
                              Inc(x);
                        until ((line[x]=';') or (x=(Length(line)+1)));
                        temp := Copy(line,i,x-i);
-                       //WriteLn(temp);
                        x := 0;
                        for i := Length(temp) downto 1 do
                        begin
                             x := x + (Ord(temp[i])-48)*POW(10,Length(temp)-i);
                        end;
-                       //WriteLn(temp,' ',x,' ',x*10,' ',x + 5);
                        FindInteger := x;
                        Break;
                   end
@@ -260,7 +262,6 @@ implementation
         begin
         FindInteger := -1;
         end;
-        WriteLn(FindInteger,'ok');
    end;
 
    function TFile.FindString(name:string):string;
@@ -273,7 +274,6 @@ implementation
         begin
              x := 1;
              ReadLn(Handle,line);
-             //WriteLn(line);
              if Length(line)>0 then
              begin
              for i := 1 to Length(line)do
@@ -282,7 +282,6 @@ implementation
                   begin
                        if x = Length(name) then
                        begin
-                            //WriteLn(line[i],' ',i,' ',name[x]);
                             x := i;
                             Break;
                        end;
@@ -293,7 +292,6 @@ implementation
                   x := 1;
              end;
              temp := '';
-             //WriteLn(line,' ',i,' ',name,' ',x);
              if i <> Length(line) then
              begin
                   if line[x+1] = '=' then
@@ -301,12 +299,9 @@ implementation
                        x := x + 2;
                        i := i + 2;
                        repeat
-                             //temp := temp + line[x];
                              Inc(x);
                        until ((line[x]=';') or (x=(Length(line)+1)));
-                     //  WriteLn(line,' ',i,' ',x);
                        temp := Copy(line,i,x-i);
-                       //WriteLn(temp);
                        FindString := temp;
                        Break;
                   end
@@ -336,15 +331,14 @@ implementation
    var pt: TFile;
    begin
            Init := FALSE;
-           pt := TFile.Create(); //new(pt);
+           //pt := TFile.Create();
            pt.Init(path1);
            Width := pt.FindInteger(string('WIDTH'));
            Height := pt.FindInteger(string('HEIGHT'));
            BPP := pt.FindInteger('BPP');
            Caption := pt.FindString('CAPTION');
            pt.CloseFile();
-           pt.Free();
-           //dispose(pt);
+           //pt.Free();
            if ((Width <= 0) or (Height <= 0) or (BPP <= 0) or (Caption = 'ERROR'))then
            begin
                 WriteLn('Bledne dane w pliku ',path1);
@@ -381,6 +375,7 @@ implementation
                    Init := TRUE;
            end;
            gameStatus := gMenu;
+           menuStatus := '1';
            if Init = FALSE then
            WriteLn('Utworzenie okna ',Width,'x',Height);
            end;
@@ -410,7 +405,6 @@ implementation
          end;
          DrawScreen();
        until (gameStatus = gQuit);
-       //WriteLn(Weapons[1].Name);
    end;
 
    procedure TGame.DrawScreen();
@@ -422,15 +416,15 @@ implementation
                 Fill_Surface(mainScreen,@color);
                 Set_Color(WHITE,@Fonts[0].color);
                 Fonts[0].Resize(60);
-                Fonts[0].Write(mainScreen,250,100,'B U N K R Y');
-                {Fonts[Font]^.Resize(15);
+                {Fonts[0].Write(mainScreen,250,100,'B U N K R Y');
+                Fonts[Font]^.Resize(15);
                 Fonts[Font]^.Write(mainScreen,330,170,'Marcin Copik, Inf I, Grupa 3');
                 Fonts[Font]^.Resize(20);
                 Fonts[Font]^.Write(mainScreen,330,300,'1  -  Nowa Gra');
                 Fonts[Font]^.Write(mainScreen,330,340,'2  -  Wyjdz');}
            end;
            gAiming:
-           //Maps[Map].Draw();
+           Maps[Map].Draw(Width,Height,mainScreen);
            end;
            SDL_Flip(mainScreen);
    end;
@@ -467,15 +461,13 @@ implementation
        line1,line2:string;
    begin
              Load_Data := FALSE;
-             //new(pt);
-             pt := TFile.Create();
+             //pt := TFile.Create();
              pt.Init(path1);
-             //WriteLn(IntToStr(PtrUInt(pt)));
              temp := pt.FindInteger('WEAPONS_NUMBER');
              if temp <> -1 then
              begin
                   SetLength(Weapons,temp);
-                  WeaponsNumber := temp;
+                  WeaponsNumber := temp-1;
                   for i:=1 to temp do
                   begin
                        temp2 := pt.FindInteger(string('WEAPON'+IntToStr(i)+'_SPEED'));
@@ -484,9 +476,7 @@ implementation
                        line2 := pt.FindString(string('WEAPON'+IntToStr(i)+'_TYPE'));
                        if((temp2 <> -1) and (temp3 <> -1) and (line1 <> 'ERROR') and (line2 <> 'ERROR')) then
                        begin
-                            //new(weapons[i]);
-                            Write(temp,i);
-                            Weapons[i-1] := TWeapon.Create();
+                            //Weapons[i-1] := TWeapon.Create();
                             if line2 = 'BULLET' then
                             begin
                             Weapons[i-1].Init(string(line1),temp2,temp3,BULLET);
@@ -523,23 +513,21 @@ implementation
              begin
                   SetLength(Fonts,temp);
                   FontsNumber := temp;
-                  Font := 1;
+                  Font := 0;
                   for i:=1 to temp do
                   begin
                        temp2 := pt.FindInteger(string('FONT'+IntToStr(i)+'_SIZE'));
                        line1 := pt.FindString(string('FONT'+IntToStr(i)+'_PATH'));
-                       //new(Fonts[i]);
-                       WriteLn(temp2,line1);
                        if((temp2 <> -1) and (line1 <> 'ERROR')) then
                        begin
-                            Fonts[i-1] := TFont.Create();
+                            //Fonts[i-1] := TFont.Create();
                             Fonts[i-1].Load(temp2,line1);
 
-                            if Fonts[i-1].Font = NIL  then
+                            {if Fonts[i-1].Font = NIL  then
                             begin
                                  WriteLn('Blad w trakcie wczytywania czcionki');
                                  Load_Data := TRUE;
-                            end;
+                            end;}
                        end
                        else
                        begin
@@ -556,34 +544,24 @@ implementation
                   Load_Data := TRUE;
              end;
              end;
-             //WriteLn(pt^.Path);
-             //WriteLn(IntToStr(PtrUInt(pt)));
-             //pt.CloseFile();
-             //pt.Init(path1);
-             WriteLn(temp);
-             temp7 := pt.FindInteger('FONT1_SIZE');
-             WriteLn(temp7);
-             WriteLn(Load_Data);
+
              if Load_Data = FALSE then
              begin
-             temp7 := pt.FindInteger('MAPS_NUMBER');
-             //temp := 1;
-             WriteLn('temp ',temp7);
-             if temp7 <> -1 then
+             temp := pt.FindInteger('MAPS_NUMBER');
+             if temp <> -1 then
              begin
-                  SetLength(Maps,temp7);
-                  MapsNumber := temp7;
-                  Map := 1;
-                  for i:=1 to temp7 do
+                  SetLength(Maps,temp);
+                  MapsNumber := temp;
+                  Map := 0;
+                  for i:=1 to temp do
                   begin
-                       Maps[i-1] := TMap.Create;
-                       temp2:= pt.FindInteger(string('MAP'+IntToStr(i)+'_MIN'));
+                       //Maps[i-1] := TMap.Create;
+                       temp2 := pt.FindInteger(string('MAP'+IntToStr(i)+'_MIN'));
                        temp3 := pt.FindInteger(string('MAP'+IntToStr(i)+'_MAX'));
                        temp4 := pt.FindInteger(string('MAP'+IntToStr(i)+'_COLORR'));
                        temp5 := pt.FindInteger(string('MAP'+IntToStr(i)+'_COLORG'));
                        temp6 := pt.FindInteger(string('MAP'+IntToStr(i)+'_COLORB'));
                        line1 := pt.FindString(string('MAP'+IntToStr(i)+'_BACKGROUND'));
-                       //new(Maps[i]);
                        if((temp2 <> -1) and (temp3 <> -1)and(temp4 <> -1) and (temp5 <> -1)and (temp6 <> -1)) then
                        begin
                             if line1 = 'FILL' then
@@ -621,8 +599,7 @@ implementation
                   Load_Data := TRUE;
              end;
              end;
-             pt.Free();
-             //dispose(pt);
+             //pt.Free();
    end;
 
 
@@ -635,32 +612,17 @@ implementation
         begin
              SDL_FreeSurface(Fonts[i-1].msg);
              Fonts[i-1].Close();
-             Fonts[i-1].Free;
-             //dispose(Fonts[i]);
-        end;
+             //Fonts[i-1].Free;
+        end;  {
         for i := 1 to WeaponsNumber do
         begin
              Weapons[i-1].Free;
-             //dispose(Fonts[i]);
         end;
         for i := 1 to MapsNumber do
         begin
              Maps[i-1].Free;
-             //dispose(Fonts[i]);
-        end;
-       { WriteLn('ok');
-        for i := 1 to WeaponsNumber do
-            dispose(Weapons[i]);
-        WriteLn('ok2');
-        for i := 1 to MapsNumber do
-        begin
-             for j := 1 to Width do
-             begin
-                  //dispose(Maps[i]^.Heights[j]);
-             WriteLn(j);
-             end;
-             dispose(Maps[i]);
-        end;   }
+        end; }
+
         SDL_FreeSurface(mainScreen);
         SDL_FreeSurface(background);
         TTF_Quit;

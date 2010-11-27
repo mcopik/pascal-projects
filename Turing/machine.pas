@@ -1,0 +1,285 @@
+unit machine;
+
+interface
+
+uses Classes, SysUtils, Crt, Tape;
+
+
+type
+  TDirection=(LEFT,RIGHT,NOTHING);
+
+  TOrder =record
+  Direction:TDirection;//FALSE-LEFT,TRUE-RIGHT
+  State:integer;
+  Write:char;
+  end;
+
+  TTuring = object
+  Symbols: array of char;
+  SymbolsNumber:integer;
+
+  HeadStatesNumber:integer;
+  HeadState:integer;
+
+  Position:integer;
+  Tape: TTape;
+  Length:integer;
+
+  Orders: array of TOrder;
+
+  Delay_Time:integer;
+  Path : string;
+  FileOut:Text;
+
+  procedure Init();
+  procedure SetOrder(x,y:integer;a,b:char;z:integer);
+  procedure Move(direction:TDirection);
+  procedure WriteToTape(symbol:char);
+  procedure SetPosition(pos:boolean);
+  procedure SetSymbols(n:integer;arr:array of char);
+  procedure SetTape(n:integer;arr:array of char);
+  procedure SetDelay(n:integer);
+  procedure SetHeadsNumber(x:integer);
+  procedure SetPath(temp:string);
+  procedure Run();
+
+  function GetNumber(symbol:char):integer;
+  function IsSymbol(x:char):boolean;
+  function Read():char;
+  end;
+implementation
+
+function Min(a,b:integer):integer;
+begin
+     if a >= b then
+     begin
+          Min := b;
+     end
+     else
+         Min := a;
+
+end;
+
+procedure TTuring.Init();
+begin
+     SetLength(Orders,(HeadStatesNumber-2)*SymbolsNumber);
+end;
+
+procedure TTuring.SetOrder(x,y:integer;a,b:char;z:integer);
+var ord:TOrder;
+begin
+     ord.Write:= a;
+     ord.State:= z;
+     if b = 'L' then
+     begin
+          ord.Direction := LEFT;
+     end
+     else if b = 'P' then
+     begin
+          ord.Direction := RIGHT;
+     end
+     else
+         ord.Direction := NOTHING;
+
+     Orders[x*(HeadStatesNumber-2)+y] := ord;
+end;
+
+function TTuring.GetNumber(symbol:char):integer;
+var i:integer;
+begin
+     for i :=0 to SymbolsNumber-1 do
+     begin
+       if Symbols[i] = symbol then
+       GetNumber := i;
+     end;
+end;
+
+procedure TTuring.Move(direction:TDirection);
+begin
+     if direction = LEFT then
+     begin
+     Position := Position -1;
+     end
+     else if direction = RIGHT then
+     begin
+     Position := Position +1;
+     end;
+end;
+procedure TTuring.SetPosition(pos:boolean);
+begin
+     if pos = FALSE then
+     begin
+     Position := 0;
+     end
+     else
+     begin
+     Position := Length-1;
+     end;
+end;
+
+function TTuring.Read():char;
+begin
+     if ((Position > -1) and (Position < Length)) then
+     begin
+     Read := Tape.Get(Position);
+     end
+     else
+     Read := '$';
+end;
+procedure TTuring.WriteToTape(symbol:char);
+begin
+     if((Position>=0)and(Position<Length)) then
+     begin
+     Tape.WriteToTape(symbol,Position);
+     end
+     else if Position < 0 then
+     begin
+     Tape.Add(symbol);
+     Position := 0;
+     Length := Length + 1;
+     end
+     else
+     begin
+     Tape.Add_End(symbol);
+     Length := Length +1;
+     Position := Length-1;
+     end;
+end;
+
+procedure TTuring.SetSymbols(n:integer;arr:array of char);
+var i:integer;
+begin
+     SetLength(Symbols,n);
+     for i := 0 to n do
+     Symbols[i] := arr[i];
+     SymbolsNumber := n;
+end;
+
+procedure TTuring.SetTape(n:integer;arr:array of char);
+var i:integer;
+begin
+     Tape.Create();
+     for i := 0 to n do
+     Tape.Add_End(arr[i]);
+     Length := n;
+end;
+
+procedure TTuring.SetHeadsNumber(x:integer);
+begin
+     HeadStatesNumber := x;
+end;
+
+function TTuring.IsSymbol(x:char):boolean;
+var i:integer;
+begin
+     IsSymbol := FALSE;
+     for i := 0 to SymbolsNumber do
+     begin
+          if Symbols[i] = x then
+          begin
+               IsSymbol := TRUE;
+               Break;
+          end;
+     end;
+end;
+
+procedure TTuring.SetDelay(n:integer);
+begin
+          Delay_Time := n;
+end;
+
+procedure TTuring.SetPath(temp:string);
+begin
+          Path := temp;
+          Delay_Time := -1;
+          Assign(FileOut,Path+'.log');
+          ReWrite(FileOut);
+end;
+
+procedure TTuring.Run();
+var x:TOrder;
+    temp:char;
+    temp2:string;
+    i:integer;
+begin
+     repeat
+          x := Orders[HeadState*SymbolsNumber + GetNumber(Read())];
+          temp := Read();
+          WriteToTape(x.Write);
+          HeadState := x.State;
+          Move(x.Direction);
+          //if Delay_Time >= 0 then
+          //Draw();
+
+          temp2 := 'Odczytano symbol ';
+          temp2 := temp2+temp;
+          temp2 := temp2+'.Zapisano symbol ';
+          temp2 := temp2+x.Write;
+          temp2 := temp2+', glowica w przeszla w stan q';
+          temp2 := temp2+IntToStr(HeadState);
+
+          if x.Direction = LEFT then
+          begin
+          temp2 := temp2+' i przemiescila sie w lewo.';
+          end
+          else if x.Direction = RIGHT then
+          begin
+          temp2 := temp2+' i przemiescila sie w prawo.';
+          end
+          else
+          begin
+          temp2 := temp2+' i nie przemiescila sie.';
+          end;
+
+          if Delay_Time >= 0 then
+          begin
+               WriteLn(temp2);
+               Delay(Delay_Time);
+          end
+          else
+          begin
+               WriteLn(FileOut,temp2);
+          end;
+
+     until ((HeadState = HeadStatesNumber-1)or(HeadState = HeadStatesNumber-2));
+
+     if HeadState = HeadStatesNumber-2 then
+     begin
+     temp2 := 'Maszyna zakonczyla prace w stanie konca.';
+     end
+     else
+     temp2 := 'Maszyna zakonczyla prace w stanie bledu.';
+
+     if Delay_Time >= 0 then
+     begin
+          WriteLn(temp2);
+     end
+     else
+     begin
+          WriteLn(FileOut,temp2);
+     end;
+
+
+     temp2 := '... ';
+     for i := 0 to Length -1 do
+     begin
+          temp2 := temp2+ Tape.Get(i)+' ';
+     end;
+     temp2 := temp2 + '....';
+
+     if Delay_Time >= 0 then
+     begin
+          WriteLn('Stan koncowy tasmy: ');
+          WriteLn(temp2);
+     end
+     else
+     begin
+          WriteLn(FileOut,'Stan koncowy tasmy: ');
+          WriteLn(FileOut,temp2);
+          Close(FileOut);
+     end;
+     Tape.Delete();
+end;
+
+
+end.

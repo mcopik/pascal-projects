@@ -5,9 +5,8 @@ unit Graphic_Functions;
 interface
 
 uses
-  sdl,sdlutils,sdl_ttf,Game_Variables;
-
-    //procedure Write_Text(surf:PSDL_SURFACE;font:PTTF_FONT;color:PSDL_COLOR;x,y:integer;text:pchar);
+  sdl,sdl_image,Game_Variables;
+    function Load_Image(path:string;transp:boolean):PSDL_SURFACE;
     procedure Draw_Surface(x,y:integer;src,dst:PSDL_SURFACE);
     procedure Set_Color(col:colors;color:PSDL_COLOR);
     procedure Fill_Surface(surf:PSDL_SURFACE;color:PSDL_COLOR);
@@ -20,7 +19,7 @@ implementation
                    SDL_BlitSurface(src,NIL,dst,@rect);
               end;
 
-              procedure Set_Color(col:colors,color:PSDL_COLOR);
+              procedure Set_Color(col:colors;color:PSDL_COLOR);
               begin
                    case col of
                    WHITE:
@@ -35,12 +34,46 @@ implementation
                    color^.g := 0;
                    color^.b := 0;
                    end;
+                   YELLOW:
+                   begin
+                   color^.r := 255;
+                   color^.g := 255;
+                   color^.b := 0;
+                   end;
+                   BLUE:
+                   begin
+                   color^.r := 0;
+                   color^.g := 255;
+                   color^.b := 255;
+                   end;
+                   RED:
+                   begin
+                   color^.r := 255;
+                   color^.g := 0;
+                   color^.b := 0;
                    end;
               end;
 
               procedure Fill_Surface(surf:PSDL_SURFACE;color:PSDL_COLOR);
               begin
                    SDL_FillRect(surf,NIL,SDL_MapRGB(surf^.format,color^.r,color^.g,color^.b));
+              end;
+
+              function Load_Image(path:string;transp:boolean):PSDL_SURFACE;
+              var temp,return:PSDL_SURFACE;
+              begin
+                   temp := IMG_Load(PChar(path));
+                   if temp <> NIL then
+                   begin
+                        if transp = TRUE then
+                        SDL_SetColorKey(temp, SDL_SRCCOLORKEY,PUint32(temp^.pixels)^);
+
+                        return := SDL_DisplayFormat(temp);
+                        SDL_FreeSurface(temp);
+                        Load_Image := return;
+                   end
+                   else
+                   Load_Image := NIL;
               end;
 
 end.

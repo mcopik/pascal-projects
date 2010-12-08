@@ -7,18 +7,17 @@ interface
 uses
   Classes, SysUtils,
   sdl;
-type   //surfacePointer=PSDL_SURFACE;
-       //fontPointer=PTTF_FONT;
-       //colorPointer=PSDL_Color;
-       weaponType=(BULLET,ROCKET);
-       colors=(WHITE,BLUE,GREEN,BLACK);
+type
+       colors=(WHITE,BLUE,GREEN,BLACK,YELLOW,RED);
+       textPosition=(NONE,LEFT,RIGHT,CENTER);
 
 var
-   event : TSDL_Event;
-   rect: TSDL_Rect;
-   color: TSDL_Color;
+       event : TSDL_Event;
+       rect: TSDL_Rect;
+       color: TSDL_Color;
 const
-     FPS:integer = 25;
+       FPS:integer = 25;
+       TRANSPARENCY:array[1..3] of integer = (255,0,255);
 implementation
 
 end.

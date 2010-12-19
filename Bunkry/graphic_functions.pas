@@ -1,11 +1,11 @@
-unit Graphic_Functions;
+unit graphic_functions;
 
 
 
 interface
 
 uses
-  sdl,sdl_image,Game_Variables;
+  sdl,sdl_image,game_variables;
     function Load_Image(path:string;transp:boolean):PSDL_SURFACE;
     procedure Draw_Surface(x,y:integer;src,dst:PSDL_SURFACE);
     procedure Set_Color(col:colors;color:PSDL_COLOR);

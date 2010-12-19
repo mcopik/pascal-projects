@@ -1,12 +1,10 @@
-unit Game_Functions;
+unit game_functions;
 
 {$mode objfpc}{$H+}
 
 interface
-
-uses
-  Classes, SysUtils; 
-  function Get_Delay(fps:integer): integer;
+uses SysUtils,game_variables;
+  function GetTime(): integer;
   //function POW(a,b:integer):integer;
   type
     TFile = object
@@ -19,10 +17,11 @@ uses
   end;
 implementation
 
-function Get_Delay(fps:integer): integer;
+function GetTime(): integer;
 begin
-           Get_Delay := trunc(1000/FPS);
-      end;
+     GetTime := trunc(1000/FPS);
+end;
+
 function POW(a,b:integer):integer;
 var temp:integer;
     i: integer;

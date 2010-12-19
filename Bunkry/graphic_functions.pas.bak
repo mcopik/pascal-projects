@@ -1,4 +1,4 @@
-unit Graphic_Functions;
+unit graphic_functions;
 
 
 
@@ -51,6 +51,7 @@ implementation
                    color^.r := 255;
                    color^.g := 0;
                    color^.b := 0;
+                   end;
                    end;
               end;
 

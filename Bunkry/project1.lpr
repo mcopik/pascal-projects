@@ -2,7 +2,7 @@ program project1;
 
 
 uses
-  Classes, SysUtils, sdl, sdlutils, sdl_ttf, Game_Objects, menu;
+  Classes, SysUtils, Game_Objects, weapon;
 
   var game:TGame;
 
